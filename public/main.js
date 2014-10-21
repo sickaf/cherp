@@ -39,7 +39,8 @@ $(function() {
     } else {
       message += "there are " + data.numUsers + " participants: "+connectedUsers;
     }
-    log(message);
+
+    if(iAmHost) log(message);
   }
 
   // Sets the client's username
