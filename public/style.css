@@ -91,7 +91,7 @@ ul {
 
 /* Font */
 
-.messages {
+.hostMessages {
   font-size: 150%;
 }
 
@@ -121,7 +121,7 @@ ul {
   float: right;
 }
 
-.messages {
+.hostMessages {
   height: 100%;
   margin: 0;
   border-right: 5px solid #000;
