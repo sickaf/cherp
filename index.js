@@ -22,9 +22,9 @@ io.on('connection', function (socket) {
   var addedUser = false;
 
   // when the client emits 'new message', this listens and executes
-  socket.on('new message', function (data) {
+  socket.on('new host message', function (data) {
     // we tell the client to execute 'new message'
-    socket.broadcast.emit('new message', {
+    socket.broadcast.emit('new host message', {
       username: socket.username,
       message: data
     });
@@ -39,7 +39,7 @@ io.on('connection', function (socket) {
     });
   });
 
-  // when the client emits 'add user', this listens and executes
+    // when the client emits 'add user', this listens and executes
   socket.on('add user', function (username) {
     // we store the username in the socket session for this client
     socket.username = username;

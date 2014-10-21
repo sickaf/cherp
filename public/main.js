@@ -10,7 +10,7 @@ $(function() {
   // Initialize varibles
   var $window = $(window);
   var $usernameInput = $('.usernameInput'); // Input for username
-  var $messages = $('.messages'); // Messages area
+  var $hostMessages = $('.hostMessages'); // Messages area
   var $fanMessages = $('.fanMessages'); // fan messages area
   var $inputMessage = $('.inputMessage'); // Input message input box
 
@@ -69,13 +69,13 @@ $(function() {
       
       if(iAmHost) 
       {
-        addChatMessage({
+        addHostMessage({
           username: username,
           message: message
         });
 
         // tell server to execute 'new message' and send along one parameter
-        socket.emit('new message', message);
+        socket.emit('new host message', message);
       }
       else 
       {
@@ -97,7 +97,7 @@ $(function() {
   }
 
   // Adds the visual chat message to the message list
-  function addChatMessage (data, options) {
+  function addHostMessage (data, options) {
     // Don't fade the message in if there is an 'X was typing'
     var $typingMessages = getTypingMessages(data);
     options = options || {};
@@ -146,13 +146,11 @@ $(function() {
     addFanMessageElement($messageDiv, options);
   }
 
-
-
   // Adds the visual chat typing message
   function addChatTyping (data) {
     data.typing = true;
     data.message = 'is typing';
-    addChatMessage(data);
+    addHostMessage(data);
   }
 
   // Removes the visual chat typing message
@@ -186,11 +184,11 @@ $(function() {
       $el.hide().fadeIn(FADE_TIME);
     }
     if (options.prepend) {
-      $messages.prepend($el);
+      $hostMessages.prepend($el);
     } else {
-      $messages.append($el);
+      $hostMessages.append($el);
     }
-    $messages[0].scrollTop = $messages[0].scrollHeight;
+    $hostMessages[0].scrollTop = $hostMessages[0].scrollHeight;
   }
 
  // Adds a message element to the messages and scrolls to the bottom
@@ -318,8 +316,8 @@ $(function() {
   });
 
   // Whenever the server emits 'new message', update the chat body
-  socket.on('new message', function (data) {
-    addChatMessage(data);
+  socket.on('new host message', function (data) {
+    addHostMessage(data);
   });
 
   // Whenever the server emits 'new fan message', update the chat body
