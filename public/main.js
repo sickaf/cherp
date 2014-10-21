@@ -309,7 +309,7 @@ $(function() {
   socket.on('login', function (data) {
     connected = true;
     // Display the welcome message
-    var message = "Hi.  This is Cherp. – ";
+    var message = "Hi.  This is Cherp.";
     log(message, {
       prepend: true
     });
