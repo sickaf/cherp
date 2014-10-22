@@ -113,19 +113,9 @@ $(function() {
 
     var options = {};
 
-    ////////
-    // $('#lines').append($('<p>').append($('<b>').text(from),
-    // '<img src="' + base64Image + '"/>'));
-    ////////
-
     var $usernameDiv = $('<span class="username"/>')
       .text(from)
       .css('color', getUsernameColor(from));
-
-    // var $messageBodyDiv = $('<span class="messageBody">')
-    //   .text(from), 
-    //   '<img src="' + base64Image + '"/>'));;
-
 
     var $messageBodyDiv = $('<span class="messageBody">')
       .text(from)
@@ -134,11 +124,6 @@ $(function() {
     var $messageDiv = $('<li class="message"/>')
       .data('username', from)
       .append($usernameDiv, $messageBodyDiv);
-
-
-
-
-
 
     addMessageElement($messageDiv, options);
   }
@@ -337,6 +322,7 @@ $(function() {
 
   //
   // dom manipulation code to send images
+  // THIS NEEDS TO BE UPDATED
   //
   $(function () {
     $('#imagefile').bind('change', function(e){
@@ -349,8 +335,6 @@ $(function() {
       reader.readAsDataURL(data);
     });
   });
-
-
 
 
 
