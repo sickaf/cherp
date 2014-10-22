@@ -108,16 +108,16 @@ ul {
 
 /* Messages */
 
-.hostChatArea {
+.hostChatArea, .fanChatArea{
   height: 100%;
   width: 50%;
   padding-bottom: 60px;
+}
+
+.hostChatArea {
   float: left;
 }
 .fanChatArea {
-  height: 100%;
-  width: 50%;
-  padding-bottom: 60px;
   float: right;
 }
 
@@ -139,6 +139,10 @@ ul {
 
 .message.typing .messageBody {
   color: gray;
+}
+
+.message.repost {
+  margin-left: 30px;
 }
 
 .username {

@@ -21,7 +21,7 @@ $(function() {
 
   // Prompt for setting a username
   var username;
-  var iAmHost = false;
+  var iAmHost = false; //this probably needs to be kept by the server
   var connected = false;
   var typing = false;
   var lastTypingTime;
@@ -125,9 +125,11 @@ $(function() {
       .text(data.message);
 
     var typingClass = data.typing ? 'typing' : '';
+    var repostClass = data.repost ? 'repost' : '';
     var $messageDiv = $('<li class="message"/>')
       .data('username', data.username)
       .addClass(typingClass)
+      .addClass(repostClass)
       .append($usernameDiv, $messageBodyDiv);
 
     addMessageElement($messageDiv, options);
@@ -142,27 +144,23 @@ $(function() {
     var $messageBodyDiv = $('<span class="messageBody">')
       .text(data.message);
 
-    var typingClass = data.typing ? 'typing' : '';
     var $messageDiv = $('<li class="message"/>')
       .data('username', data.username)
-      .addClass(typingClass)
       .append($usernameDiv, $messageBodyDiv);
 
-    addFanMessageElement($messageDiv, options);
-  }
-
-  // Adds the visual chat typing message
-  function addHostTyping (data) {
-    data.typing = true;
-    data.message = 'is typing';
-    addHostMessage(data);
-  }
-
-  // Removes the visual chat typing message
-  function removeHostTyping (data) {
-    getTypingMessages(data).fadeOut(function () {
-      $(this).remove();
+    //sets up a listener so that if the host clicks it, it gets copied to the host's messages
+    $messageDiv.click(function () {
+      if(iAmHost){
+        data.repost = true;
+        addHostMessage(data);
+        socket.emit('host repost', data);
+      }
+      else {
+        log("youre not the host... faggot");
+      }
     });
+
+    addFanMessageElement($messageDiv, options);
   }
 
   // Adds a message element to the messages and scrolls to the bottom
@@ -228,6 +226,22 @@ $(function() {
   }
 
 
+  // Adds the visual chat typing message
+  function addHostTyping (data) {
+    data.typing = true;
+    data.message = 'is typing';
+    addHostMessage(data);
+  }
+
+  // Removes the visual chat typing message
+  function removeHostTyping (data) {
+    getTypingMessages(data).fadeOut(function () {
+      $(this).remove();
+    });
+  }
+
+
+
   // Prevents input from having injected markup
   function cleanInput (input) {
     return $('<div/>').text(input).text();
@@ -271,6 +285,16 @@ $(function() {
     var index = Math.abs(hash % COLORS.length);
     return COLORS[index];
   }
+
+  //this wont work for dates or arrays
+  function clone(obj) {
+    if (null == obj || "object" != typeof obj) return obj;
+    var copy = obj.constructor();
+    for (var attr in obj) {
+        if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
+    }
+    return copy;
+}
 
   // Keyboard events
 
@@ -325,7 +349,6 @@ $(function() {
       log("The host is " + data.hostName);
     };
 
-
     addParticipantsMessage(data);
   });
 
@@ -340,6 +363,10 @@ $(function() {
     addFanMessage(data);
   });
 
+    // Whenever the server emits 'host repost', update the chat body
+  socket.on('host repost', function (data) {
+    addHostMessage(data);
+  });
 
   // Whenever the server emits 'user joined', log it in the chat body
   socket.on('user joined', function (data) {

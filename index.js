@@ -17,7 +17,7 @@ app.use(express.static(__dirname + '/public'));
 // usernames which are currently connected to the chat
 var usernames = {};
 var numUsers = 0;
-var hostName = "not set lol";
+var hostName = "hostName not set lol";
 
 io.on('connection', function (socket) {
   var addedUser = false;
@@ -40,6 +40,11 @@ io.on('connection', function (socket) {
     });
   });
 
+    // when the client emits 'host repost', this listens and executes
+  socket.on('host repost', function (data) {
+    socket.broadcast.emit('host repost', data);
+  });
+
     // when the client emits 'add user', this listens and executes
   socket.on('add user', function (username) {
     // we store the username in the socket session for this client
@@ -59,8 +64,6 @@ io.on('connection', function (socket) {
       hostName: hostName
     });
     // echo globally (all clients) that a person has connected
-
-    console.log('usernames.length is ' + Object.keys(usernames).length);
 
     socket.broadcast.emit('user joined', {
       username: socket.username,
