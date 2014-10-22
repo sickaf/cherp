@@ -21,18 +21,18 @@ var numUsers = 0;
 io.on('connection', function (socket) {
   var addedUser = false;
 
-  // when the client emits 'new message', this listens and executes
+  // when the client emits 'new host message', this listens and executes
   socket.on('new host message', function (data) {
-    // we tell the client to execute 'new message'
+    // we tell the client to execute 'new host message'
     socket.broadcast.emit('new host message', {
       username: socket.username,
       message: data
     });
   });
 
-    // when the client emits 'new message', this listens and executes
+    // when the client emits 'new fan message', this listens and executes
   socket.on('new fan message', function (data) {
-    // we tell the client to execute 'new message'
+    // we tell the client to execute 'new fan message'
     socket.broadcast.emit('new fan message', {
       username: socket.username,
       message: data

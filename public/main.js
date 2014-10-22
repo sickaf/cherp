@@ -1,10 +1,13 @@
 $(function() {
   var FADE_TIME = 150; // ms
   var TYPING_TIMER_LENGTH = 400; // ms
+
+//http://flatuicolors.com/
   var COLORS = [
-    '#e21400', '#91580f', '#f8a700', '#f78b00',
-    '#58dc00', '#287b00', '#a8f07a', '#4ae8c4',
-    '#3b88eb', '#3824aa', '#a700ff', '#d300e7'
+    '#1abc9c', '#2ecc71', '#3498db',            '#34495e',
+    '#16a085',                       '#8e44ad',
+    '#f1c40f', '#e67e22', '#e74c3c',            
+               '#d35400', '#c0392b',            '#7f8c8d'  
   ];
 
   // Initialize varibles
@@ -35,7 +38,7 @@ $(function() {
     }
     if (data.numUsers === 1) {
       iAmHost = true;
-      message += "it's just you here bruh";
+      message += "you're the host";
     } else {
       message += "there are " + data.numUsers + " participants: "+connectedUsers;
     }
@@ -288,7 +291,10 @@ $(function() {
   });
 
   $inputMessage.on('input', function() {
-    updateTyping();
+    //we're only interested in typing events for the hosts
+    if(iAmHost) {
+          updateTyping();
+    }
   });
 
   // Click events
