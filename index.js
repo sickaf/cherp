@@ -12,6 +12,12 @@ server.listen(port, function () {
 // Routing
 app.use(express.static(__dirname + '/public'));
 
+// var router = express.Router();
+// router.get('/:name', function(req, res) {
+//   res.send('hello ' + req.params.name + '!');
+// });
+
+
 // Chatroom
 
 // usernames which are currently connected to the chat
@@ -22,6 +28,12 @@ var hostName = "hostName not set lol";
 io.on('connection', function (socket) {
   var addedUser = false;
 
+  //Received an image: broadcast to all
+  socket.on('new host image', function (data) {
+    socket.broadcast.emit('new host image', socket.username, data);
+  });
+
+
   // when the client emits 'new host message', this listens and executes
   socket.on('new host message', function (data) {
     // we tell the client to execute 'new host message'
@@ -31,7 +43,7 @@ io.on('connection', function (socket) {
     });
   });
 
-    // when the client emits 'new fan message', this listens and executes
+  // when the client emits 'new fan message', this listens and executes
   socket.on('new fan message', function (data) {
     // we tell the client to execute 'new fan message'
     socket.broadcast.emit('new fan message', {
@@ -40,7 +52,7 @@ io.on('connection', function (socket) {
     });
   });
 
-    // when the client emits 'host repost', this listens and executes
+  // when the client emits 'host repost', this listens and executes
   socket.on('host repost', function (data) {
     socket.broadcast.emit('host repost', data);
   });

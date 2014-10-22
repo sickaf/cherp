@@ -108,6 +108,43 @@ $(function() {
     addMessageElement($el, options);
   }
 
+ // Adds the visual chat image to the message list
+  function addHostImage (from, base64Image) {
+
+    var options = {};
+
+    ////////
+    // $('#lines').append($('<p>').append($('<b>').text(from),
+    // '<img src="' + base64Image + '"/>'));
+    ////////
+
+    var $usernameDiv = $('<span class="username"/>')
+      .text(from)
+      .css('color', getUsernameColor(from));
+
+    // var $messageBodyDiv = $('<span class="messageBody">')
+    //   .text(from), 
+    //   '<img src="' + base64Image + '"/>'));;
+
+
+    var $messageBodyDiv = $('<span class="messageBody">')
+      .text(from)
+      .append('<img src="' + base64Image + '"/>');
+
+    var $messageDiv = $('<li class="message"/>')
+      .data('username', from)
+      .append($usernameDiv, $messageBodyDiv);
+
+
+
+
+
+
+    addMessageElement($messageDiv, options);
+  }
+
+
+
   // Adds the visual chat message to the message list
   function addHostMessage (data, options) {
     // Don't fade the message in if there is an 'X was typing'
@@ -296,6 +333,30 @@ $(function() {
     return copy;
 }
 
+
+
+  //
+  // dom manipulation code to send images
+  //
+  $(function () {
+    $('#imagefile').bind('change', function(e){
+      var data = e.originalEvent.target.files[0];
+      var reader = new FileReader();
+      reader.onload = function(evt){
+        addHostImage("me", evt.target.result);
+        socket.emit('new host image', evt.target.result);
+      };
+      reader.readAsDataURL(data);
+    });
+  });
+
+
+
+
+
+
+
+
   // Keyboard events
 
   $window.keydown(function (event) {
@@ -352,6 +413,10 @@ $(function() {
     addParticipantsMessage(data);
   });
 
+  //receive host image from server
+  socket.on('new host image', function(from, base64Image) {
+    addHostImage(from, base64Image);
+  });
 
   // Whenever the server emits 'new message', update the chat body
   socket.on('new host message', function (data) {
