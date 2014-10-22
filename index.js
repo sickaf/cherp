@@ -17,6 +17,7 @@ app.use(express.static(__dirname + '/public'));
 // usernames which are currently connected to the chat
 var usernames = {};
 var numUsers = 0;
+var hostName = "not set lol";
 
 io.on('connection', function (socket) {
   var addedUser = false;
@@ -45,15 +46,26 @@ io.on('connection', function (socket) {
     socket.username = username;
     // add the client's username to the global list
     usernames[username] = username;
+    
+    //set the hostname
+    if(numUsers === 0) {
+      hostName = username;
+    }
+
     ++numUsers;
     addedUser = true;
     socket.emit('login', {
-      numUsers: numUsers
+      numUsers: numUsers,
+      hostName: hostName
     });
     // echo globally (all clients) that a person has connected
+
+    console.log('usernames.length is ' + Object.keys(usernames).length);
+
     socket.broadcast.emit('user joined', {
       username: socket.username,
-      numUsers: numUsers
+      numUsers: numUsers,
+      usernames: usernames
     });
   });
 

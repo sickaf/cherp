@@ -13,16 +13,14 @@ $(function() {
   // Initialize varibles
   var $window = $(window);
   var $usernameInput = $('.usernameInput'); // Input for username
-  var $hostMessages = $('.hostMessages'); // Messages area
+  var $hostMessages = $('.hostMessages'); // host messages area
   var $fanMessages = $('.fanMessages'); // fan messages area
   var $inputMessage = $('.inputMessage'); // Input message input box
-
   var $loginPage = $('.login.page'); // The login page
   var $chatPage = $('.chat.page'); // The chatroom page
 
   // Prompt for setting a username
   var username;
-  var connectedUsers = 'you';
   var iAmHost = false;
   var connected = false;
   var typing = false;
@@ -33,17 +31,27 @@ $(function() {
 
   function addParticipantsMessage (data) {
     var message = '';
-    if ("username" in data) {
-          connectedUsers = connectedUsers + ", "+data.username;
+    
+    //if there is a list of users, print them out.
+    if ("usernames" in data){
+        var usernamesList = data.usernames
+        var names = "";
+
+        for (var key in usernamesList) 
+        {
+            if (usernamesList.hasOwnProperty(key)) 
+            {
+                names += " " + key;
+            }
+        }
+        log("there are " + data.numUsers + " people here: " + names);
     }
+
     if (data.numUsers === 1) {
       iAmHost = true;
       message += "you're the host";
-    } else {
-      message += "there are " + data.numUsers + " participants: "+connectedUsers;
-    }
-
-    if(iAmHost) log(message);
+      log(message)
+    } 
   }
 
   // Sets the client's username
@@ -127,13 +135,6 @@ $(function() {
 
  // Adds the visual fan message to the message list
   function addFanMessage (data, options) {
-    // Don't fade the message in if there is an 'X was typing'
-    var $typingMessages = getTypingMessages(data);
-    options = options || {};
-    if ($typingMessages.length !== 0) {
-      options.fade = false;
-      $typingMessages.remove();
-    }
 
     var $usernameDiv = $('<span class="username"/>')
       .text(data.username)
@@ -151,14 +152,14 @@ $(function() {
   }
 
   // Adds the visual chat typing message
-  function addChatTyping (data) {
+  function addHostTyping (data) {
     data.typing = true;
     data.message = 'is typing';
     addHostMessage(data);
   }
 
   // Removes the visual chat typing message
-  function removeChatTyping (data) {
+  function removeHostTyping (data) {
     getTypingMessages(data).fadeOut(function () {
       $(this).remove();
     });
@@ -315,12 +316,19 @@ $(function() {
   socket.on('login', function (data) {
     connected = true;
     // Display the welcome message
-    var message = "Hi.  This is Cherp.";
+    var message = "Hi.  This is Cherp by sick.af";
     log(message, {
       prepend: true
     });
+
+    if ("hostName" in data && data.numUsers > 1) {
+      log("The host is " + data.hostName);
+    };
+
+
     addParticipantsMessage(data);
   });
+
 
   // Whenever the server emits 'new message', update the chat body
   socket.on('new host message', function (data) {
@@ -343,16 +351,16 @@ $(function() {
   socket.on('user left', function (data) {
     log(data.username + ' left');
     addParticipantsMessage(data);
-    removeChatTyping(data);
+    removeHostTyping(data);
   });
 
   // Whenever the server emits 'typing', show the typing message
   socket.on('typing', function (data) {
-    addChatTyping(data);
+    addHostTyping(data);
   });
 
   // Whenever the server emits 'stop typing', kill the typing message
   socket.on('stop typing', function (data) {
-    removeChatTyping(data);
+    removeHostTyping(data);
   });
 });
