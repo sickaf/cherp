@@ -108,24 +108,23 @@ $(function() {
     addMessageElement($el, options);
   }
 
+
  // Adds the visual chat image to the message list
   function addHostImage (from, base64Image) {
 
-    var options = {};
 
     var $usernameDiv = $('<span class="username"/>')
       .text(from)
       .css('color', getUsernameColor(from));
 
     var $messageBodyDiv = $('<span class="messageBody">')
-      .text(from)
       .append('<img src="' + base64Image + '"/>');
 
     var $messageDiv = $('<li class="message"/>')
       .data('username', from)
       .append($usernameDiv, $messageBodyDiv);
 
-    addMessageElement($messageDiv, options);
+    addMessageElement($messageDiv);
   }
 
 
@@ -262,8 +261,6 @@ $(function() {
     });
   }
 
-
-
   // Prevents input from having injected markup
   function cleanInput (input) {
     return $('<div/>').text(input).text();
@@ -319,26 +316,34 @@ $(function() {
 }
 
 
-
-  //
+  ////////////////////////////////////////////////////
+  //////////////////////////////////////////////////
+  //////////////////////////////////////////////////
+  //////////////////////////////////////////////////
   // dom manipulation code to send images
-  // THIS NEEDS TO BE UPDATED
+  // THIS NEEDS TO BE UPDATED TO NOT LOOK SO GAY
   //
   $(function () {
     $('#imagefile').bind('change', function(e){
       var data = e.originalEvent.target.files[0];
       var reader = new FileReader();
       reader.onload = function(evt){
-        addHostImage("me", evt.target.result);
-        socket.emit('new host image', evt.target.result);
+        if(iAmHost)
+        {
+          addHostImage("me", evt.target.result);
+          socket.emit('new host image', evt.target.result);
+        }
+        else {
+          log("YOURE NOT THE FUCKING HOST.  Not going to send that image");
+        }
       };
       reader.readAsDataURL(data);
     });
   });
-
-
-
-
+  //////////////////////////////////////////////////
+  //////////////////////////////////////////////////
+  //////////////////////////////////////////////////
+  //////////////////////////////////////////////////
 
 
   // Keyboard events
@@ -378,6 +383,7 @@ $(function() {
   $inputMessage.click(function () {
     $inputMessage.focus();
   });
+  
 
   // Socket events
 
