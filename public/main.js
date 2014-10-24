@@ -419,6 +419,13 @@ $(function() {
     addParticipantsMessage(data);
   });
 
+  //TODO
+  //add messages from the database
+  socket.on('add database messages', function(data) {
+    
+  });
+
+
   //receive host image from server
   socket.on('new host image', function(from, base64Image) {
     addHostImage(from, base64Image);

@@ -5,6 +5,21 @@ var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var port = process.env.PORT || 3000;
 
+//temporary.  needs to be updated
+var mongo = require('mongodb');
+var monk = require('monk');
+var db = monk('localhost:27017/cherp');
+
+app.use(function(req, res, next) {
+  req.db = db;
+  next();
+});
+
+////////////////
+// var routes = require('./routes/index');
+// var users = require('./routes/users');
+////////////////
+
 server.listen(port, function () {
   console.log('Server listening at port %d', port);
 });
@@ -13,10 +28,21 @@ server.listen(port, function () {
 app.use(express.static(__dirname + '/public'));
 
 // var router = express.Router();
-// router.get('/:name', function(req, res) {
+// app.get('/:name', function(req, res) {
 //   res.send('hello ' + req.params.name + '!');
 // });
 
+/* GET Userlist page. */
+app.get('/messagelist', function(req, res) {
+    var db = req.db;
+    var collection = db.get('messagecollection');
+    collection.find({},{},function(e,docs){
+      socket.broadcast.emit('add database messages', data);
+    });
+});
+
+
+var app = express();
 
 // Chatroom
 

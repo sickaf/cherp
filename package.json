@@ -8,7 +8,9 @@
   "license": "BSD",
   "dependencies": {
     "express": "~4.0.0",
-    "socket.io": "^1.1.0"
+    "socket.io": "^1.1.0",
+    "mongodb": "*",
+    "monk": "*"
   },
   "subdomain": "devspinn-chat",
   "scripts": {
