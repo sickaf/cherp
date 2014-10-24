@@ -20,12 +20,24 @@ app.use(function(req, res, next) {
 // var users = require('./routes/users');
 ////////////////
 
+
 server.listen(port, function () {
   console.log('Server listening at port %d', port);
 });
 
 // Routing
 app.use(express.static(__dirname + '/public'));
+
+app.get('/', function(req, res) {
+  res.render('index.html');
+});
+
+app.get('/fartmanshit', function(req, res) {
+  res.render('index.html');
+});
+
+
+
 
 // var router = express.Router();
 // app.get('/:name', function(req, res) {
@@ -40,7 +52,6 @@ app.get('/messagelist', function(req, res) {
       socket.broadcast.emit('add database messages', data);
     });
 });
-
 
 var app = express();
 
