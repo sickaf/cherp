@@ -438,6 +438,8 @@ $(function() {
     addFanMessage(data[0]);
     addFanMessage(data[1]);
     addFanMessage(data[2]);
+    addFanMessage(data[3]);
+    addFanMessage(data[4]);
   });
 
 

@@ -4,62 +4,60 @@ var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var port = process.env.PORT || 3000;
+var bodyParser = require('body-parser');
 
-//temporary.  needs to be updated
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+
+
+//
+// database variables
+//
 var mongo = require('mongodb');
 var monk = require('monk');
 var db = monk('localhost:27017/cherp');
+var messageData;
+
 
 //
-//database
+// load database
 //
+
+// Make our db accessible to our router
+// app.use(function(req,res,next){
+//     req.db = db;
+//     next();
+// });
+
 app.use(function(req, res, next) {
   req.db = db;
+  var collection = db.get('messagecollection');
+    collection.find({},{},function(e,docs){
+      messageData = docs;
+  });
   next();
-});
-
-server.listen(port, function () {
-  console.log('Server listening at port %d', port);
 });
 
 
 //
 // Routing
 //
-var routes = require('./routes/index');
 app.use(express.static(__dirname + '/public'));
-
-///////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////
-///////                                                  //////
-///////  GET Userlist page                               //////
-///////  THIS NEEDS TO BE UPDATED TO NOT BE SO SHITTY    //////
-///////                                                  //////
-///////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////
-var messageData;
-app.get('/messagelist', function(req, res) {
-    var db = req.db;
-    var collection = db.get('messagecollection');
-    collection.find({},{},function(e,docs){
-      messageData = docs;
-      res.send(docs);
-    });
-});
-
-
+var routes = require('./routes/index');
 app.use('/', routes);
 
 
-var app = express();
 
+server.listen(port, function () {
+  console.log('Server listening at port %d', port);
+});
+
+
+
+//
 // Chatroom
+//
 
 // usernames which are currently connected to the chat
 var usernames = {};
@@ -124,7 +122,7 @@ io.on('connection', function (socket) {
       usernames: usernames
     });
 
-    socket.broadcast.emit('add database messages', messageData);
+    socket.emit('add database messages', messageData);
 
   });
 
@@ -157,3 +155,5 @@ io.on('connection', function (socket) {
     }
   });
 });
+
+module.exports = app; 
