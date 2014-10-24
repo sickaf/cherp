@@ -10,48 +10,52 @@ var mongo = require('mongodb');
 var monk = require('monk');
 var db = monk('localhost:27017/cherp');
 
+//
+//database
+//
 app.use(function(req, res, next) {
   req.db = db;
   next();
 });
 
-////////////////
-// var routes = require('./routes/index');
-// var users = require('./routes/users');
-////////////////
-
-
 server.listen(port, function () {
   console.log('Server listening at port %d', port);
 });
 
+
+//
 // Routing
+//
+var routes = require('./routes/index');
 app.use(express.static(__dirname + '/public'));
 
-app.get('/', function(req, res) {
-  res.render('index.html');
-});
-
-app.get('/fartmanshit', function(req, res) {
-  res.render('index.html');
-});
-
-
-
-
-// var router = express.Router();
-// app.get('/:name', function(req, res) {
-//   res.send('hello ' + req.params.name + '!');
-// });
-
-/* GET Userlist page. */
+///////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+///////                                                  //////
+///////  GET Userlist page                               //////
+///////  THIS NEEDS TO BE UPDATED TO NOT BE SO SHITTY    //////
+///////                                                  //////
+///////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+var messageData;
 app.get('/messagelist', function(req, res) {
     var db = req.db;
     var collection = db.get('messagecollection');
     collection.find({},{},function(e,docs){
-      socket.broadcast.emit('add database messages', data);
+      messageData = docs;
+      res.send(docs);
     });
 });
+
+
+app.use('/', routes);
+
 
 var app = express();
 
@@ -119,6 +123,9 @@ io.on('connection', function (socket) {
       numUsers: numUsers,
       usernames: usernames
     });
+
+    socket.broadcast.emit('add database messages', messageData);
+
   });
 
   // when the client emits 'typing', we broadcast it to others
