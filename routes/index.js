@@ -17,15 +17,8 @@ router.post('/addmessagetodatabase', function(req, res) {
 	//set our internal DB variable
 	var db = req.db;
 
-	//get our form values, that depend on the "name" attributes
-
-	// var $usernameInput = $('.usernameInput'); // Input for username
-
 	var userName = req.body.username;
-	// var userName = "devontestloser";
-
 	var userMessage = req.body.usermessage;
-	// var userMessage = "devontestmessage2";
 
 	//set our collection
 	var collection = db.get('messagecollection');
