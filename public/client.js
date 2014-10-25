@@ -64,11 +64,9 @@ $(function() {
     // If the username is valid
     if (username) {
       $loginPage.fadeOut();
-      // $chatPage.show();
       $chatnamePage.show();
       $loginPage.off('click');
-      // $currentInput = $inputMessage.focus();
-       $currentInput = $chatnameInput.focus();
+      $currentInput = $chatnameInput.focus();
 
       // Tell the server your username
       socket.emit('add user', username);
@@ -86,8 +84,8 @@ $(function() {
       $chatnamePage.off('click');
       $currentInput = $inputMessage.focus();
 
-      // Tell the server your username
-      //socket.emit('enter chat', chatname);
+      // Tell the server your chatname
+      socket.emit('enter chat', chatname);
     }
   }
 
@@ -108,7 +106,7 @@ $(function() {
         });
 
         // tell server to execute 'new message' and send along one parameter
-        socket.emit('new host message', message);
+        // socket.emit('new host message', message);
       }
       else 
       {
@@ -117,9 +115,11 @@ $(function() {
           message: message
         });
         
-        // tell server to execute 'new fan message' and send along one parameter
-        socket.emit('new fan message', message);
+        // tell server to execute 'new message' and send along one parameter
+        // socket.emit('new message', message);
       }
+      socket.emit('new message', message);
+
     }
   }
 
@@ -436,10 +436,7 @@ $(function() {
   socket.on('login', function (data) {
     connected = true;
     // Display the welcome message
-    var message = "Hi.  This is Cherp by sick.af";
-    log(message, {
-      prepend: true
-    });
+    log("Hi.  This is Cherp by sick.af");
 
     if ("hostName" in data && data.numUsers > 1) {
       log("The host is " + data.hostName);
@@ -464,13 +461,15 @@ $(function() {
   ///////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////
   socket.on('add database messages', function(data) {
-    
     for (var i = 0; i < data.length; i++) {
-
       addFanMessage(data[i]);
     }
   });
 
+  // Whenever the server emits 'new message', update the chat body
+  socket.on('update', function (data) {
+    log(data);
+  });
 
   //receive host image from server
   socket.on('new host image', function(from, base64Image) {
@@ -481,6 +480,7 @@ $(function() {
   socket.on('new host message', function (data) {
     addHostMessage(data);
   });
+
 
   // Whenever the server emits 'new fan message', update the chat body
   socket.on('new fan message', function (data) {

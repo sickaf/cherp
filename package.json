@@ -10,6 +10,8 @@
     "express": "~4.0.0",
     "socket.io": "^1.1.0",
     "body-parser": "~1.8.1",
+    "underscore" : "*",
+    "node-uuid" : "*",
     "mongodb": "*",
     "monk": "*",
     "mongoose": "*",
