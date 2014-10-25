@@ -131,40 +131,32 @@ io.on('connection', function (socket) {
   // when the client emits 'new host message', this listens and executes
   socket.on('new message', function (data) {
 
-    io.sockets.in(socket.room).emit("new host message", {
-      username: people[socket.id].username,
-      message: data
-    });
-
     if(people[socket.id].owns == socket.room) {
-      socket.emit("update", "sending HOST message. socket.room: "+socket.room+ " and you own "+people[socket.id].owns);
-      
+      // socket.emit("update", "sending HOST message. socket.room: "+socket.room+ " and you own "+people[socket.id].owns);
+  
       io.sockets.in(socket.room).emit("new host message", {
         username: people[socket.id].username,
         message: data
       });
 
-      // socket.broadcast.emit('new host message', {
-      //   username: people[socket.id].username,
-      //   message: data
-      // });
     }
     else {
-      socket.emit("update", "sending FAN message. socket.room: "+socket.room+ " and you own "+people[socket.id].owns);
+      // socket.emit("update", "sending FAN message. socket.room: "+socket.room+ " and you own "+people[socket.id].owns);
       io.sockets.in(socket.room).emit("new fan message", {
         username: people[socket.id].username,
         message: data
       });
-      // socket.broadcast.emit('new fan message', {
-      //   username: people[socket.id].username,
-      //   message: data
-      // });
     }
   });
 
   // when the client emits 'host repost', this listens and executes
   socket.on('host repost', function (data) {
-    socket.broadcast.emit('host repost', data);
+    if(people[socket.id].owns == socket.room) {
+      io.sockets.in(socket.room).emit('host repost', data);
+    }
+    else {
+      socket.emit("update", "ur not the host lol pull out homie");
+    }
   });
 
   // when the client emits 'add user', this listens and executes

@@ -86,26 +86,21 @@ $(function() {
     if (message && connected) {
       $inputMessage.val('');
       
-      if(iAmHost) 
-      {
-        addHostMessage({
-          username: username,
-          message: "C:"+message
-        });
+      // if(iAmHost) 
+      // {
+      //   addHostMessage({
+      //     username: username,
+      //     message: "[client] "+message
+      //   });
 
-        // tell server to execute 'new message' and send along one parameter
-        // socket.emit('new host message', message);
-      }
-      else 
-      {
-        addFanMessage({
-          username: username,
-          message: "C:"+message
-        });
-        
-        // tell server to execute 'new message' and send along one parameter
-        // socket.emit('new message', message);
-      }
+      // }
+      // else 
+      // {
+      //   addFanMessage({
+      //     username: username,
+      //     message: "[client] "+message
+      //   });
+      // }
       socket.emit('new message', message);
 
     }
@@ -180,14 +175,18 @@ $(function() {
 
     //sets up a listener so that if the host clicks it, it gets copied to the host's messages
     $messageDiv.click(function () {
-      if(iAmHost){
-        data.repost = true;
-        addHostMessage(data);
-        socket.emit('host repost', data);
-      }
-      else {
-        log("youre not the host... idiot");
-      }
+
+      data.repost = true;
+      socket.emit('host repost', data);
+
+      // if(iAmHost){
+      //   data.repost = true;
+      //   addHostMessage(data);
+      //   socket.emit('host repost', data);
+      // }
+      // else {
+      //   log("youre not the host... idiot");
+      // }
     });
 
     addFanMessageElement($messageDiv, options);
