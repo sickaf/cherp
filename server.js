@@ -8,6 +8,7 @@ var port = process.env.PORT || 3000;
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
+var MongoStore = require('express-session-mongo')
 var passport = require('passport');
 var flash    = require('connect-flash');
 var path = require('path');
@@ -46,10 +47,14 @@ app.use(cookieParser());
 
 // passport
 app.use(session({
-    secret: 'devon is gay', // session secret
-    resave: true,
-    saveUninitialized: true
-})); 
+  cookie : {
+    maxAge: 3600000 // see below
+  },
+  secret: 'devon is gay', // session secret
+  resave: true,
+  saveUninitialized: true,
+  store : new MongoStore({ db: 'cherp' })
+}));
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
 app.use(flash()); // use connect-flash for flash messages stored in session

@@ -23,7 +23,8 @@
     "morgan": "*",
     "cookie-parser": "*",
     "method-override": "*",
-    "express-session": "*" 
+    "express-session": "*",
+    "express-session-mongo": "*"
   },
   "subdomain": "devspinn-chat",
   "scripts": {
