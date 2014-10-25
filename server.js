@@ -5,6 +5,8 @@ var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var port = process.env.PORT || 3000;
 var bodyParser = require('body-parser');
+var logger = require('morgan'); //hoping this will make debugging easier
+
 
 var Room = require('./room.js');
 
@@ -17,11 +19,12 @@ var monk = require('monk');
 var db = monk('localhost:27017/cherp');
 var messageData;
 
-//
-// allow us to parse the HTML body. currently used to parse newmessage.html
-//
+// allows us to parse the HTML body. currently used to parse newmessage.html
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+
+//i think we need this to print the stack trace in the event of an error
+app.use(logger('dev'));
 
 //
 // Make our db accessible to our router and populate messageData with stored messages
@@ -46,14 +49,47 @@ server.listen(port, function () {
   console.log('Server listening at port %d', port);
 });
 
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+    var err = new Error('Not Found');
+    err.status = 404;
+    next(err);
+});
+
+//
+// error handlers
+//
+// development error handler -- will print stacktrace
+if (app.get('env') === 'development') {
+    app.use(function(err, req, res, next) {
+        res.status(err.status || 500);
+        res.render('error', {
+            message: err.message,
+            error: err
+        });
+    });
+}
+
+// production error handler -- no stacktraces leaked to user
+app.use(function(err, req, res, next) {
+    res.status(err.status || 500);
+    res.render('error', {
+        message: err.message,
+        error: {}
+    });
+});
+
 //
 // Chatroom
 //
 
-// usernames which are currently connected to the chat
-var usernames = {};
-var numUsers = 0;
-var hostName = "hostName not set lol";
+// people which are currently connected to the chat
+var people = {};  //this should become people
+var numUsers = 0; //deprecate this
+var hostName = "hostName not set lol"; //deprecate this
+
+var rooms = {};
+var sockets = [];
 
 io.on('connection', function (socket) {
   var addedUser = false;
@@ -91,7 +127,7 @@ io.on('connection', function (socket) {
     // we store the username in the socket session for this client
     socket.username = username;
     // add the client's username to the global list
-    usernames[username] = username;
+    people[username] = username;
     
     //set the hostname
     if(numUsers === 0) {
@@ -109,7 +145,7 @@ io.on('connection', function (socket) {
     socket.broadcast.emit('user joined', {
       username: socket.username,
       numUsers: numUsers,
-      usernames: usernames
+      usernames: people
     });
 
     socket.emit('add database messages', messageData);
@@ -132,9 +168,9 @@ io.on('connection', function (socket) {
 
   // when the user disconnects.. perform this
   socket.on('disconnect', function () {
-    // remove the username from global usernames list
+    // remove the username from global people list
     if (addedUser) {
-      delete usernames[socket.username];
+      delete people[socket.username];
       --numUsers;
 
       // echo globally that this client has left

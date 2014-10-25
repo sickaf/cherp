@@ -10,7 +10,7 @@ router.get('/newuser', function(req, res) {
 
 /* GET New User page. */
 router.get('/newmessage', function(req, res) {
-    res.sendfile(__dirname+'/public/newmessage.html');
+    res.sendfile(rootFilePath+'/public/newmessage.html');
 });
 
 /* POST to Add User Service */
