@@ -6,11 +6,6 @@ var io = require('socket.io')(server);
 var port = process.env.PORT || 3000;
 var bodyParser = require('body-parser');
 
-
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-
-
 //
 // database variables
 //
@@ -21,15 +16,17 @@ var messageData;
 
 
 //
-// load database
+// allow us to parse the HTML body. currently used to parse newmessage.html
 //
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 
-// Make our db accessible to our router
-// app.use(function(req,res,next){
-//     req.db = db;
-//     next();
-// });
 
+
+
+//
+// Make our db accessible to our router and populate messageData with stored messages
+//
 app.use(function(req, res, next) {
   req.db = db;
   var collection = db.get('messagecollection');
@@ -53,8 +50,6 @@ server.listen(port, function () {
   console.log('Server listening at port %d', port);
 });
 
-
-
 //
 // Chatroom
 //
@@ -71,7 +66,6 @@ io.on('connection', function (socket) {
   socket.on('new host image', function (data) {
     socket.broadcast.emit('new host image', socket.username, data);
   });
-
 
   // when the client emits 'new host message', this listens and executes
   socket.on('new host message', function (data) {
