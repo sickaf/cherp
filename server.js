@@ -103,19 +103,34 @@ io.on('connection', function (socket) {
   // when the client emits 'new host message', this listens and executes
   socket.on('new message', function (data) {
 
-    if(people[socket.id].username == hostName) {
-      socket.emit("update", "sending HOST message. hostname: "+hostName+ " and you are "+people[socket.id].username);
-      socket.broadcast.emit('new host message', {
+    io.sockets.in(socket.room).emit("new host message", {
+      username: people[socket.id].username,
+      message: data
+    });
+
+    if(people[socket.id].owns == socket.room) {
+      socket.emit("update", "sending HOST message. socket.room: "+socket.room+ " and you own "+people[socket.id].owns);
+      
+      io.sockets.in(socket.room).emit("new host message", {
         username: people[socket.id].username,
         message: data
       });
+
+      // socket.broadcast.emit('new host message', {
+      //   username: people[socket.id].username,
+      //   message: data
+      // });
     }
     else {
-      socket.emit("update", "sending FAN message. hostname: "+hostName+ " and you are "+people[socket.id].username);
-      socket.broadcast.emit('new fan message', {
+      socket.emit("update", "sending FAN message. socket.room: "+socket.room+ " and you own "+people[socket.id].owns);
+      io.sockets.in(socket.room).emit("new fan message", {
         username: people[socket.id].username,
         message: data
       });
+      // socket.broadcast.emit('new fan message', {
+      //   username: people[socket.id].username,
+      //   message: data
+      // });
     }
   });
 
@@ -127,20 +142,16 @@ io.on('connection', function (socket) {
   // when the client emits 'add user', this listens and executes
   socket.on('add user', function (username) {
 
-    var ownerRoomID = null;
-    var inRoomID = 69;
-
     //set the hostname
-    if(_.size(people) === 0) {
-      hostName = username;
-      ownerRoomID = 69;
-    }
+    // if(_.size(people) === 0) {
+    //   hostName = username;
+    // }
 
     ++numUsers;
     addedUser = true;
 
-    people[socket.id] = {"username" : username, "owns" : ownerRoomID, "inroom": inRoomID};
-    socket.emit("update", "You have connected to the server and are owner of room # " + ownerRoomID);
+    people[socket.id] = {"username" : username, "owns" : null, "inroom": null};
+    socket.emit("update", "You have connected to the server");
     io.sockets.emit("update", people[socket.id].username + " is online.")
     sizePeople = _.size(people);
     sizeRooms = _.size(rooms);
@@ -158,33 +169,43 @@ io.on('connection', function (socket) {
     // echo globally (all clients) that a person has connected
     socket.broadcast.emit('user joined', {
       username: people[socket.id].username,
-      numUsers: sizePeople,
-      usernames: ["no longer keeping track this way"]
+      numUsers: sizePeople
     });
 
     socket.emit('add database messages', messageData);
   });
 
-  // socket.on('enter chat', function (chatname) {
+  socket.on('enter chat', function (chatname) {
 
-  //     // var id = uuid.v4();
-  //     var existingChat = rooms[chatname];
-  //     if(existingChat) {
-  //       existingChat[chatname].addFan(people[socket.id].username);
-  //     }
-  //     else {
-  //       var id = uuid.v4();
-  //       var room = new Room(chatname, id, people[socket.id].username);
-  //       rooms[id] = room;
-  //       //add room to socket, and auto join the creator of the room
-  //       people[socket.id].owns = id;
-  //     }
-  //       socket.room = chatname;
-  //       socket.join(socket.room);
-  //       people[socket.id].inroom = id;
-  //       socket.emit("new host message", "Welcome to " + room.name + ".");
-  //       socket.emit("sendRoomID", {id: id});  
-  // });
+    if (people[socket.id].inroom) {
+      socket.emit("update", "You are already in a room.");
+    }
+    else if (people[socket.id].owns) {
+      socket.emit("update", "You already own a room! This is madness!");
+    }
+    else { //LETS DO THIS
+            
+      //what if the chatroom already exists!!
+      if(chatname in rooms) { 
+        socket.emit("update", chatname + " already exists.  adding you as a fan");
+        rooms[chatname].addFan(people[socket.id].username);
+        people[socket.id].inroom = chatname;
+      }
+      else { //room doesnt exist. create it
+        socket.emit("update", chatname + " doesnt exist.  adding you as host");
+
+        var id = uuid.v4();
+        var room = new Room(chatname, id, people[socket.id]);
+        rooms[chatname] = room;
+        //add room to socket, and auto join the creator of the room
+        people[socket.id].owns = chatname;
+      }
+
+        socket.room = chatname;
+        socket.join(socket.room);
+        socket.emit("update", "Welcome to " + chatname + ".");
+    }
+  });
 
 
   // when the client emits 'typing', we broadcast it to others

@@ -35,20 +35,8 @@ $(function() {
   function addParticipantsMessage (data) {
     var message = '';
     
-    //if there is a list of users, print them out.
-    if ("usernames" in data){
-        var usernamesList = data.usernames
-        var names = "";
 
-        for (var key in usernamesList) 
-        {
-            if (usernamesList.hasOwnProperty(key)) 
-            {
-                names += " " + key;
-            }
-        }
-        log("there are " + data.numUsers + " people here: " + names);
-    }
+    log("there are " + data.numUsers + " people in this room.");
 
     if (data.numUsers === 1) {
       iAmHost = true;
@@ -102,7 +90,7 @@ $(function() {
       {
         addHostMessage({
           username: username,
-          message: message
+          message: "C:"+message
         });
 
         // tell server to execute 'new message' and send along one parameter
@@ -112,7 +100,7 @@ $(function() {
       {
         addFanMessage({
           username: username,
-          message: message
+          message: "C:"+message
         });
         
         // tell server to execute 'new message' and send along one parameter
