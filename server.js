@@ -6,6 +6,9 @@ var io = require('socket.io')(server);
 var port = process.env.PORT || 3000;
 var bodyParser = require('body-parser');
 
+var Room = require('./room.js');
+
+
 //
 // database variables
 //
