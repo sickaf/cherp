@@ -1,5 +1,12 @@
 var express = require('express');
+var path = require('path');
 var router = express.Router();
+
+var rootFilePath = path.dirname(require.main.filename)
+
+router.get('/newuser', function(req, res) {
+	res.sendfile(rootFilePath+'/public/index.html');
+});
 
 /* GET New User page. */
 router.get('/newmessage', function(req, res) {
