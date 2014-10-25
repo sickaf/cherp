@@ -435,11 +435,11 @@ $(function() {
   ///////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////
   socket.on('add database messages', function(data) {
-    addFanMessage(data[0]);
-    addFanMessage(data[1]);
-    addFanMessage(data[2]);
-    addFanMessage(data[3]);
-    addFanMessage(data[4]);
+    
+    for (var i = 0; i < data.length; i++) {
+
+      addFanMessage(data[i]);
+    }
   });
 
 

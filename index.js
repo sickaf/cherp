@@ -14,15 +14,11 @@ var monk = require('monk');
 var db = monk('localhost:27017/cherp');
 var messageData;
 
-
 //
 // allow us to parse the HTML body. currently used to parse newmessage.html
 //
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-
-
-
 
 //
 // Make our db accessible to our router and populate messageData with stored messages
@@ -36,15 +32,12 @@ app.use(function(req, res, next) {
   next();
 });
 
-
 //
 // Routing
 //
 app.use(express.static(__dirname + '/public'));
 var routes = require('./routes/index');
 app.use('/', routes);
-
-
 
 server.listen(port, function () {
   console.log('Server listening at port %d', port);

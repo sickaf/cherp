@@ -1,11 +1,6 @@
 var express = require('express');
 var router = express.Router();
 
-
-// router.get('/', function(req, res) {
-//   res.sendFile(__dirname + '/public/index.html');
-// });
-
 /* GET New User page. */
 router.get('/newmessage', function(req, res) {
     res.sendfile(__dirname+'/public/newmessage.html');
