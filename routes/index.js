@@ -34,7 +34,7 @@ router.post('/addmessagetodatabase', function(req, res) {
 		else {
 			//res.location("/");
 			//res.redirect("/");
-			res.send("okay maybe that worked:\n "+JSON.stringify(req.body, undefined, 2) + " username: "+req.body.username);
+			res.send("okay maybe that worked");
 		}
 	});
 });
