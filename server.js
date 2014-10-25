@@ -1,3 +1,4 @@
+// set up ======================================================================
 // Setup basic express server
 var express = require('express');
 var app = express();
@@ -5,6 +6,11 @@ var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var port = process.env.PORT || 3000;
 var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
+var session = require('express-session');
+var passport = require('passport');
+var flash    = require('connect-flash');
+var path = require('path');
 var logger = require('morgan'); //hoping this will make debugging easier
 var _ = require('underscore')._; //tool for doing things like calling .size on an array
 var uuid = require('node-uuid'); //for generating IDs for things like rooms
@@ -14,10 +20,20 @@ var Room = require('./room.js');
 //
 // database variables
 //
-var mongo = require('mongodb');
-var monk = require('monk');
-var db = monk('localhost:27017/cherp');
+var mongoose = require('mongoose');
+var configDB = require('./config/database.js')
+// var mongo = require('mongodb');
+// var monk = require('monk');
+// var db = monk('localhost:27017/cherp');
 var messageData;
+
+var Room = require('./room.js');
+
+// configuration ===============================================================
+
+mongoose.connect(configDB.url);
+
+require('./config/passport')(passport); // pass passport for configuration
 
 // allows us to parse the HTML body. currently used to parse newmessage.html
 app.use(bodyParser.json());
@@ -26,24 +42,36 @@ app.use(bodyParser.urlencoded({ extended: false }));
 //i think we need this to print the stack trace in the event of an error
 app.use(logger('dev'));
 
+app.use(cookieParser());
+
+// passport
+app.use(session({
+    secret: 'devon is gay', // session secret
+    resave: true,
+    saveUninitialized: true
+})); 
+app.use(passport.initialize());
+app.use(passport.session()); // persistent login sessions
+app.use(flash()); // use connect-flash for flash messages stored in session
+
 //
 // Make our db accessible to our router and populate messageData with stored messages
 //
-app.use(function(req, res, next) {
-  req.db = db;
-  var collection = db.get('messagecollection');
-    collection.find({},{},function(e,docs){
-      messageData = docs;
-  });
-  next();
-});
+// app.use(function(req, res, next) {
+//   req.db = db;
+//   var collection = db.get('messagecollection');
+//     collection.find({},{},function(e,docs){
+//       messageData = docs;
+//   });
+//   next();
+// });
 
 //
 // Routing
 //
-app.use(express.static(__dirname + '/public'));
-var routes = require('./routes/index');
-app.use('/', routes);
+// app.use(express.static(__dirname + '/public'));
+require('./routes/routes.js')(app, passport); // pass in app and passport
+app.use(express.static(path.join(__dirname, 'public')));
 
 server.listen(port, function () {
   console.log('Server listening at port %d', port);

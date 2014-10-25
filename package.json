@@ -13,7 +13,17 @@
     "underscore" : "*",
     "node-uuid" : "*",
     "mongodb": "*",
-    "monk": "*"
+    "monk": "*",
+    "mongoose": "*",
+    "passport": "*",
+    "passport-local": "*",
+    "passport-twitter": "*",
+    "connect-flash" : "*",   
+    "bcrypt-nodejs" : "*",
+    "morgan": "*",
+    "cookie-parser": "*",
+    "method-override": "*",
+    "express-session": "*" 
   },
   "subdomain": "devspinn-chat",
   "scripts": {
