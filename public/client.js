@@ -13,14 +13,17 @@ $(function() {
   // Initialize varibles
   var $window = $(window);
   var $usernameInput = $('.usernameInput'); // Input for username
+  var $chatnameInput = $('.chatnameInput'); // Input for chatname
   var $hostMessages = $('.hostMessages'); // host messages area
   var $fanMessages = $('.fanMessages'); // fan messages area
   var $inputMessage = $('.inputMessage'); // Input message input box
   var $loginPage = $('.login.page'); // The login page
+  var $chatnamePage = $('.chatname.page'); // The login page
   var $chatPage = $('.chat.page'); // The chatroom page
 
   // Prompt for setting a username
   var username;
+  var chatname;
   var iAmHost = false; //this probably needs to be kept by the server
   var connected = false;
   var typing = false;
@@ -61,12 +64,30 @@ $(function() {
     // If the username is valid
     if (username) {
       $loginPage.fadeOut();
-      $chatPage.show();
+      // $chatPage.show();
+      $chatnamePage.show();
       $loginPage.off('click');
-      $currentInput = $inputMessage.focus();
+      // $currentInput = $inputMessage.focus();
+       $currentInput = $chatnameInput.focus();
 
       // Tell the server your username
       socket.emit('add user', username);
+    }
+  }
+
+  // Sets the chatname
+  function setChatname () {
+    chatname = cleanInput($chatnameInput.val().trim());
+
+    // If the username is valid
+    if (chatname) {
+      $chatnamePage.fadeOut();
+      $chatPage.show();
+      $chatnamePage.off('click');
+      $currentInput = $inputMessage.focus();
+
+      // Tell the server your username
+      //socket.emit('enter chat', chatname);
     }
   }
 
@@ -371,11 +392,19 @@ $(function() {
     }
     // When the client hits ENTER on their keyboard
     if (event.which === 13) {
-      if (username) {
+
+      //if the chatname is already set, we're good to go
+      if (chatname) {
         sendMessage();
         socket.emit('stop typing');
         typing = false;
-      } else {
+      }
+      //okay, the user has set a username, but hasn't chosen a chat, do that
+      else if (username) {
+        setChatname();
+      }
+      //the user hasn't even chosen a username? do that first!
+      else {
         setUsername();
       }
     }
