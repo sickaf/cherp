@@ -6,10 +6,10 @@ var io = require('socket.io')(server);
 var port = process.env.PORT || 3000;
 var bodyParser = require('body-parser');
 var logger = require('morgan'); //hoping this will make debugging easier
-
+var _ = require('underscore')._; //tool for doing things like calling .size on an array
+var uuid = require('node-uuid'); //for generating IDs for things like rooms
 
 var Room = require('./room.js');
-
 
 //
 // database variables
@@ -84,7 +84,7 @@ app.use(function(err, req, res, next) {
 //
 
 // people which are currently connected to the chat
-var people = {};  //this should become people
+var people = {}; 
 var numUsers = 0; //deprecate this
 var hostName = "hostName not set lol"; //deprecate this
 
@@ -92,29 +92,31 @@ var rooms = {};
 var sockets = [];
 
 io.on('connection', function (socket) {
+  
   var addedUser = false;
 
   //Received an image: broadcast to all
   socket.on('new host image', function (data) {
-    socket.broadcast.emit('new host image', socket.username, data);
+    socket.broadcast.emit('new host image', people[socket.id].username, data);
   });
 
   // when the client emits 'new host message', this listens and executes
-  socket.on('new host message', function (data) {
-    // we tell the client to execute 'new host message'
-    socket.broadcast.emit('new host message', {
-      username: socket.username,
-      message: data
-    });
-  });
+  socket.on('new message', function (data) {
 
-  // when the client emits 'new fan message', this listens and executes
-  socket.on('new fan message', function (data) {
-    // we tell the client to execute 'new fan message'
-    socket.broadcast.emit('new fan message', {
-      username: socket.username,
-      message: data
-    });
+    if(people[socket.id].username == hostName) {
+      socket.emit("update", "sending HOST message. hostname: "+hostName+ " and you are "+people[socket.id].username);
+      socket.broadcast.emit('new host message', {
+        username: people[socket.id].username,
+        message: data
+      });
+    }
+    else {
+      socket.emit("update", "sending FAN message. hostname: "+hostName+ " and you are "+people[socket.id].username);
+      socket.broadcast.emit('new fan message', {
+        username: people[socket.id].username,
+        message: data
+      });
+    }
   });
 
   // when the client emits 'host repost', this listens and executes
@@ -122,60 +124,95 @@ io.on('connection', function (socket) {
     socket.broadcast.emit('host repost', data);
   });
 
-    // when the client emits 'add user', this listens and executes
+  // when the client emits 'add user', this listens and executes
   socket.on('add user', function (username) {
-    // we store the username in the socket session for this client
-    socket.username = username;
-    // add the client's username to the global list
-    people[username] = username;
-    
+
+    var ownerRoomID = null;
+    var inRoomID = 69;
+
     //set the hostname
-    if(numUsers === 0) {
+    if(_.size(people) === 0) {
       hostName = username;
+      ownerRoomID = 69;
     }
 
     ++numUsers;
     addedUser = true;
+
+    people[socket.id] = {"username" : username, "owns" : ownerRoomID, "inroom": inRoomID};
+    socket.emit("update", "You have connected to the server and are owner of room # " + ownerRoomID);
+    io.sockets.emit("update", people[socket.id].username + " is online.")
+    sizePeople = _.size(people);
+    sizeRooms = _.size(rooms);
+    socket.emit("update", "people.size: "+sizePeople);
+    socket.emit("update", "people are: "+JSON.stringify(people));
+    socket.emit("update", "rooms.size: "+sizeRooms);
+    sockets.push(socket);
+
+    //sets connected = true and displays welcome messages
     socket.emit('login', {
       numUsers: numUsers,
       hostName: hostName
     });
-    // echo globally (all clients) that a person has connected
 
+    // echo globally (all clients) that a person has connected
     socket.broadcast.emit('user joined', {
-      username: socket.username,
-      numUsers: numUsers,
-      usernames: people
+      username: people[socket.id].username,
+      numUsers: sizePeople,
+      usernames: ["no longer keeping track this way"]
     });
 
     socket.emit('add database messages', messageData);
-
   });
+
+  // socket.on('enter chat', function (chatname) {
+
+  //     // var id = uuid.v4();
+  //     var existingChat = rooms[chatname];
+  //     if(existingChat) {
+  //       existingChat[chatname].addFan(people[socket.id].username);
+  //     }
+  //     else {
+  //       var id = uuid.v4();
+  //       var room = new Room(chatname, id, people[socket.id].username);
+  //       rooms[id] = room;
+  //       //add room to socket, and auto join the creator of the room
+  //       people[socket.id].owns = id;
+  //     }
+  //       socket.room = chatname;
+  //       socket.join(socket.room);
+  //       people[socket.id].inroom = id;
+  //       socket.emit("new host message", "Welcome to " + room.name + ".");
+  //       socket.emit("sendRoomID", {id: id});  
+  // });
+
 
   // when the client emits 'typing', we broadcast it to others
   socket.on('typing', function () {
     socket.broadcast.emit('typing', {
-      username: socket.username
+      username: people[socket.id].username
     });
   });
 
   // when the client emits 'stop typing', we broadcast it to others
   socket.on('stop typing', function () {
     socket.broadcast.emit('stop typing', {
-      username: socket.username
+      username: people[socket.id].username
     });
   });
 
   // when the user disconnects.. perform this
   socket.on('disconnect', function () {
     // remove the username from global people list
+    var usernameToDelete;
     if (addedUser) {
-      delete people[socket.username];
+      usernameToDelete = people[socket.id].username;
+      delete people[socket.id];
       --numUsers;
 
       // echo globally that this client has left
       socket.broadcast.emit('user left', {
-        username: socket.username,
+        username: usernameToDelete,
         numUsers: numUsers
       });
     }
