@@ -1,6 +1,6 @@
 {
   "name": "socket.io-chat",
-  "version": "0.0.0-19",
+  "version": "0.0.0-20",
   "description": "sick.af",
   "main": "server.js",
   "author": "devon townsend",
@@ -12,8 +12,6 @@
     "body-parser": "~1.8.1",
     "underscore": "*",
     "node-uuid": "*",
-    "mongodb": "*",
-    "monk": "*",
     "mongoose": "*",
     "passport": "*",
     "passport-local": "*",
