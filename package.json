@@ -2,7 +2,7 @@
   "name": "socket.io-chat",
   "version": "0.0.0-18",
   "description": "sick.af",
-  "main": "index.js",
+  "main": "server.js",
   "author": "devon townsend",
   "private": true,
   "license": "BSD",
@@ -15,7 +15,7 @@
   },
   "subdomain": "devspinn-chat",
   "scripts": {
-    "start": "node index.js"
+    "start": "node server.js"
   },
   "engines": {
     "node": "0.10.x"
