@@ -24,7 +24,7 @@ $(function() {
   // Prompt for setting a username
   var username;
   var chatname;
-  var iAmHost = false; //this probably needs to be kept by the server
+  var iAmHost = false;
   var connected = false;
   var typing = false;
   var lastTypingTime;
@@ -420,11 +420,6 @@ $(function() {
       iAmHost = bool;
     }
   });
-
-  // //receive host image from server
-  // socket.on('new host image', function(from, base64Image) {
-  //   addHostImage(from, base64Image);
-  // });
 
   // Whenever the server emits 'new message', update the chat body
   socket.on('new host message', function (data) {

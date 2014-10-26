@@ -18,7 +18,7 @@ Room.prototype.addFan = function(username) {
   this.peopleNum++;
 };
 
-// probably a better way to do it
+// probably the better way to do it
 // Room.prototype.removeFan = function(person) {
 //   var fanIndex = -1;
 //   for(var i = 0; i < this.fans.length; i++){
