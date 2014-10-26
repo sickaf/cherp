@@ -2,6 +2,7 @@ function Room(name, id, owner) {
   this.name = name;
   this.id = id;
   this.hosts = [];
+  this.hostMessages = [];
   this.hosts[0] = owner;
   this.fans = [];
   this.fanLimit = 4;

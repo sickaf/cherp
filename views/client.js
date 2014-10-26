@@ -188,6 +188,9 @@ $(function() {
     $messageBodyDiv.click(function () {
       data.repost = true;
       socket.emit('host repost', data);
+      if(iAmHost){
+        addHostMessage(data);
+      }
     });
 
     var $messageDiv = $('<li class="message"/>')

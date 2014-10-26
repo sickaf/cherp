@@ -149,22 +149,21 @@ io.on('connection', function (socket) {
 
   // when the client emits 'new host message', this listens and executes
   socket.on('new message', function (data) {
+    var fullMessage = {
+      username: people[socket.id].username,
+      message: data
+    };
 
     if(people[socket.id].owns == socket.room) {
-      socket.broadcast.to(socket.room).emit("new host message", {
-        username: people[socket.id].username,
-        message: data
-      });
+      rooms[socket.room].hostMessages.push(fullMessage);
+      socket.broadcast.to(socket.room).emit("new host message", fullMessage);
     }
     else {
-      socket.broadcast.to(socket.room).emit("new fan message", {
-        username: people[socket.id].username,
-        message: data
-      });
+      socket.broadcast.to(socket.room).emit("new fan message", fullMessage);
     }
   });
 
-  // when the client emits 'host repost', this listens and executes
+  // when the client emits 'make host', this listens and executes
   socket.on('make host', function (username) {
     
     var userToUpgrade = getPersonWithUsername(username);
@@ -187,7 +186,8 @@ io.on('connection', function (socket) {
   // when the client emits 'host repost', this listens and executes
   socket.on('host repost', function (data) {
     if(people[socket.id].owns == socket.room) {
-      io.sockets.in(socket.room).emit('host repost', data);
+      socket.broadcast.to(socket.room).emit('host repost', data);
+      rooms[socket.room].hostMessages.push(data);
     }
     else {
       socket.emit("update", "ur not the host lol pull out homie");
@@ -229,6 +229,11 @@ io.on('connection', function (socket) {
         rooms[chatname].addFan(people[socket.id].username);
         socket.emit("update", "the room "+chatname + " already exists.  adding you as a fan. now "+chatname + " has "+rooms[chatname].peopleNum+" people");
         people[socket.id].inroom = chatname;
+
+        //fill the new user in on old messages
+        for(var i = 0; i < rooms[chatname].hostMessages.length; i++) {
+          socket.emit("new host message", rooms[chatname].hostMessages[i]);
+        }
       }
       else { //room doesnt exist. create it
         socket.emit("update", "the room "+chatname + " doesnt exist yet.  adding you as host");
