@@ -22,7 +22,9 @@
     "cookie-parser": "*",
     "method-override": "*",
     "express-session": "*",
-    "express-session-mongo": "*"
+    "express-session-mongo": "*",
+    "mongodb-uri": "*",
+    "mongoose-session": "*"
   },
   "subdomain": "devspinn-chat",
   "scripts": {
