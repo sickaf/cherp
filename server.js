@@ -139,8 +139,15 @@ io.on('connection', function (socket) {
 
   //Received an image: broadcast to all
   socket.on('new image', function (data) {
+    var fullMessage = {
+      username: people[socket.id].username,
+      base64Image: data,
+      image: true
+    };
+
     if(people[socket.id].owns == socket.room) {
-      io.sockets.in(socket.room).emit('new host image', people[socket.id].username, data);
+      io.sockets.in(socket.room).emit('new host message', fullMessage);
+      rooms[socket.room].hostMessages.push(fullMessage);
     }
     else  {
       socket.emit("update", "ur not the host get a day job");
@@ -155,8 +162,8 @@ io.on('connection', function (socket) {
     };
 
     if(people[socket.id].owns == socket.room) {
-      rooms[socket.room].hostMessages.push(fullMessage);
       socket.broadcast.to(socket.room).emit("new host message", fullMessage);
+      rooms[socket.room].hostMessages.push(fullMessage);
     }
     else {
       socket.broadcast.to(socket.room).emit("new fan message", fullMessage);

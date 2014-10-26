@@ -122,26 +122,6 @@ $(function() {
   }
 
 
- // Adds the visual chat image to the message list
-  function addHostImage (from, base64Image) {
-
-
-    var $usernameDiv = $('<span class="username"/>')
-      .text(from)
-      .css('color', getUsernameColor(from));
-
-    var $messageBodyDiv = $('<span class="messageBody">')
-      .append('<img src="' + base64Image + '"/>');
-
-    var $messageDiv = $('<li class="message"/>')
-      .data('username', from)
-      .append($usernameDiv, $messageBodyDiv);
-
-    addMessageElement($messageDiv);
-  }
-
-
-
   // Adds the visual chat message to the message list
   function addHostMessage (data, options) {
     // Don't fade the message in if there is an 'X was typing'
@@ -151,15 +131,25 @@ $(function() {
       options.fade = false;
       $typingMessages.remove();
     }
-
+    
     var $usernameDiv = $('<span class="username"/>')
       .text(data.username)
       .css('color', getUsernameColor(data.username));
-    var $messageBodyDiv = $('<span class="messageBody">')
+
+    var $messageBodyDiv;
+    
+    //if it's an image, do that
+    if(data.image) {
+      $messageBodyDiv = $('<span class="messageBody">')
+      .append('<img src="' + data.base64Image + '"/>');
+    } else {
+      $messageBodyDiv = $('<span class="messageBody">')
       .text(data.message);
+    }
 
     var typingClass = data.typing ? 'typing' : '';
     var repostClass = data.repost ? 'repost' : '';
+
     var $messageDiv = $('<li class="message"/>')
       .data('username', data.username)
       .addClass(typingClass)
@@ -431,10 +421,10 @@ $(function() {
     }
   });
 
-  //receive host image from server
-  socket.on('new host image', function(from, base64Image) {
-    addHostImage(from, base64Image);
-  });
+  // //receive host image from server
+  // socket.on('new host image', function(from, base64Image) {
+  //   addHostImage(from, base64Image);
+  // });
 
   // Whenever the server emits 'new message', update the chat body
   socket.on('new host message', function (data) {
