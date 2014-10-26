@@ -32,7 +32,21 @@ $(function() {
 
   var socket = io();
 
+  //someone needs to get rid of this dumb function
   function addParticipantsMessage (data) {
+    var message = '';
+    
+
+    log("there are " + data.numUsers + " people in this room.");
+
+    if (data.numUsers === 1) {
+      iAmHost = true;
+      message += "you're the host";
+      log(message)
+    } 
+  }
+
+  function addChatroomUpdate (data) {
     var message = '';
     
 
@@ -343,14 +357,24 @@ $(function() {
       var data = e.originalEvent.target.files[0];
       var reader = new FileReader();
       reader.onload = function(evt){
-        if(iAmHost)
-        {
-          addHostImage("me", evt.target.result);
+
+        //if(iAmHost)
+        // {
+          //addHostImage("me", evt.target.result);
           socket.emit('new host image', evt.target.result);
-        }
-        else {
-          log("YOURE NOT THE FUCKING HOST.  Not going to send that image.");
-        }
+        // }
+        // else {
+        //   log("YOURE NOT THE FUCKING HOST.  Not going to send that image.");
+        // }
+
+        // if(iAmHost)
+        // {
+        //   addHostImage("me", evt.target.result);
+        //   socket.emit('new host image', evt.target.result);
+        // }
+        // else {
+        //   log("YOURE NOT THE FUCKING HOST.  Not going to send that image.");
+        // }
       };
       reader.readAsDataURL(data);
     });
@@ -422,30 +446,14 @@ $(function() {
   // Whenever the server emits 'login', log the login message
   socket.on('login', function (data) {
     connected = true;
-    // Display the welcome message
-    log("Hi.  This is Cherp by sick.af");
-
-    if ("hostName" in data && data.numUsers > 1) {
-      log("The host is " + data.hostName);
-    };
-
-    addParticipantsMessage(data);
   });
 
 
-  ///////////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////
   ///////                                                  //////
   ///////  add messages from the database                  //////
   ///////  THIS NEEDS TO BE UPDATED TO NOT BE SO SHITTY    //////
   ///////                                                  //////
-  ///////////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////
   socket.on('add database messages', function(data) {
     for (var i = 0; i < data.length; i++) {
@@ -482,14 +490,17 @@ $(function() {
   // Whenever the server emits 'user joined', log it in the chat body
   socket.on('user joined', function (data) {
     log(data.username + ' joined');
-    addParticipantsMessage(data);
+  });
+
+  // Whenever the server emits 'user joined chat', log it in the chat body
+  socket.on('user joined chat', function (data) {
+    log(data.username + ' joined chatroom '+data.chatname);
   });
 
   // Whenever the server emits 'user left', log it in the chat body
   socket.on('user left', function (data) {
-    log(data.username + ' left');
-    addParticipantsMessage(data);
-    removeHostTyping(data);
+    log(data.username + ' left. they were in chatroom: '+data.chatname+". There are "+data.numUsers+" left, and "+data.numUsersInChat+" left in chatroom: "+data.chatname);
+    removeHostTyping(data); //data must include data.username
   });
 
   // Whenever the server emits 'typing', show the typing message

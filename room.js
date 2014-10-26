@@ -5,26 +5,45 @@ function Room(name, id, owner) {
   this.hosts[0] = owner;
   this.fans = [];
   this.fanLimit = 4;
+  this.peopleNum = 1;
   this.status = "available";
   this.private = false;
 };
 
-Room.prototype.addFan = function(personID) {
+Room.prototype.addFan = function(username) {
   if (this.status === "available") {
-    this.fans.push(personID);
+    this.fans.push(username);
   }
+  this.peopleNum++;
 };
 
-Room.prototype.removeFan = function(person) {
+// probably a better way to do it
+// Room.prototype.removeFan = function(person) {
+//   var fanIndex = -1;
+//   for(var i = 0; i < this.fans.length; i++){
+//     if(this.fans[i].id === person.id){
+//       fanIndex = i;
+//       break;
+//     }
+//   }
+//   this.fans.remove(fanIndex);
+//   this.peopleNum--;
+// };
+
+Room.prototype.removeFan = function(username) {
   var fanIndex = -1;
   for(var i = 0; i < this.fans.length; i++){
-    if(this.fans[i].id === person.id){
+    if(this.fans[i] == username){
       fanIndex = i;
       break;
     }
   }
-  this.fans.remove(fanIndex);
+  // this.fans.remove(fanIndex);
+  this.hosts.splice(fanIndex,1);
+
+  this.peopleNum--;
 };
+
 
 Room.prototype.getFan = function(personID) {
   var fan = null;
@@ -41,17 +60,19 @@ Room.prototype.addHost = function(personID) {
   if (this.status === "available") {
     this.hosts.push(personID);
   }
+  this.peopleNum++;
 };
 
-Room.prototype.removeHost = function(person) {
+Room.prototype.removeHost = function(username) {
   var hostIndex = -1;
   for(var i = 0; i < this.hosts.length; i++){
-    if(this.hosts[i].id === person.id){
+    if(this.hosts[i].username === username){
       hostIndex = i;
       break;
     }
   }
-  this.hosts.remove(hostIndex);
+  this.hosts.splice(hostIndex,1);
+  this.peopleNum--;
 };
 
 Room.prototype.getHost = function(personID) {

@@ -16,19 +16,13 @@ var logger = require('morgan'); //hoping this will make debugging easier
 var _ = require('underscore')._; //tool for doing things like calling .size on an array
 var uuid = require('node-uuid'); //for generating IDs for things like rooms
 
-var Room = require('./room.js');
 
 //
 // database variables
 //
 var mongoose = require('mongoose');
 var configDB = require('./config/database.js')
-// var mongo = require('mongodb');
-// var monk = require('monk');
-// var db = monk('localhost:27017/cherp');
-var messageData;
 
-var Room = require('./room.js');
 
 // configuration ===============================================================
 
@@ -59,17 +53,6 @@ app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
 app.use(flash()); // use connect-flash for flash messages stored in session
 
-//
-// Make our db accessible to our router and populate messageData with stored messages
-//
-// app.use(function(req, res, next) {
-//   req.db = db;
-//   var collection = db.get('messagecollection');
-//     collection.find({},{},function(e,docs){
-//       messageData = docs;
-//   });
-//   next();
-// });
 
 //
 // Routing
@@ -89,34 +72,35 @@ app.use(function(req, res, next) {
     next(err);
 });
 
-//
-// error handlers
-//
-// development error handler -- will print stacktrace
-if (app.get('env') === 'development') {
-    app.use(function(err, req, res, next) {
-        res.status(err.status || 500);
-        res.render('error', {
-            message: err.message,
-            error: err
-        });
-    });
-}
+// //
+// // error handlers
+// //
+// // development error handler -- will print stacktrace
+// if (app.get('env') === 'development') {
+//     app.use(function(err, req, res, next) {
+//         res.status(err.status || 500);
+//         res.render('error', {
+//             message: err.message,
+//             error: err
+//         });
+//     });
+// }
 
-// production error handler -- no stacktraces leaked to user
-app.use(function(err, req, res, next) {
-    res.status(err.status || 500);
-    res.render('error', {
-        message: err.message,
-        error: {}
-    });
-});
+// // production error handler -- no stacktraces leaked to user
+// app.use(function(err, req, res, next) {
+//     res.status(err.status || 500);
+//     res.render('error', {
+//         message: err.message,
+//         error: {}
+//     });
+// });
 
 //
 // Chatroom
 //
 
 // people which are currently connected to the chat
+var Room = require('./room.js');
 var people = {}; 
 var numUsers = 0; //deprecate this
 var hostName = "hostName not set lol"; //deprecate this
@@ -130,7 +114,13 @@ io.on('connection', function (socket) {
 
   //Received an image: broadcast to all
   socket.on('new host image', function (data) {
-    socket.broadcast.emit('new host image', people[socket.id].username, data);
+    if(people[socket.id].owns == socket.room) {
+      io.sockets.in(socket.room).emit('new host image', people[socket.id].username, data);
+    }
+    else  {
+      socket.emit("update", "ur not the host get a day job");
+    }
+
   });
 
   // when the client emits 'new host message', this listens and executes
@@ -138,12 +128,10 @@ io.on('connection', function (socket) {
 
     if(people[socket.id].owns == socket.room) {
       // socket.emit("update", "sending HOST message. socket.room: "+socket.room+ " and you own "+people[socket.id].owns);
-  
       io.sockets.in(socket.room).emit("new host message", {
         username: people[socket.id].username,
         message: data
       });
-
     }
     else {
       // socket.emit("update", "sending FAN message. socket.room: "+socket.room+ " and you own "+people[socket.id].owns);
@@ -167,46 +155,40 @@ io.on('connection', function (socket) {
   // when the client emits 'add user', this listens and executes
   socket.on('add user', function (username) {
 
-    //set the hostname
-    // if(_.size(people) === 0) {
-    //   hostName = username;
-    // }
-
     ++numUsers;
     addedUser = true;
 
     people[socket.id] = {"username" : username, "owns" : null, "inroom": null};
-    socket.emit("update", "You have connected to the server");
-    io.sockets.emit("update", people[socket.id].username + " is online.")
-    sizePeople = _.size(people);
-    sizeRooms = _.size(rooms);
-    socket.emit("update", "people.size: "+sizePeople);
+    
+    //messaging
+    socket.emit("update", "Welcome to the world. You have connected to the server.");
+    io.sockets.emit("update", people[socket.id].username + " is online.");
+    socket.emit("update", "people.size: "+_.size(people));
     socket.emit("update", "people are: "+JSON.stringify(people));
-    socket.emit("update", "rooms.size: "+sizeRooms);
+    socket.emit("update", "rooms.size: "+_.size(rooms));
+    socket.emit('login', {}); //sets connected = true
+
+
+    
     sockets.push(socket);
 
-    //sets connected = true and displays welcome messages
-    socket.emit('login', {
-      numUsers: numUsers,
-      hostName: hostName
-    });
 
     // echo globally (all clients) that a person has connected
     socket.broadcast.emit('user joined', {
       username: people[socket.id].username,
-      numUsers: sizePeople
+      numUsers: _.size(people)
     });
 
-    socket.emit('add database messages', messageData);
+    // socket.emit('add database messages', messageData);
   });
 
   socket.on('enter chat', function (chatname) {
 
-    if (people[socket.id].inroom) {
-      socket.emit("update", "You are already in a room.");
-    }
-    else if (people[socket.id].owns) {
+    if (people[socket.id].owns) {
       socket.emit("update", "You already own a room! This is madness!");
+    }
+    else if (people[socket.id].inroom) {
+      socket.emit("update", "You are already in a room.");
     }
     else { //LETS DO THIS
             
@@ -214,22 +196,28 @@ io.on('connection', function (socket) {
       if(chatname in rooms) { 
         socket.emit("update", chatname + " already exists.  adding you as a fan");
         rooms[chatname].addFan(people[socket.id].username);
+        socket.emit("update", "now "+chatname + " has "+rooms[chatname].peopleNum+" people");
         people[socket.id].inroom = chatname;
       }
       else { //room doesnt exist. create it
         socket.emit("update", chatname + " doesnt exist.  adding you as host");
-
         var id = uuid.v4();
         var room = new Room(chatname, id, people[socket.id]);
         rooms[chatname] = room;
         //add room to socket, and auto join the creator of the room
         people[socket.id].owns = chatname;
+        people[socket.id].inroom = chatname;
       }
 
         socket.room = chatname;
         socket.join(socket.room);
         socket.emit("update", "Welcome to " + chatname + ".");
     }
+    // echo globally (all clients) that a person has connected
+    socket.broadcast.emit('user joined chat', {
+      username: people[socket.id].username,
+      chatname: chatname
+    });
   });
 
 
@@ -251,16 +239,26 @@ io.on('connection', function (socket) {
   socket.on('disconnect', function () {
     // remove the username from global people list
     var usernameToDelete;
+    var roomForDeletingUser;
     if (addedUser) {
       usernameToDelete = people[socket.id].username;
+      roomForDeletingUser = rooms[people[socket.id].inroom];
+
+      if(people[socket.id].owns == null) {
+        roomForDeletingUser.removeFan(usernameToDelete);
+      } else {
+        roomForDeletingUser.removeHost(usernameToDelete);
+      }
       delete people[socket.id];
-      --numUsers;
 
       // echo globally that this client has left
       socket.broadcast.emit('user left', {
         username: usernameToDelete,
-        numUsers: numUsers
+        chatname: roomForDeletingUser.name,
+        numUsers: _.size(people),
+        numUsersInChat: roomForDeletingUser.peopleNum
       });
+
     }
   });
 });
