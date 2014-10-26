@@ -99,22 +99,7 @@ $(function() {
     // if there is a non-empty message and a socket connection
     if (message && connected) {
       $inputMessage.val('');
-      
-      // if(iAmHost) 
-      // {
-      //   addHostMessage({
-      //     username: username,
-      //     message: "[client] "+message
-      //   });
-
-      // }
-      // else 
-      // {
-      //   addFanMessage({
-      //     username: username,
-      //     message: "[client] "+message
-      //   });
-      // }
+    
       socket.emit('new message', message);
 
     }
@@ -180,28 +165,32 @@ $(function() {
     var $usernameDiv = $('<span class="username"/>')
       .text(data.username)
       .css('color', getUsernameColor(data.username));
+
+
+    $usernameDiv.click(function () {
+      socket.emit('make host', data.username);
+    });
+
     var $messageBodyDiv = $('<span class="messageBody">')
       .text(data.message);
+
+    $messageBodyDiv.click(function () {
+      data.repost = true;
+      socket.emit('host repost', data);
+    });
 
     var $messageDiv = $('<li class="message"/>')
       .data('username', data.username)
       .append($usernameDiv, $messageBodyDiv);
 
+    // //sets up a listener so that if the host clicks it, it gets copied to the host's messages
+    // $messageDiv.click(function () {
+
+    //   data.repost = true;
+    //   socket.emit('host repost', data);
+    // });
     //sets up a listener so that if the host clicks it, it gets copied to the host's messages
-    $messageDiv.click(function () {
 
-      data.repost = true;
-      socket.emit('host repost', data);
-
-      // if(iAmHost){
-      //   data.repost = true;
-      //   addHostMessage(data);
-      //   socket.emit('host repost', data);
-      // }
-      // else {
-      //   log("youre not the host... idiot");
-      // }
-    });
 
     addFanMessageElement($messageDiv, options);
   }
@@ -448,11 +437,6 @@ $(function() {
     // Whenever the server emits 'host repost', update the chat body
   socket.on('host repost', function (data) {
     addHostMessage(data);
-  });
-
-  // Whenever the server emits 'user joined', log it in the chat body
-  socket.on('user joined', function (data) {
-    log(data.username + ' joined');
   });
 
   // Whenever the server emits 'user joined chat', log it in the chat body

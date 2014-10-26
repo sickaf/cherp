@@ -105,6 +105,18 @@ var sockets = [];
 
       //socket.broadcast.to(socket.room).emit("new host message", {
 
+function getPersonWithUsername (username) {
+  var toReturn = null;
+  for (var key in people) {
+    if (people.hasOwnProperty(key)) {
+        if(username == people[key].username) {
+          toReturn = people[key];
+          break;
+        }
+    }
+  }
+  return toReturn;
+}
 
 function getPeopleList () {
   var toReturn = "";
@@ -154,6 +166,24 @@ io.on('connection', function (socket) {
   });
 
   // when the client emits 'host repost', this listens and executes
+  socket.on('make host', function (username) {
+    
+    var userToUpgrade = getPersonWithUsername(username);
+    if(people[socket.id].owns == socket.room) {
+      var roomForUpgrade = rooms[people[socket.id].owns];
+      roomForUpgrade.addHost(username);
+      roomForUpgrade.removeFan(username);
+      userToUpgrade.owns = roomForUpgrade.name;
+      userToUpgrade.inroom = roomForUpgrade.name;
+      socket.emit("update", "just made "+username+" a host.");
+
+    }
+    else {
+      socket.emit("update", "ur not the host u cant upgrade people");
+    }
+  });
+
+  // when the client emits 'host repost', this listens and executes
   socket.on('host repost', function (data) {
     if(people[socket.id].owns == socket.room) {
       io.sockets.in(socket.room).emit('host repost', data);
@@ -179,11 +209,6 @@ io.on('connection', function (socket) {
     
     sockets.push(socket);
 
-    // echo globally (all clients) that a person has connected
-    socket.broadcast.emit('user joined', {
-      username: people[socket.id].username,
-      numUsers: _.size(people)
-    });
 
     // socket.emit('add database messages', messageData);
   });
@@ -255,7 +280,8 @@ io.on('connection', function (socket) {
       roomForDeletingUser = rooms[people[socket.id].inroom];
 
       if(people[socket.id].owns == null) {
-        roomForDeletingUser.removeFan(usernameToDelete);
+        delete roomForDeletingUser;
+        // roomForDeletingUser.removeFan(usernameToDelete);
       } else {
         roomForDeletingUser.removeHost(usernameToDelete);
       }

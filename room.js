@@ -56,9 +56,9 @@ Room.prototype.getFan = function(personID) {
   return fan;
 };
 
-Room.prototype.addHost = function(personID) {
+Room.prototype.addHost = function(username) {
   if (this.status === "available") {
-    this.hosts.push(personID);
+    this.hosts.push(username);
   }
   this.peopleNum++;
 };
