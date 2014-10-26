@@ -61,7 +61,12 @@ $(function() {
 
   // Sets the client's username
   function setUsername () {
-    username = cleanInput($usernameInput.val().trim());
+    if (userUsername) {
+      username = userUsername;
+    }
+    else {
+      username = cleanInput($usernameInput.val().trim());
+    }
 
     // If the username is valid
     if (username) {
