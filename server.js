@@ -55,9 +55,8 @@ app.use(flash()); // use connect-flash for flash messages stored in session
 //
 // Routing
 //
-// app.use(express.static(__dirname + '/public'));
 require('./routes/routes.js')(app, passport); // pass in app and passport
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'views'))); // tells express that static content is in the views directory
 
 server.listen(port, function () {
   console.log('Server listening at port %d', port);
