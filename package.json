@@ -1,6 +1,6 @@
 {
   "name": "socket.io-chat",
-  "version": "0.0.0-25",
+  "version": "0.0.0-29",
   "description": "sick.af",
   "main": "server.js",
   "author": "devon townsend",
@@ -18,7 +18,7 @@
     "passport-twitter": "*",
     "connect-flash": "*",
     "bcrypt-nodejs": "*",
-    "ejs":"*",
+    "ejs": "*",
     "morgan": "*",
     "cookie-parser": "*",
     "method-override": "*",

@@ -2,6 +2,7 @@ function Room(name, id, owner) {
   this.name = name;
   this.id = id;
   this.hosts = [];
+  this.hostMessages = [];
   this.hosts[0] = owner;
   this.fans = [];
   this.fanLimit = 4;
@@ -73,6 +74,11 @@ Room.prototype.removeHost = function(username) {
   }
   this.hosts.splice(hostIndex,1);
   this.peopleNum--;
+
+  if(hosts.length == 0) {
+    addHost(fans[0]);
+    removeFan(fans[0]);
+  }
 };
 
 Room.prototype.getHost = function(personID) {
