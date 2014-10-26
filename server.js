@@ -8,7 +8,6 @@ var port = process.env.PORT || 3000;
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
-var MongoStore = require('express-session-mongo')
 var passport = require('passport');
 var flash    = require('connect-flash');
 var path = require('path');
@@ -16,17 +15,15 @@ var logger = require('morgan'); //hoping this will make debugging easier
 var _ = require('underscore')._; //tool for doing things like calling .size on an array
 var uuid = require('node-uuid'); //for generating IDs for things like rooms
 
-
 //
 // database variables
 //
 var mongoose = require('mongoose');
 var configDB = require('./config/database.js')
 
-
 // configuration ===============================================================
 
-mongoose.connect(configDB.url);
+mongoose.connect(configDB.url, configDB.options);
 
 require('./config/passport')(passport); // pass passport for configuration
 
@@ -47,12 +44,11 @@ app.use(session({
   secret: 'devon is gay', // session secret
   resave: true,
   saveUninitialized: true,
-  store : new MongoStore({ db: 'cherp' })
+  store : require('mongoose-session')(mongoose)
 }));
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
 app.use(flash()); // use connect-flash for flash messages stored in session
-
 
 //
 // Routing

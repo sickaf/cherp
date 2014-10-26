@@ -1,5 +1,7 @@
+var uriUtil = require('mongodb-uri');
+
 module.exports = {
-
-	'url' : 'localhost:27017/cherp' // looks like mongodb://<user>:<pass>@mongo.onmodulus.net:27017/Mikha4ot
-
+	'url' : uriUtil.formatMongoose('mongodb://admin:meat69spin@ds047940.mongolab.com:47940/cherp'),
+	'options': { server: { socketOptions: { keepAlive: 1, connectTimeoutMS: 30000 } }, 
+                replset: { socketOptions: { keepAlive: 1, connectTimeoutMS : 30000 }}}
 };
