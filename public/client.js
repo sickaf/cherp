@@ -175,8 +175,8 @@ $(function() {
     var $usernameDiv = $('<span class="username"/>')
       .text(data.username)
       .css('color', getUsernameColor(data.username));
-
-
+    
+    //set up a listener so that if the host clicks this div they will become the host
     $usernameDiv.click(function () {
       socket.emit('make host', data.username);
     });
@@ -184,6 +184,7 @@ $(function() {
     var $messageBodyDiv = $('<span class="messageBody">')
       .text(data.message);
 
+    //set up a listener so that if the host clicks this div itll get forwarded
     $messageBodyDiv.click(function () {
       data.repost = true;
       socket.emit('host repost', data);
@@ -193,13 +194,6 @@ $(function() {
       .data('username', data.username)
       .append($usernameDiv, $messageBodyDiv);
 
-    // //sets up a listener so that if the host clicks it, it gets copied to the host's messages
-    // $messageDiv.click(function () {
-
-    //   data.repost = true;
-    //   socket.emit('host repost', data);
-    // });
-    //sets up a listener so that if the host clicks it, it gets copied to the host's messages
 
 
     addFanMessageElement($messageDiv, options);
