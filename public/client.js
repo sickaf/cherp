@@ -99,9 +99,19 @@ $(function() {
     // if there is a non-empty message and a socket connection
     if (message && connected) {
       $inputMessage.val('');
-    
+      
       socket.emit('new message', message);
-
+      if(iAmHost) {
+        addHostMessage({
+          username: username,
+          message: message
+        });
+      } else {
+        addFanMessage({
+          username: username,
+          message: message
+        });
+      }
     }
   }
 
@@ -418,6 +428,12 @@ $(function() {
     log(data);
   });
 
+  socket.on('set iAmHost', function (username, bool) {
+    if(username == username) {
+      iAmHost = bool;
+    }
+  });
+
   //receive host image from server
   socket.on('new host image', function(from, base64Image) {
     addHostImage(from, base64Image);
@@ -427,7 +443,6 @@ $(function() {
   socket.on('new host message', function (data) {
     addHostMessage(data);
   });
-
 
   // Whenever the server emits 'new fan message', update the chat body
   socket.on('new fan message', function (data) {

@@ -149,14 +149,14 @@ io.on('connection', function (socket) {
   // when the client emits 'new host message', this listens and executes
   socket.on('new message', function (data) {
 
-    if(people[socket.id].owns == socket.room) {      
-      io.sockets.in(socket.room).emit("new host message", {
+    if(people[socket.id].owns == socket.room) {
+      socket.broadcast.to(socket.room).emit("new host message", {
         username: people[socket.id].username,
         message: data
       });
     }
     else {
-      io.sockets.in(socket.room).emit("new fan message", {
+      socket.broadcast.to(socket.room).emit("new fan message", {
         username: people[socket.id].username,
         message: data
       });
@@ -174,6 +174,8 @@ io.on('connection', function (socket) {
       userToUpgrade.owns = roomForUpgrade.name;
       userToUpgrade.inroom = roomForUpgrade.name;
       socket.emit("update", "just made "+username+" a host.");
+      socket.broadcast.to(socket.room).emit("set iAmHost", username, true); 
+
 
     }
     else {
@@ -223,19 +225,21 @@ io.on('connection', function (socket) {
             
       //what if the chatroom already exists!!
       if(chatname in rooms) { 
-        socket.emit("update", "the room "+chatname + " already exists.  adding you as a fan");
         rooms[chatname].addFan(people[socket.id].username);
-        socket.emit("update", "now "+chatname + " has "+rooms[chatname].peopleNum+" people");
+        socket.emit("update", "the room "+chatname + " already exists.  adding you as a fan. now "+chatname + " has "+rooms[chatname].peopleNum+" people");
         people[socket.id].inroom = chatname;
       }
       else { //room doesnt exist. create it
         socket.emit("update", "the room "+chatname + " doesnt exist yet.  adding you as host");
+
         var id = uuid.v4();
         var room = new Room(chatname, id, people[socket.id]);
         rooms[chatname] = room;
         //add room to socket, and auto join the creator of the room
         people[socket.id].owns = chatname;
         people[socket.id].inroom = chatname;
+        socket.emit("set iAmHost", people[socket.id].username, true); 
+
       }
 
         socket.room = chatname;
