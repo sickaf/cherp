@@ -40,6 +40,12 @@
 
   <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
+  <script>
+  var userUsername;
+  <% if (user) { %>
+  userUsername =  <%- JSON.stringify(user.twitter.username) %>;
+  <% } %>
+  </script>
   <script src="client.js"></script>
 </body>
 </html>
