@@ -255,8 +255,8 @@ io.on('connection', function (socket) {
 
       }
 
-        socket.room = chatname;
-        socket.join(socket.room);
+      socket.room = chatname;
+      socket.join(socket.room);
     }
     // echo globally (all clients) that a person has connected
     socket.broadcast.emit('user joined chat', {
@@ -292,11 +292,10 @@ io.on('connection', function (socket) {
     var roomForDeletingUser;
     if (addedUser) {
       usernameToDelete = people[socket.id].username;
-      roomForDeletingUser = rooms[people[socket.id].inroom];
+      roomForDeletingUser = rooms[socket.room];
 
       if(people[socket.id].owns == null) {
-        delete roomForDeletingUser;
-        // roomForDeletingUser.removeFan(usernameToDelete);
+        roomForDeletingUser.removeFan(usernameToDelete);
       } else {
         roomForDeletingUser.removeHost(usernameToDelete);
       }

@@ -74,6 +74,11 @@ Room.prototype.removeHost = function(username) {
   }
   this.hosts.splice(hostIndex,1);
   this.peopleNum--;
+
+  if(hosts.length == 0) {
+    addHost(fans[0]);
+    removeFan(fans[0]);
+  }
 };
 
 Room.prototype.getHost = function(personID) {
