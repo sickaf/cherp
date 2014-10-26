@@ -8,7 +8,8 @@ module.exports = function(app, passport) {
 	});
 
 	app.get('/login', function(req, res) {
-		res.sendfile('public/login.html');
+		res.render('login', { message: req.flash('loginMessage') });
+		// res.sendfile('public/login.html');
 	});
 
 	// process the login form

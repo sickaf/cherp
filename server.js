@@ -31,6 +31,8 @@ require('./config/passport')(passport); // pass passport for configuration
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
+app.set('view engine', 'ejs');
+
 //i think we need this to print the stack trace in the event of an error
 app.use(logger('dev'));
 
