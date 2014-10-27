@@ -39,7 +39,7 @@ app.use(logger('dev'));
 app.use(cookieParser());
 
 // passport
-app.use(session({
+var sessionMiddleware = session({
   cookie : {
     maxAge: 3600000 // see below
   },
@@ -47,10 +47,15 @@ app.use(session({
   resave: true,
   saveUninitialized: true,
   store : require('mongoose-session')(mongoose)
-}));
+});
+app.use(sessionMiddleware);
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
 app.use(flash()); // use connect-flash for flash messages stored in session
+
+io.use(function(socket, next){
+  sessionMiddleware(socket.request, {}, next);
+})
 
 //
 // Routing
@@ -138,6 +143,9 @@ function getPeopleList () {
 }
 
 io.on('connection', function (socket) {
+
+  var userId = socket.request.session.passport.user;
+  console.log(userId);
   
   var addedUser = false;
   
