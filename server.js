@@ -173,17 +173,15 @@ io.on('connection', function (socket) {
   // when the client emits 'make host', this listens and executes
   socket.on('make host', function (username) {
     
-    var userToUpgrade = getPersonWithUsername(username);
     if(people[socket.id].owns == socket.room) {
+      var userToUpgrade = getPersonWithUsername(username);
       var roomForUpgrade = rooms[people[socket.id].owns];
-      roomForUpgrade.addHost(username);
-      roomForUpgrade.removeFan(username);
-      userToUpgrade.owns = roomForUpgrade.name;
-      userToUpgrade.inroom = roomForUpgrade.name;
+      socket.emit("update", "about to make "+userToUpgrade.username+" a host with id: "+userToUpgrade.id);
+
+      roomForUpgrade.promoteFanToHost(userToUpgrade.id);
+
       socket.emit("update", "just made "+username+" a host.");
       socket.broadcast.to(socket.room).emit("set iAmHost", username, true); 
-
-
     }
     else {
       socket.emit("update", "ur not the host u cant upgrade people");
@@ -206,19 +204,20 @@ io.on('connection', function (socket) {
 
     addedUser = true;
 
-    people[socket.id] = {"username" : username, "owns" : null, "inroom": null};
+    people[socket.id] = { "id" : socket.id,
+                          "username" : username, 
+                          "owns" : null, 
+                          "inroom": null};
+
     
     //messaging
     socket.emit("update", "Welcome to the world. You have connected to the server.");
     io.sockets.emit("update", people[socket.id].username + " is online.");
-    socket.emit("update", "people are: "+getPeopleList());
-    socket.emit("update", "rooms.size: "+_.size(rooms));
+    socket.emit("update", "total list of people is: "+getPeopleList());
     socket.emit('login', {}); //sets connected = true
     
     sockets.push(socket);
 
-
-    // socket.emit('add database messages', messageData);
   });
 
   socket.on('enter chat', function (chatname) {
@@ -233,11 +232,12 @@ io.on('connection', function (socket) {
             
       //what if the chatroom already exists!!
       if(chatname in rooms) { 
-        rooms[chatname].addFan(people[socket.id].username);
+        rooms[chatname].addFan(people[socket.id]);
         socket.emit("update", "the room "+chatname + " already exists.  adding you as a fan. now "+chatname + " has "+rooms[chatname].peopleNum+" people");
-        people[socket.id].inroom = chatname;
+        //people[socket.id].inroom = chatname;
 
         //fill the new user in on old messages
+        socket.emit("update", "rooms[chatname].hostMessages.length: "+rooms[chatname].hostMessages.length);
         for(var i = 0; i < rooms[chatname].hostMessages.length; i++) {
           socket.emit("new host message", rooms[chatname].hostMessages[i]);
         }
@@ -249,12 +249,11 @@ io.on('connection', function (socket) {
         var room = new Room(chatname, id, people[socket.id]);
         rooms[chatname] = room;
         //add room to socket, and auto join the creator of the room
-        people[socket.id].owns = chatname;
-        people[socket.id].inroom = chatname;
+        // people[socket.id].owns = chatname;
+        // people[socket.id].inroom = chatname;
         socket.emit("set iAmHost", people[socket.id].username, true); 
-
       }
-
+      socket.emit("update", "there are now "+_.size(rooms)+" rooms ");
       socket.room = chatname;
       socket.join(socket.room);
     }
@@ -285,6 +284,8 @@ io.on('connection', function (socket) {
     }
   });
 
+
+
   // when the user disconnects.. perform this
   socket.on('disconnect', function () {
     // remove the username from global people list
@@ -297,7 +298,10 @@ io.on('connection', function (socket) {
       if(people[socket.id].owns == null) {
         roomForDeletingUser.removeFan(usernameToDelete);
       } else {
-        roomForDeletingUser.removeHost(usernameToDelete);
+        var newHost = roomForDeletingUser.removeHost(usernameToDelete);
+        if(newHost) {
+          socket.broadcast.to(socket.room).emit("set iAmHost", newHost.username, true); 
+        }
       }
       delete people[socket.id];
 
