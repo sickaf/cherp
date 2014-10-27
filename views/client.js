@@ -61,23 +61,17 @@ $(function() {
 
   // Sets the client's username
   function setUsername () {
-    if (userUsername) {
-      username = userUsername;
-    }
-    else {
-      username = cleanInput($usernameInput.val().trim());
-    }
 
-    // If the username is valid
-    if (username) {
+      username = user.username;
+   
       $loginPage.fadeOut();
       $chatnamePage.show();
       $loginPage.off('click');
       $currentInput = $chatnameInput.focus();
 
+      console.log(user.username);
       // Tell the server your username
-      socket.emit('add user', username);
-    }
+      socket.emit('add user', user.username);
   }
 
   // Sets the chatname

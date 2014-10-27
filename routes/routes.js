@@ -1,13 +1,30 @@
+var User = require('../user');
+
 module.exports = function(app, passport) {
 
 	// =====================================
 	// HOME PAGE (with login links) ========
 	// =====================================
 	app.get('/', function(req, res) {
-		 res.render('index', {
-			user : req.user // get the user out of session and pass to template
-		});
+		if (req.user) {
+			console.log('found twitter user');
+			res.render('index', {
+				user : req.user // get the user out of session and pass to template
+			});
+		} else {
+			var newUser = new User();
+            newUser.username = 'anon_' + randomString(10, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
+            res.render('index', {
+				user : newUser // get the user out of session and pass to template
+			});
+		}
 	});
+
+	function randomString(length, chars) {
+        var result = '';
+        for (var i = length; i > 0; --i) result += chars[Math.round(Math.random() * (chars.length - 1))];
+        return result;
+    }
 
 	app.get('/login', function(req, res) {
 		res.render('login', { message: req.flash('loginMessage') });
