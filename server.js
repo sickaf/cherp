@@ -200,12 +200,12 @@ io.on('connection', function (socket) {
   });
 
   // when the client emits 'add user', this listens and executes
-  socket.on('add user', function (username) {
+  socket.on('add user', function (user) {
 
     addedUser = true;
 
     people[socket.id] = { "id" : socket.id,
-                          "username" : username, 
+                          "username" : user.username, 
                           "owns" : null, 
                           "inroom": null};
 

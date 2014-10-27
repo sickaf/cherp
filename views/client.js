@@ -71,7 +71,7 @@ $(function() {
 
       console.log(user.username);
       // Tell the server your username
-      socket.emit('add user', user.username);
+      socket.emit('add user', user);
   }
 
   // Sets the chatname
