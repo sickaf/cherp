@@ -12,30 +12,30 @@ $(function() {
 
   // Initialize varibles
   var $window = $(window);
-  var $usernameInput = $('.usernameInput'); // Input for username
   var $chatnameInput = $('.chatnameInput'); // Input for chatname
   var $hostMessages = $('.hostMessages'); // host messages area
   var $fanMessages = $('.fanMessages'); // fan messages area
   var $inputMessage = $('.inputMessage'); // Input message input box
-  var $loginPage = $('.login.page'); // The login page
   var $chatnamePage = $('.chatname.page'); // The login page
   var $chatPage = $('.chat.page'); // The chatroom page
 
   // Prompt for setting a username
-  var username;
+  var username = user.username;
   var chatname;
   var iAmHost = false;
   var connected = false;
   var typing = false;
   var lastTypingTime;
-  var $currentInput = $usernameInput.focus();
+  var $currentInput = $chatnameInput.focus();
 
   var socket = io();
+
+  $chatnamePage.show();
+  socket.emit('add user', user);
 
   //someone needs to get rid of this dumb function
   function addParticipantsMessage (data) {
     var message = '';
-    
 
     log("there are " + data.numUsers + " people in this room.");
 
@@ -48,7 +48,6 @@ $(function() {
 
   function addChatroomUpdate (data) {
     var message = '';
-    
 
     log("there are " + data.numUsers + " people in this room.");
 
@@ -59,23 +58,9 @@ $(function() {
     } 
   }
 
-  // Sets the client's username
-  function setUsername () {
-
-      username = user.username;
-   
-      $loginPage.fadeOut();
-      $chatnamePage.show();
-      $loginPage.off('click');
-      $currentInput = $chatnameInput.focus();
-
-      console.log(user.username);
-      // Tell the server your username
-      socket.emit('add user', user);
-  }
-
   // Sets the chatname
   function setChatname () {
+
     chatname = cleanInput($chatnameInput.val().trim());
 
     // If the username is valid
@@ -83,7 +68,6 @@ $(function() {
       $chatnamePage.fadeOut();
       $chatPage.show();
       $chatnamePage.off('click');
-      $currentInput = $inputMessage.focus();
 
       // Tell the server your chatname
       socket.emit('enter chat', chatname);
@@ -362,12 +346,8 @@ $(function() {
         typing = false;
       }
       //okay, the user has set a username, but hasn't chosen a chat, do that
-      else if (username) {
-        setChatname();
-      }
-      //the user hasn't even chosen a username? do that first!
       else {
-        setUsername();
+        setChatname();
       }
     }
   });
@@ -377,11 +357,6 @@ $(function() {
   });
 
   // Click events
-
-  // Focus input when clicking anywhere on login page
-  $loginPage.click(function () {
-    $currentInput.focus();
-  });
 
   // Focus input when clicking on the message input's border
   $inputMessage.click(function () {
