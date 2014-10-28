@@ -29,61 +29,6 @@ module.exports = function(passport) {
         });
     });
 
- // 	// =========================================================================
- //    // LOCAL SIGNUP ============================================================
- //    // =========================================================================
- //    // we are using named strategies since we have one for login and one for signup
-	// // by default, if there was no name, it would just be called 'local'
-
- //    passport.use('local-signup', new LocalStrategy({
- //        // by default, local strategy uses username and password, we will override with email
-
- //        passReqToCallback : true // allows us to pass back the entire request to the callback
- //    },
- //    function(req, username, password, done) {
-
- //        // asynchronous
- //        // User.findOne wont fire unless data is sent back
- //        process.nextTick(function() {
-
-	// 	// find a user whose username is the same as the forms username
-	// 	// we are checking to see if the user trying to login already exists
- //         User.findOne({ $or:[ {'local.email' :  req.body.email}, {'local.username' : username} ] }, function(err, user) {
- //            // if there are any errors, return the error
- //            if (err)
- //                return done(err);
-
- //            // check to see if theres already a user with that email
- //            if (user) {
- //                if (user.local.email == req.body.email) {
- //                    console.log('tried to sign up with existing email: ' + user.local.email)
- //                    return done(null, false, req.flash('signupMessage', 'That email is already associated with a user.'));
- //                }
- //                console.log('tried to sign up with existing username: ' + username)
- //                return done(null, false, req.flash('signupMessage', 'This username is taken.'));
- //            } else {
-	// 			// if there is no user with that email
- //                // create the user
-    //             var newUser            = new User();
-
-    //             // set the user's local credentials
-    //             newUser.local.username    = username;
-    //             newUser.local.email     = req.body.email
-    //             newUser.local.password = newUser.generateHash(password);
-
-				// // save the user
-    //             newUser.save(function(err) {
-    //                 if (err) {
-    //                     throw err;
-    //                 }
-    //                 console.log('new user successfully signed up')
-    //                 return done(null, newUser);
-    //             });
- //            }
- //        });    
- //        });
- //    }));
-
     // =========================================================================
     // TWITTER =================================================================
     // =========================================================================
