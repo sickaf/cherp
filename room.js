@@ -51,7 +51,7 @@ Room.prototype.removeFan = function(personID) {
 Room.prototype.getFan = function(personID) {
   var fan = null;
   for(var i = 0; i < this.fans.length; i++) {
-    if(this.fans[i].id == personID) {
+    if(this.fans[i].id === personID) {
       fan = this.fans[i];
       break;
     }
@@ -61,7 +61,7 @@ Room.prototype.getFan = function(personID) {
 
 Room.prototype.addHost = function(host) {
   if (this.status === "available") {
-    host.owns = this.name;  
+    host.owns = this.name;
     host.inroom = this.name;
     this.hosts.push(host);
     this.peopleNum++;

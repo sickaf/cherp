@@ -31,7 +31,9 @@ $(function() {
   var socket = io();
 
   $chatnamePage.show();
-  socket.emit('add user', user);
+
+  // socket.emit('add user', user);
+  socket.emit('add username', user);
 
   //someone needs to get rid of this dumb function
   function addParticipantsMessage (data) {
@@ -348,6 +350,7 @@ $(function() {
       //okay, the user has set a username, but hasn't chosen a chat, do that
       else {
         setChatname();
+        $currentInput = $inputMessage.focus();
       }
     }
   });
@@ -369,6 +372,7 @@ $(function() {
   // Whenever the server emits 'login', log the login message
   socket.on('login', function (data) {
     connected = true;
+    log(data);
   });
 
 

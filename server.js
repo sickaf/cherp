@@ -103,24 +103,12 @@ app.use(function(req, res, next) {
 
 // people which are currently connected to the chat
 var Room = require('./room.js');
-var people = {}; 
+var people = []; 
 var rooms = {};
 var sockets = [];
 
       //socket.broadcast.to(socket.room).emit("new host message", {
 
-function getPersonWithUsername (username) {
-  var toReturn = null;
-  for (var key in people) {
-    if (people.hasOwnProperty(key)) {
-        if(username == people[key].username) {
-          toReturn = people[key];
-          break;
-        }
-    }
-  }
-  return toReturn;
-}
 
 function getPeopleList () {
   var toReturn = "";
@@ -139,21 +127,38 @@ function getPeopleList () {
 }
 
 io.on('connection', function (socket) {
-
-  var userId = socket.request.session.passport.user;
-  console.log(userId);
   
-  var addedUser = false;
+  var ourHeroID = uuid.v4();
+
+  var ourHero = { "id" : ourHeroID,
+                  "socketID" : socket.id, 
+                  "username" : "usernamenotset", 
+                  "owns" : null, 
+                  "inroom": null};
+
+  people.push(ourHero);
+
+  socket.emit("update", "ourhero is "+JSON.stringify(ourHero));
+
+  //messaging
+  socket.emit('login', "Welcome to the world. You have connected to the server. People are: "+getPeopleList()); //sets connected = true
+  
+  sockets.push(socket);
+
+  var addedUser = true;  
+
+
+
 
   //Received an image: broadcast to all
   socket.on('new image', function (data) {
     var fullMessage = {
-      username: people[socket.id].username,
+      username: ourHero.username,
       base64Image: data,
       image: true
     };
 
-    if(people[socket.id].owns == socket.room) {
+    if(ourHero.owns == socket.room) {
       io.sockets.in(socket.room).emit('new host message', fullMessage);
       rooms[socket.room].hostMessages.push(fullMessage);
     }
@@ -164,12 +169,13 @@ io.on('connection', function (socket) {
 
   // when the client emits 'new host message', this listens and executes
   socket.on('new message', function (data) {
+
     var fullMessage = {
-      username: people[socket.id].username,
+      username: ourHero.username,
       message: data
     };
 
-    if(people[socket.id].owns == socket.room) {
+    if(ourHero.owns == socket.room) {
       socket.broadcast.to(socket.room).emit("new host message", fullMessage);
       rooms[socket.room].hostMessages.push(fullMessage);
     }
@@ -181,10 +187,10 @@ io.on('connection', function (socket) {
   // when the client emits 'make host', this listens and executes
   socket.on('make host', function (username) {
     
-    if(people[socket.id].owns == socket.room) {
-      var userToUpgrade = getPersonWithUsername(username);
-      var roomForUpgrade = rooms[people[socket.id].owns];
-      socket.emit("update", "about to make "+userToUpgrade.username+" a host with id: "+userToUpgrade.id);
+    if(ourHero.owns == socket.room) {
+
+      var userToUpgrade = _.where(people, {username: username});
+      var roomForUpgrade = rooms[ourHero.owns];
 
       roomForUpgrade.promoteFanToHost(userToUpgrade.id);
 
@@ -198,7 +204,7 @@ io.on('connection', function (socket) {
 
   // when the client emits 'host repost', this listens and executes
   socket.on('host repost', function (data) {
-    if(people[socket.id].owns == socket.room) {
+    if(ourHero.owns == socket.room) {
       socket.broadcast.to(socket.room).emit('host repost', data);
       rooms[socket.room].hostMessages.push(data);
     }
@@ -211,41 +217,53 @@ io.on('connection', function (socket) {
   socket.on('add user', function (user) {
 
     addedUser = true;
+    ourHero = { "id" : user.id,
+                "socketID" : socket.id, 
+                "username" : user.username, 
+                "owns" : null, 
+                "inroom": null};
+    people.push(ourHero);
 
-    people[socket.id] = { "id" : socket.id,
-                          "username" : user.username, 
-                          "owns" : null, 
-                          "inroom": null};
+    socket.emit("update", "ourhero is "+JSON.stringify(ourHero));
 
-    
     //messaging
-    socket.emit("update", "Welcome to the world. You have connected to the server.");
-    io.sockets.emit("update", people[socket.id].username + " is online.");
-    socket.emit("update", "total list of people is: "+getPeopleList());
-    socket.emit('login', {}); //sets connected = true
+    io.sockets.emit("update", ourHero.username + " is online.");
+    socket.emit('login', "Welcome to the world. You have connected to the server. People are: "+getPeopleList()); //sets connected = true
     
     sockets.push(socket);
 
   });
 
+  // when the client emits 'add username', this listens and executes
+  socket.on('add username', function (user) {
+    ourHero.username = user.username;
+  });
+
   socket.on('enter chat', function (chatname) {
 
-    if (people[socket.id].owns) {
+    socket.emit("update", "ourHero has the username "+ourHero.username + " and wants to enter chat: "+chatname);
+
+    if (ourHero.owns) {
       socket.emit("update", "You already own a room! This is madness!");
     }
-    else if (people[socket.id].inroom) {
+    else if (ourHero.inroom) {
       socket.emit("update", "You are already in a room.");
     }
-    else { //LETS DO THIS
-            
+    else { //LETS DO THIS  
       //what if the chatroom already exists!!
-      if(chatname in rooms) { 
-        rooms[chatname].addFan(people[socket.id]);
-        socket.emit("update", "the room "+chatname + " already exists.  adding you as a fan. now "+chatname + " has "+rooms[chatname].peopleNum+" people");
-        //people[socket.id].inroom = chatname;
+      if(chatname in rooms) {
+        var existingRoom = rooms[chatname];
+        if(existingRoom.peopleNum == 0) {
+          rooms[chatname].addHost(ourHero);
+          socket.emit("set iAmHost", ourHero.username, true); 
+          socket.emit("update", "the room "+chatname + " already exists.  adding you as a HOST. now "+chatname + " has "+rooms[chatname].peopleNum+" people");
+        }
+        else {
+          rooms[chatname].addFan(ourHero);
+          socket.emit("update", "the room "+chatname + " already exists.  adding you as a FAN. now "+chatname + " has "+rooms[chatname].peopleNum+" people");
+        }
 
         //fill the new user in on old messages
-        socket.emit("update", "rooms[chatname].hostMessages.length: "+rooms[chatname].hostMessages.length);
         for(var i = 0; i < rooms[chatname].hostMessages.length; i++) {
           socket.emit("new host message", rooms[chatname].hostMessages[i]);
         }
@@ -254,12 +272,12 @@ io.on('connection', function (socket) {
         socket.emit("update", "the room "+chatname + " doesnt exist yet.  adding you as host");
 
         var id = uuid.v4();
-        var room = new Room(chatname, id, people[socket.id]);
+        var room = new Room(chatname, id, ourHero);
+        socket.emit("update", "ourhero owns "+ourHero.owns);
+
         rooms[chatname] = room;
         //add room to socket, and auto join the creator of the room
-        // people[socket.id].owns = chatname;
-        // people[socket.id].inroom = chatname;
-        socket.emit("set iAmHost", people[socket.id].username, true); 
+        socket.emit("set iAmHost", ourHero.username, true); 
       }
       socket.emit("update", "there are now "+_.size(rooms)+" rooms ");
       socket.room = chatname;
@@ -267,17 +285,16 @@ io.on('connection', function (socket) {
     }
     // echo globally (all clients) that a person has connected
     socket.broadcast.emit('user joined chat', {
-      username: people[socket.id].username,
+      username: ourHero.username,
       chatname: chatname
     });
   });
 
   // when the client emits 'typing', we broadcast it to others
   socket.on('typing', function () {
-
-    if(people[socket.id].owns == socket.room) { //we only give a shit if they are a host
+    if(ourHero.owns == socket.room) { //we only give a shit if they are a host
       socket.broadcast.to(socket.room).emit('typing', {
-        username: people[socket.id].username
+        username: ourHero.username
       });
     }
   });
@@ -285,9 +302,9 @@ io.on('connection', function (socket) {
   // when the client emits 'stop typing', we broadcast it to others
   socket.on('stop typing', function () {
 
-    if(people[socket.id].owns == socket.room) { //we only give a shit if they are a host
+    if(ourHero.owns == socket.room) { //we only give a shit if they are a host
       socket.broadcast.to(socket.room).emit('stop typing', {
-        username: people[socket.id].username
+        username: ourHero.username
       });
     }
   });
@@ -300,26 +317,27 @@ io.on('connection', function (socket) {
     var usernameToDelete;
     var roomForDeletingUser;
     if (addedUser) {
-      usernameToDelete = people[socket.id].username;
       roomForDeletingUser = rooms[socket.room];
 
-      if(people[socket.id].owns == null) {
-        roomForDeletingUser.removeFan(usernameToDelete);
+      if(ourHero.owns == null) {
+        roomForDeletingUser.removeFan(ourHero.username);
       } else {
-        var newHost = roomForDeletingUser.removeHost(usernameToDelete);
+        var newHost = roomForDeletingUser.removeHost(ourHero.username);
         if(newHost) {
           socket.broadcast.to(socket.room).emit("set iAmHost", newHost.username, true); 
         }
       }
-      delete people[socket.id];
 
       // echo globally that this client has left
       socket.broadcast.emit('user left', {
-        username: usernameToDelete,
+        username: ourHero.username,
         chatname: roomForDeletingUser.name,
-        numUsers: _.size(people),
+        numUsers: _.size(people) - 1,
         numUsersInChat: roomForDeletingUser.peopleNum
       });
+
+      people = _.without(people, ourHero);
+      delete ourHero;
     }
   });
 });
