@@ -7,18 +7,26 @@ module.exports = function(app, passport) {
 	// =====================================
 	app.get('/', function(req, res) {
 		if (req.user) {
-			console.log('found twitter user');
+			console.log('user found');
 			res.render('index', {
 				user : req.user // get the user out of session and pass to template
 			});
 		} else {
+			console.log('no logged in user');
 			var newUser = new User();
-            newUser.username = 'anon_' + randomString(10, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
-            res.render('index', {
-				user : newUser // get the user out of session and pass to template
+            newUser.username = 'anon_' + randomString(8, 'abcdefghijklmnopqrstuvqxyz');
+            newUser.password = '';
+            console.log(newUser);
+            req.logIn(newUser, function (err) {
+  				if (err) {
+    				throw err;
+  				}
+
+  				res.redirect('/');
+
 			});
-		}
-	});
+        }
+     });
 
 	function randomString(length, chars) {
         var result = '';
