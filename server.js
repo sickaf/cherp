@@ -15,11 +15,14 @@ var logger = require('morgan'); //hoping this will make debugging easier
 var _ = require('underscore')._; //tool for doing things like calling .size on an array
 var uuid = require('node-uuid'); //for generating IDs for things like rooms
 
+
 //
 // database variables
 //
 var mongoose = require('mongoose');
 var configDB = require('./config/database.js')
+
+app.use(flash()); // use connect-flash for flash messages stored in session
 
 // configuration ===============================================================
 
@@ -51,7 +54,6 @@ var sessionMiddleware = session({
 app.use(sessionMiddleware);
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
-app.use(flash()); // use connect-flash for flash messages stored in session
 
 io.use(function(socket, next){
   sessionMiddleware(socket.request, {}, next);
@@ -113,18 +115,34 @@ var sockets = [];
 function getPeopleList () {
   var toReturn = "";
   var first = true;
-  for (var key in people) {
-    if (people.hasOwnProperty(key)) {
-      if (first) {
-        toReturn = people[key].username;
-        first = false;
-      } else {
-        toReturn += ", " + people[key].username;
-      }
+  for (var i = 0; i < people.length; i++) {
+    if (first) {
+      toReturn = people[i].username;
+      first = false;
+    } else {
+      toReturn += ", " + people[i].username;
     }
   }
   return toReturn;
 }
+function getRoomList () {
+  var toReturn = "";
+  var first = true;
+
+  for (var chatname in rooms) {
+    if (rooms.hasOwnProperty(chatname)) {
+      if (first) {
+        toReturn = chatname;
+        first = false;
+      } else {
+      toReturn += ", " + chatname;
+      }
+    }
+  }
+  return toReturn;
+  }
+
+
 
 io.on('connection', function (socket) {
   
@@ -279,15 +297,13 @@ io.on('connection', function (socket) {
         //add room to socket, and auto join the creator of the room
         socket.emit("set iAmHost", ourHero.username, true); 
       }
-      socket.emit("update", "there are now "+_.size(rooms)+" rooms ");
+
       socket.room = chatname;
       socket.join(socket.room);
     }
-    // echo globally (all clients) that a person has connected
-    socket.broadcast.emit('user joined chat', {
-      username: ourHero.username,
-      chatname: chatname
-    });
+
+    socket.broadcast.emit("update", ourHero.username+" is now in room "+chatname+". There are now "+_.size(rooms)+" rooms: "+getRoomList());
+
   });
 
   // when the client emits 'typing', we broadcast it to others
@@ -308,8 +324,6 @@ io.on('connection', function (socket) {
       });
     }
   });
-
-
 
   // when the user disconnects.. perform this
   socket.on('disconnect', function () {

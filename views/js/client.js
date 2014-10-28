@@ -421,7 +421,7 @@ $(function() {
 
   // Whenever the server emits 'user left', log it in the chat body
   socket.on('user left', function (data) {
-    log(data.username + ' left. they were in chatroom: '+data.chatname+". There are "+data.numUsers+" left, and "+data.numUsersInChat+" left in chatroom: "+data.chatname);
+    log(data.username + ' left. they were in chatroom: '+data.chatname+". "+data.numUsers+" left, and "+data.numUsersInChat+" left in chatroom: "+data.chatname);
     removeHostTyping(data); //data must include data.username
   });
 
