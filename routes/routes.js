@@ -6,41 +6,22 @@ module.exports = function(app, passport) {
 	// HOME PAGE (with login links) ========
 	// =====================================
 	app.get('/', function(req, res) {
-
 		if (req.user) {
 			console.log('user found');
-			res.render('index', {
-				user : req.user // get the user out of session and pass to template
-			});
-		} 
-		else {
-			console.log('no logged in user');
-			var newUser = new User();
-            newUser.username = 'anon_' + randomString(8, 'abcdefghijklmnopqrstuvqxyz');
-            newUser.password = '';
-            console.log(newUser);
-  			res.render('index', {
-				user : newUser // get the user out of session and pass to template
-			});
+			res.render('index', { user : req.user });
+		} else {
+			console.log('no user found, creating anon user and saving to session');
+			
+			var user = new User();
+      		user.username = randomUsername();
+
+      		res.render('index', { user : user });
         }
      });
-
-	function randomString(length, chars) {
-        var result = '';
-        for (var i = length; i > 0; --i) result += chars[Math.round(Math.random() * (chars.length - 1))];
-        return result;
-    }
 
 	app.get('/login', function(req, res) {
 		res.render('login', { message: req.flash('loginMessage') });
 	});
-
-	// process the login form
-	app.post('/login', passport.authenticate('local-login', {
-		successRedirect : '/', // redirect to index
-		failureRedirect : '/login', // redirect back to the signup page if there is an error
-		failureFlash : true // allow flash messages
-	}));
 
 	// =====================================
 	// SIGNUP ==============================
@@ -101,4 +82,13 @@ function isLoggedIn(req, res, next) {
 
 	// if they aren't redirect them to the login
 	res.redirect('/login');
+}
+
+function randomUsername() {
+
+	var nouns = ['fart','weed','420','snowboard','longboarding','blaze','pussy'];
+	var descriptors = ['fan','dude','man','doctor','expert','thug'];
+    var noun = nouns[Math.floor(Math.random() * nouns.length)];
+    var descriptor = descriptors[Math.floor(Math.random() * descriptors.length)];
+    return noun+descriptor;
 }

@@ -145,8 +145,19 @@ function getRoomList () {
 
 
 io.on('connection', function (socket) {
-  
-  var ourHeroID = uuid.v4();
+
+  var ourHeroID;
+  var authorizedUser = socket.request.session.passport.user;
+  if (authorizedUser) {
+      console.log('socket connecton from twitter user');
+      ourHeroID = authorizedUser;
+  }
+  else {
+      console.log('socket connecton from anon user, generating temp ID');
+      ourHeroID = uuid.v4();
+  }
+
+  console.log('hero id: ' + ourHeroID);
 
   var ourHero = { "id" : ourHeroID,
                   "socketID" : socket.id, 
@@ -164,9 +175,6 @@ io.on('connection', function (socket) {
   sockets.push(socket);
 
   var addedUser = true;  
-
-
-
 
   //Received an image: broadcast to all
   socket.on('new image', function (data) {
