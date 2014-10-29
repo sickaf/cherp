@@ -300,7 +300,6 @@ io.on('connection', function (socket) {
         var id = uuid.v4();
         var room = new Room(chatname, id, ourHero);
         socket.emit("update", "ourhero owns "+ourHero.owns);
-
         rooms[chatname] = room;
         //add room to socket, and auto join the creator of the room
         socket.emit("set iAmHost", ourHero.username, true); 
@@ -311,6 +310,7 @@ io.on('connection', function (socket) {
     }
 
     socket.broadcast.emit("update", ourHero.username+" is now in room "+chatname+". There are now "+_.size(rooms)+" rooms: "+getRoomList());
+    io.sockets.emit("update roomsList", rooms);
 
   });
 

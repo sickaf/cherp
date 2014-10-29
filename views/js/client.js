@@ -18,6 +18,8 @@ $(function() {
   var $inputMessage = $('.inputMessage'); // Input message input box
   var $chatnamePage = $('.chatname.page'); // The login page
   var $chatPage = $('.chat.page'); // The chatroom page
+  var $roomsList = $('.roomsList'); // fan messages area
+
 
   // Prompt for setting a username
   var username = user.username;
@@ -104,6 +106,16 @@ $(function() {
   function log (message, options) {
     var $el = $('<li>').addClass('log').text(message);
     addMessageElement($el, options);
+  }
+
+  function updateRoomsList (data, options) {
+                 // <li><a href="#">One more separated link</a></li>
+    // log("addRoomToList called with chatname "+data);
+    for (var i = 0; i < data.length; i++) {
+      var $roomDiv = $('<li><a href="#">'+data.chatname+' ('+data.peopleNum+')</a></li>');
+      $roomsList.append($roomDiv);
+    }
+    // var $roomDiv = $('<li />').text(data.chatname);
   }
 
 
@@ -402,6 +414,11 @@ $(function() {
   // Whenever the server emits 'new message', update the chat body
   socket.on('new host message', function (data) {
     addHostMessage(data);
+  });
+
+   // Whenever the server emits 'new message', update the chat body
+  socket.on('update roomsList', function (data) {
+    updateRoomsList(data);
   });
 
   // Whenever the server emits 'new fan message', update the chat body
