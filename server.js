@@ -145,12 +145,10 @@ function getRoomList () {
 
 io.on('connection', function (socket) {
 
-  console.log(socket.request.session);
-
   var ourHeroID;
   if ("user" in socket.request.session.passport) {
+      console.log('socket connecton from logged in twitter user');
       var authorizedUser = socket.request.session.passport.user;
-      console.log('socket connecton from twitter user');
       ourHeroID = authorizedUser;
   }
   else {
