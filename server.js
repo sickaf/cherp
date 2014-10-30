@@ -139,12 +139,14 @@ function getRoomWithID (id) {
   else return null;
 }
 
-function pushMessageToDB(roomID, fullMessage){
-  RoomModel.findOne({ 'id' : roomID }, function(err, room) {
+// function pushMessageToDB(roomID, fullMessage){
+function pushMessageToDB(name, roomID, fullMessage){
+  // RoomModel.findOne({ 'id' : roomID }, function(err, room) {
+  RoomModel.findOne({ 'name' : name }, function(err, room) {
   if (err)
     console.log("database ERR: "+err);
   if (room) {
-    console.log("database found room with id: "+room.id);
+    console.log("database found room with name: "+room.name);
     room.hostMessages.push(fullMessage);
     room.save(function(err) {
       if (err)
@@ -157,6 +159,7 @@ function pushMessageToDB(roomID, fullMessage){
     console.log("database did not find room");
     var newRoom = new RoomModel();
     newRoom.id = roomID;
+    newRoom.name = name;
     newRoom.hostMessages = [];
     newRoom.hostMessages.push(fullMessage);
     newRoom.save(function(err) {
@@ -204,7 +207,8 @@ function pushMessageToDB(roomID, fullMessage){
 io.on('connection', function (socket) {
 
   var ourHeroID;
-  if ("user" in socket.request.session.passport) {
+  // if ("user" in socket.request.session.passport) {
+  if (false) {
       console.log('socket connecton from logged in twitter user');
       var authorizedUser = socket.request.session.passport.user;
       ourHeroID = authorizedUser;
@@ -245,8 +249,7 @@ io.on('connection', function (socket) {
     if(ourHero.owns == socket.room) {
       io.sockets.in(socket.room).emit('new host message', fullMessage);
       // getRoomWithName(socket.room).hostMessages.push(fullMessage);
-      pushMessageToDB(socket.room, fullMessage);
-
+      pushMessageToDB(getRoomWithID(socket.room).name, socket.room, fullMessage);
     }
     else  {
       socket.emit("update", "ur not the host get a day job");
@@ -264,7 +267,7 @@ io.on('connection', function (socket) {
     if(ourHero.owns == socket.room) {
       console.log(" ourhero owns : socket.room : "+ourHero.owns+" : "+socket.room);
       socket.broadcast.to(socket.room).emit("new host message", fullMessage);
-      pushMessageToDB(socket.room, fullMessage);
+      pushMessageToDB(getRoomWithID(socket.room).name, socket.room, fullMessage);
     }
     else {
       socket.broadcast.to(socket.room).emit("new fan message", fullMessage);
@@ -294,8 +297,7 @@ io.on('connection', function (socket) {
     if(ourHero.owns == socket.room) {
       console.log(" hostrepost ourhero owns : socket.room : "+ourHero.owns+" : "+socket.room);
       socket.broadcast.to(socket.room).emit('host repost', data);
-      pushMessageToDB(socket.room, data);
-
+      pushMessageToDB(getRoomWithID(socket.room).name, socket.room, data);
     }
     else {
       socket.emit("update", "ur not the host lol pull out homie");
@@ -358,15 +360,7 @@ io.on('connection', function (socket) {
         socket.emit("update", "the room "+chatname + " already exists.  adding you as a FAN. now "+chatname + " has "+getRoomWithName(chatname).peopleNum+" people");
       }
 
-      RoomModel.findOne({ 'id' :  getRoomWithName(chatname).id}, function(err, room) {
-        if (err)
-          console.log("database ERR getting hostMessages: "+err);
-        if (room) {
-          console.log("database found room with id: "+room.id);
-          socket.emit("add database messages", room.hostMessages);
-        }
-      });
-
+      // RoomModel.findOne({ 'id' :  getRoomWithName(chatname).id}, function(err, room) {
     }
     else { //room doesnt exist. create it
       socket.emit("update", "the room "+chatname + " doesnt exist yet.  adding you as host");
@@ -381,6 +375,18 @@ io.on('connection', function (socket) {
     socket.leave(socket.room);
     socket.room = getRoomWithName(chatname).id;
     socket.join(socket.room);
+
+    RoomModel.findOne({'name' : chatname}, function(err, room) {
+      if (err)
+        console.log("database ERR getting hostMessages: "+err);
+      if (room) {
+        console.log("database found room with name: "+room.name);
+        socket.emit("add database messages", room.hostMessages);
+      } else {
+        console.log("database couldnt find "+chatname+" to load messages from");
+      }
+    });
+
     
 
     socket.broadcast.emit("update", ourHero.username+" is now in room "+chatname+". There are now "+_.size(rooms)+" rooms: "+getRoomList());
