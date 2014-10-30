@@ -147,8 +147,9 @@ function getRoomList () {
 io.on('connection', function (socket) {
 
   var ourHeroID;
-  var authorizedUser = socket.request.session.passport.user;
-  if (authorizedUser) {
+  if ("passport" in socket.request.session) {
+  // if (false) {
+      var authorizedUser = socket.request.session.passport.user;
       console.log('socket connecton from twitter user');
       ourHeroID = authorizedUser;
   }
@@ -267,47 +268,55 @@ io.on('connection', function (socket) {
 
   socket.on('enter chat', function (chatname) {
 
-    socket.emit("update", "ourHero has the username "+ourHero.username + " and wants to enter chat: "+chatname);
 
     if (ourHero.owns) {
       socket.emit("update", "You already own a room! This is madness!");
+      return;
     }
-    else if (ourHero.inroom) {
-      socket.emit("update", "You are already in a room.");
+
+    //LETS DO THIS
+
+    //socket.emit("clear messages", {});
+
+    socket.emit("update", "ourHero ("+ourHero.username + ") wants to enter chat: "+chatname);
+
+    if (ourHero.inroom) {
+      socket.emit("update", "You are already in a room.  Going to remove you from room "+ourHero.inroom);
+      rooms[ourHero.inroom].removeFan(ourHero.id);
     }
-    else { //LETS DO THIS  
-      //what if the chatroom already exists!!
-      if(chatname in rooms) {
-        var existingRoom = rooms[chatname];
-        if(existingRoom.peopleNum == 0) {
-          rooms[chatname].addHost(ourHero);
-          socket.emit("set iAmHost", ourHero.username, true); 
-          socket.emit("update", "the room "+chatname + " already exists.  adding you as a HOST. now "+chatname + " has "+rooms[chatname].peopleNum+" people");
-        }
-        else {
-          rooms[chatname].addFan(ourHero);
-          socket.emit("update", "the room "+chatname + " already exists.  adding you as a FAN. now "+chatname + " has "+rooms[chatname].peopleNum+" people");
-        }
 
-        //fill the new user in on old messages
-        for(var i = 0; i < rooms[chatname].hostMessages.length; i++) {
-          socket.emit("new host message", rooms[chatname].hostMessages[i]);
-        }
-      }
-      else { //room doesnt exist. create it
-        socket.emit("update", "the room "+chatname + " doesnt exist yet.  adding you as host");
-
-        var id = uuid.v4();
-        var room = new Room(chatname, id, ourHero);
-        socket.emit("update", "ourhero owns "+ourHero.owns);
-        rooms[chatname] = room;
-        //add room to socket, and auto join the creator of the room
+    //what if the chatroom already exists!!
+    if(chatname in rooms) {
+      var existingRoom = rooms[chatname];
+      if(existingRoom.peopleNum == 0) {
+        rooms[chatname].addHost(ourHero);
         socket.emit("set iAmHost", ourHero.username, true); 
+        socket.emit("update", "the room "+chatname + " already exists.  adding you as a HOST. now "+chatname + " has "+rooms[chatname].peopleNum+" people");
+      }
+      else {
+        rooms[chatname].addFan(ourHero);
+        socket.emit("update", "the room "+chatname + " already exists.  adding you as a FAN. now "+chatname + " has "+rooms[chatname].peopleNum+" people");
       }
 
-      socket.room = chatname;
-      socket.join(socket.room);
+      //fill the new user in on old messages
+      for(var i = 0; i < rooms[chatname].hostMessages.length; i++) {
+        socket.emit("new host message", rooms[chatname].hostMessages[i]);
+      }
     }
+    else { //room doesnt exist. create it
+      socket.emit("update", "the room "+chatname + " doesnt exist yet.  adding you as host");
+
+      var id = uuid.v4();
+      var room = new Room(chatname, id, ourHero);
+      socket.emit("update", "ourhero owns "+ourHero.owns);
+      rooms[chatname] = room;
+      //add room to socket, and auto join the creator of the room
+      socket.emit("set iAmHost", ourHero.username, true); 
+    }
+    socket.leave(socket.room);
+    socket.room = chatname;
+    socket.join(socket.room);
+    
 
     socket.broadcast.emit("update", ourHero.username+" is now in room "+chatname+". There are now "+_.size(rooms)+" rooms: "+getRoomList());
     io.sockets.emit("update roomsList", rooms);
@@ -338,10 +347,11 @@ io.on('connection', function (socket) {
     // remove the username from global people list
     var usernameToDelete;
     var roomForDeletingUser;
-    if (addedUser) {
+    console.log("ourHero ("+ourHero.username+") is disconnecting");
+    if (ourHero && rooms[socket.room]) {
       roomForDeletingUser = rooms[socket.room];
 
-      if(ourHero.owns == null) {
+      if(ourHero.owns == null && ourHero.inroom) {
         roomForDeletingUser.removeFan(ourHero.username);
       } else {
         var newHost = roomForDeletingUser.removeHost(ourHero.username);

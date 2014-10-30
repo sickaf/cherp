@@ -108,14 +108,23 @@ $(function() {
     addMessageElement($el, options);
   }
 
+  function clearMessages () {
+    $hostMessages.html("");
+    $fanMessages.html("");
+  }
+
+
   function updateRoomsList (data, options) {
-                 // <li><a href="#">One more separated link</a></li>
-    // log("addRoomToList called with chatname "+data);
-    for (var i = 0; i < data.length; i++) {
-      var $roomDiv = $('<li><a href="#">'+data.chatname+' ('+data.peopleNum+')</a></li>');
-      $roomsList.append($roomDiv);
+    $roomsList.html("");
+    for (var chatname in data) {
+      if (data.hasOwnProperty(chatname)) {
+        var $roomDiv = $('<li><a href="#">'+chatname+' ('+data[chatname].peopleNum+')</a></li>');
+        $roomDiv.click(function () {
+          socket.emit('enter chat', chatname);
+        });
+        $roomsList.append($roomDiv);
+       }
     }
-    // var $roomDiv = $('<li />').text(data.chatname);
   }
 
 
@@ -183,8 +192,6 @@ $(function() {
     var $messageDiv = $('<li class="message"/>')
       .data('username', data.username)
       .append($usernameDiv, $messageBodyDiv);
-
-
 
     addFanMessageElement($messageDiv, options);
   }
@@ -409,6 +416,11 @@ $(function() {
     if(username == username) {
       iAmHost = bool;
     }
+  });
+
+  // Whenever the server emits 'clear messages', update the chat body
+  socket.on('clear messages', function (data) {
+    clearMessages();
   });
 
   // Whenever the server emits 'new message', update the chat body
