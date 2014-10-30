@@ -179,24 +179,7 @@ function pushMessageToDB(name, roomID, fullMessage){
 });
 }
 
-// function getRoomList () {
-//   var toReturn = "";
-//   var first = true;
-
-//   for (var chatname in rooms) {
-//     if (rooms.hasOwnProperty(chatname)) {
-//       if (first) {
-//         toReturn = chatname;
-//         first = false;
-//       } else {
-//       toReturn += ", " + chatname;
-//       }
-//     }
-//   }
-//   return toReturn;
-//   }
-
-  function getRoomList () {
+function getRoomList () {
   var toReturn = "";
   var first = true;
     for (var i = 0; i < rooms.length; i++) {
@@ -214,7 +197,6 @@ io.on('connection', function (socket) {
 
   var ourHeroID;
   if ("user" in socket.request.session.passport) {
-    // if (false) {
       console.log('socket connecton from logged in twitter user');
       var authorizedUser = socket.request.session.passport.user;
       ourHeroID = authorizedUser;
@@ -223,7 +205,6 @@ io.on('connection', function (socket) {
       console.log('socket connecton from anon user, generating temp ID');
       ourHeroID = uuid.v4();
   }
-
 
   console.log('hero id: ' + ourHeroID);
 
@@ -310,26 +291,26 @@ io.on('connection', function (socket) {
     }
   });
 
-  // when the client emits 'add user', this listens and executes
-  socket.on('add user', function (user) {
+  // // when the client emits 'add user', this listens and executes
+  // socket.on('add user', function (user) {
 
-    addedUser = true;
-    ourHero = { "id" : user.id,
-                "socketID" : socket.id, 
-                "username" : user.username, 
-                "owns" : null, 
-                "inroom": null};
-    people.push(ourHero);
+  //   addedUser = true;
+  //   ourHero = { "id" : user.id,
+  //               "socketID" : socket.id, 
+  //               "username" : user.username, 
+  //               "owns" : null, 
+  //               "inroom": null};
+  //   people.push(ourHero);
 
-    socket.emit("update", "ourhero is "+JSON.stringify(ourHero));
+  //   socket.emit("update", "ourhero is "+JSON.stringify(ourHero));
 
-    //messaging
-    io.sockets.emit("update", ourHero.username + " is online.");
-    socket.emit('login', "Welcome to the world. You have connected to the server. People are: "+getPeopleList()); //sets connected = true
+  //   //messaging
+  //   io.sockets.emit("update", ourHero.username + " is online.");
+  //   socket.emit('login', "Welcome to the world. You have connected to the server. People are: "+getPeopleList()); //sets connected = true
     
-    sockets.push(socket);
+  //   sockets.push(socket);
 
-  });
+  //   });
 
   // when the client emits 'add username', this listens and executes
   socket.on('add username', function (user) {

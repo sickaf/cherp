@@ -60,7 +60,7 @@ module.exports = function(passport) {
                     var newUser                 = new User();
 
                     // set all of the user data that we need
-                    newUser.username = profile.username;
+                    newUser.username            = "@"+profile.username;
                     newUser.twitter.id          = profile.id;
                     newUser.twitter.token       = token;
                     newUser.twitter.username    = profile.username;

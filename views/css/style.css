@@ -89,6 +89,10 @@ ul {
   display: none;
 }
 
+.navbar {
+  margin-bottom: 0px;
+}
+
 /* Font */
 
 .hostMessages {
