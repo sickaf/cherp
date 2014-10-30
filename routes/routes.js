@@ -7,7 +7,7 @@ module.exports = function(app, passport) {
 	// =====================================
 	app.get('/', function(req, res) {
 		if (req.user) {
-			console.log('user found');
+			console.log('logged in user found in session');
 			res.render('index', { user : req.user });
 		} else {
 			console.log('no user found, creating anon user and saving to session');

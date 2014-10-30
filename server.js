@@ -15,7 +15,6 @@ var logger = require('morgan'); //hoping this will make debugging easier
 var _ = require('underscore')._; //tool for doing things like calling .size on an array
 var uuid = require('node-uuid'); //for generating IDs for things like rooms
 
-
 //
 // database variables
 //
@@ -174,10 +173,9 @@ function getRoomWithID (id) {
 io.on('connection', function (socket) {
 
   var ourHeroID;
-  if ("passport" in socket.request.session) {
-  // if (false) {
+  if ("user" in socket.request.session.passport) {
+      console.log('socket connecton from logged in twitter user');
       var authorizedUser = socket.request.session.passport.user;
-      console.log('socket connecton from twitter user');
       ourHeroID = authorizedUser;
   }
   else {
