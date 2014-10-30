@@ -116,14 +116,14 @@ $(function() {
 
   function updateRoomsList (data, options) {
     $roomsList.html("");
-    for (var chatname in data) {
-      if (data.hasOwnProperty(chatname)) {
-        var $roomDiv = $('<li><a href="#">'+chatname+' ('+data[chatname].peopleNum+')</a></li>');
-        $roomDiv.click(function () {
-          socket.emit('enter chat', chatname);
-        });
-        $roomsList.append($roomDiv);
-       }
+    
+    for (var i = 0; i <data.length; i++) {
+      var room = data[i];
+      var $roomDiv = $('<li><a href="#">'+room.name+' ('+room.peopleNum+')</a></li>');
+      $roomDiv.click(function () {
+        socket.emit('enter chat', room.name);
+      });
+      $roomsList.append($roomDiv);
     }
   }
 
@@ -394,19 +394,6 @@ $(function() {
     log(data);
   });
 
-
-  ///////////////////////////////////////////////////////////////
-  ///////                                                  //////
-  ///////  add messages from the database                  //////
-  ///////  THIS NEEDS TO BE UPDATED TO NOT BE SO SHITTY    //////
-  ///////                                                  //////
-  ///////////////////////////////////////////////////////////////
-  socket.on('add database messages', function(data) {
-    for (var i = 0; i < data.length; i++) {
-      addFanMessage(data[i]);
-    }
-  });
-
   // Whenever the server emits 'new message', update the chat body
   socket.on('update', function (data) {
     log(data);
@@ -427,6 +414,14 @@ $(function() {
   socket.on('new host message', function (data) {
     addHostMessage(data);
   });
+
+  // Whenever the server emits 'new message', update the chat body
+  socket.on('add database messages', function (data) {
+    for(var i = 0; i < data.length; i++) {
+      addHostMessage(data[i]);
+    }
+  });
+
 
    // Whenever the server emits 'new message', update the chat body
   socket.on('update roomsList', function (data) {
