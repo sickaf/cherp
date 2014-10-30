@@ -213,17 +213,19 @@ function pushMessageToDB(name, roomID, fullMessage){
 io.on('connection', function (socket) {
 
   var ourHeroID;
-  if ("user" in socket.request.session.passport) {
+  if ("passport" in socket.request.session) {
     // if (false) {
-      console.log('socket connecton from logged in twitter user');
-      var authorizedUser = socket.request.session.passport.user;
-      ourHeroID = authorizedUser;
-  }
-  else {
-      console.log('socket connecton from anon user, generating temp ID');
-      ourHeroID = uuid.v4();
+      if ("user" in socket.request.session.passport) {
+        console.log('socket connecton from logged in twitter user');
+        var authorizedUser = socket.request.session.passport.user;
+        ourHeroID = authorizedUser;
+      }
   }
 
+  if (!ourHeroID) {
+    console.log('socket connecton from anon user, generating temp ID');
+    ourHeroID = uuid.v4();
+  }
 
   console.log('hero id: ' + ourHeroID);
 
