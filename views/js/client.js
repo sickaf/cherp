@@ -394,19 +394,6 @@ $(function() {
     log(data);
   });
 
-
-  ///////////////////////////////////////////////////////////////
-  ///////                                                  //////
-  ///////  add messages from the database                  //////
-  ///////  THIS NEEDS TO BE UPDATED TO NOT BE SO SHITTY    //////
-  ///////                                                  //////
-  ///////////////////////////////////////////////////////////////
-  socket.on('add database messages', function(data) {
-    for (var i = 0; i < data.length; i++) {
-      addFanMessage(data[i]);
-    }
-  });
-
   // Whenever the server emits 'new message', update the chat body
   socket.on('update', function (data) {
     log(data);
@@ -427,6 +414,14 @@ $(function() {
   socket.on('new host message', function (data) {
     addHostMessage(data);
   });
+
+  // Whenever the server emits 'new message', update the chat body
+  socket.on('add database messages', function (data) {
+    for(var i = 0; i < data.length; i++) {
+      addHostMessage(data[i]);
+    }
+  });
+
 
    // Whenever the server emits 'new message', update the chat body
   socket.on('update roomsList', function (data) {

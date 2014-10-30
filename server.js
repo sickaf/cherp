@@ -14,6 +14,8 @@ var path = require('path');
 var logger = require('morgan'); //hoping this will make debugging easier
 var _ = require('underscore')._; //tool for doing things like calling .size on an array
 var uuid = require('node-uuid'); //for generating IDs for things like rooms
+var RoomModel = require('./roommodel');
+
 
 //
 // database variables
@@ -137,6 +139,37 @@ function getRoomWithID (id) {
   else return null;
 }
 
+function pushMessageToDB(roomID, fullMessage){
+  RoomModel.findOne({ 'id' : roomID }, function(err, room) {
+  if (err)
+    console.log("database ERR: "+err);
+  if (room) {
+    console.log("database found room with id: "+room.id);
+    room.hostMessages.push(fullMessage);
+    room.save(function(err) {
+      if (err)
+          throw err;
+      else {
+        console.log("no error saving room obj to db");
+      }
+    });
+  } else {
+    console.log("database did not find room");
+    var newRoom = new RoomModel();
+    newRoom.id = roomID;
+    newRoom.hostMessages = [];
+    newRoom.hostMessages.push(fullMessage);
+    newRoom.save(function(err) {
+      if (err)
+          throw err;
+      else {
+        console.log("no error saving room obj to db");
+      }
+    });
+  }
+});
+}
+
 // function getRoomList () {
 //   var toReturn = "";
 //   var first = true;
@@ -168,8 +201,6 @@ function getRoomWithID (id) {
   return toReturn;
   }
 
-
-
 io.on('connection', function (socket) {
 
   var ourHeroID;
@@ -182,6 +213,7 @@ io.on('connection', function (socket) {
       console.log('socket connecton from anon user, generating temp ID');
       ourHeroID = uuid.v4();
   }
+
 
   console.log('hero id: ' + ourHeroID);
 
@@ -212,7 +244,9 @@ io.on('connection', function (socket) {
 
     if(ourHero.owns == socket.room) {
       io.sockets.in(socket.room).emit('new host message', fullMessage);
-      getRoomWithName(socket.room).hostMessages.push(fullMessage);
+      // getRoomWithName(socket.room).hostMessages.push(fullMessage);
+      pushMessageToDB(socket.room, fullMessage);
+
     }
     else  {
       socket.emit("update", "ur not the host get a day job");
@@ -230,7 +264,7 @@ io.on('connection', function (socket) {
     if(ourHero.owns == socket.room) {
       console.log(" ourhero owns : socket.room : "+ourHero.owns+" : "+socket.room);
       socket.broadcast.to(socket.room).emit("new host message", fullMessage);
-      getRoomWithID(socket.room).hostMessages.push(fullMessage);
+      pushMessageToDB(socket.room, fullMessage);
     }
     else {
       socket.broadcast.to(socket.room).emit("new fan message", fullMessage);
@@ -258,10 +292,10 @@ io.on('connection', function (socket) {
   // when the client emits 'host repost', this listens and executes
   socket.on('host repost', function (data) {
     if(ourHero.owns == socket.room) {
-        console.log(" hostrepost ourhero owns : socket.room : "+ourHero.owns+" : "+socket.room);
-
+      console.log(" hostrepost ourhero owns : socket.room : "+ourHero.owns+" : "+socket.room);
       socket.broadcast.to(socket.room).emit('host repost', data);
-      getRoomWithID(socket.room).hostMessages.push(data);
+      pushMessageToDB(socket.room, data);
+
     }
     else {
       socket.emit("update", "ur not the host lol pull out homie");
@@ -296,7 +330,6 @@ io.on('connection', function (socket) {
 
   socket.on('enter chat', function (chatname) {
 
-
     if (ourHero.owns) {
       socket.emit("update", "You already own a room! This is madness!");
       return;
@@ -325,10 +358,15 @@ io.on('connection', function (socket) {
         socket.emit("update", "the room "+chatname + " already exists.  adding you as a FAN. now "+chatname + " has "+getRoomWithName(chatname).peopleNum+" people");
       }
 
-      //fill the new user in on old messages
-      for(var i = 0; i < getRoomWithName(chatname).hostMessages.length; i++) {
-        socket.emit("new host message", getRoomWithName(chatname).hostMessages[i]);
-      }
+      RoomModel.findOne({ 'id' :  getRoomWithName(chatname).id}, function(err, room) {
+        if (err)
+          console.log("database ERR getting hostMessages: "+err);
+        if (room) {
+          console.log("database found room with id: "+room.id);
+          socket.emit("add database messages", room.hostMessages);
+        }
+      });
+
     }
     else { //room doesnt exist. create it
       socket.emit("update", "the room "+chatname + " doesnt exist yet.  adding you as host");
