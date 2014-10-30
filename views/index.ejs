@@ -83,12 +83,14 @@
     </li>
   </ul>
 
-  <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+      <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script>
   var user = <%- JSON.stringify(user) %>;
   </script>
-  <script src="js/bootstrap.js"></script>
   <script src="js/client.js"></script>
 </body>
 </html>

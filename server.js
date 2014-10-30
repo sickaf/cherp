@@ -1,14 +1,14 @@
 // set up ======================================================================
 // Setup basic express server
+var port = process.env.PORT || 3000;
 var express = require('express');
 var app = express();
-var server = require('http').createServer(app);
-var io = require('socket.io')(server);
-var port = process.env.PORT || 3000;
-var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
+var server = require('http').createServer(app);
+var bodyParser = require('body-parser');
 var passport = require('passport');
+var io = require('socket.io')(server);
 var flash    = require('connect-flash');
 var path = require('path');
 var logger = require('morgan'); //hoping this will make debugging easier
@@ -16,16 +16,14 @@ var _ = require('underscore')._; //tool for doing things like calling .size on a
 var uuid = require('node-uuid'); //for generating IDs for things like rooms
 
 //
-// database variables
+// database stuff
 //
 var mongoose = require('mongoose');
 var configDB = require('./config/database.js')
-
-app.use(flash()); // use connect-flash for flash messages stored in session
+mongoose.connect(configDB.url, configDB.options);
+var RedisStore = require('connect-redis')(session);
 
 // configuration ===============================================================
-
-mongoose.connect(configDB.url, configDB.options);
 
 require('./config/passport')(passport); // pass passport for configuration
 
@@ -40,17 +38,25 @@ app.use(logger('dev'));
 
 app.use(cookieParser());
 
+
 // passport
 var sessionMiddleware = session({
+  store : new RedisStore({
+      host: 'pub-redis-17900.us-east-1-4.3.ec2.garantiadata.com',
+      port: '17900'
+  }),
+  secret: 'devon is gay',
   cookie : {
-    maxAge: 3600000 // see below
+    maxAge: 3600000
   },
-  secret: 'devon is gay', // session secret
   resave: true,
   saveUninitialized: true,
-  store : require('mongoose-session')(mongoose)
 });
+
 app.use(sessionMiddleware);
+
+app.use(flash()); // use connect-flash for flash messages stored in session
+
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
 
@@ -139,14 +145,13 @@ function getRoomList () {
     }
   }
   return toReturn;
-  }
-
-
+}
 
 io.on('connection', function (socket) {
 
   var ourHeroID;
   if ("user" in socket.request.session.passport) {
+    // if (false) {
       console.log('socket connecton from logged in twitter user');
       var authorizedUser = socket.request.session.passport.user;
       ourHeroID = authorizedUser;

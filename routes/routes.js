@@ -67,8 +67,10 @@ module.exports = function(app, passport) {
 	// LOGOUT ==============================
 	// =====================================
 	app.get('/logout', function(req, res) {
+		req.flash('loginMessage', 'Logged out');
+		req.session.destroy();
 		req.logout();
-		res.redirect('/login');
+  		res.redirect('/login');
 	});
 }
 
@@ -85,7 +87,6 @@ function isLoggedIn(req, res, next) {
 }
 
 function randomUsername() {
-
 	var nouns = ['fart','weed','420','snowboard','longboarding','blaze','pussy'];
 	var descriptors = ['fan','dude','man','doctor','expert','thug'];
     var noun = nouns[Math.floor(Math.random() * nouns.length)];
