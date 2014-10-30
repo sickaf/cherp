@@ -116,14 +116,14 @@ $(function() {
 
   function updateRoomsList (data, options) {
     $roomsList.html("");
-    for (var chatname in data) {
-      if (data.hasOwnProperty(chatname)) {
-        var $roomDiv = $('<li><a href="#">'+chatname+' ('+data[chatname].peopleNum+')</a></li>');
-        $roomDiv.click(function () {
-          socket.emit('enter chat', chatname);
-        });
-        $roomsList.append($roomDiv);
-       }
+    
+    for (var i = 0; i <data.length; i++) {
+      var room = data[i];
+      var $roomDiv = $('<li><a href="#">'+room.name+' ('+room.peopleNum+')</a></li>');
+      $roomDiv.click(function () {
+        socket.emit('enter chat', room.name);
+      });
+      $roomsList.append($roomDiv);
     }
   }
 

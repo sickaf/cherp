@@ -1,6 +1,7 @@
 function Room(name, id, owner) {
   this.name = name;
   this.id = id;
+  this.owner = owner;
   this.hosts = [];
   this.hostMessages = [];
   this.fans = [];
@@ -14,7 +15,7 @@ function Room(name, id, owner) {
 Room.prototype.addFan = function(fan) {
   if (this.status === "available") {
     fan.owns = null;
-    fan.inroom = this.name;
+    fan.inroom = this.id;
     this.fans.push(fan);
     this.peopleNum++;
   }
@@ -61,8 +62,8 @@ Room.prototype.getFan = function(personID) {
 
 Room.prototype.addHost = function(host) {
   if (this.status === "available") {
-    host.owns = this.name;
-    host.inroom = this.name;
+    host.owns = this.id;
+    host.inroom = this.id;
     this.hosts.push(host);
     this.peopleNum++;
   }
