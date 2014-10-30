@@ -18,11 +18,21 @@ $(function() {
   var $inputMessage = $('.inputMessage'); // Input message input box
   var $chatnamePage = $('.chatname.page'); // The login page
   var $chatPage = $('.chat.page'); // The chatroom page
-  var $roomsList = $('.roomsList'); // fan messages area
+  var $roomsList = $('.roomsList'); // 
+  var $usernameTitle = $('.usernameTitle'); // 
+  var $endChatButton = $('.endChatButton'); // 
 
+
+  $endChatButton.click(function () {
+    socket.emit('end chat', {});
+  });
 
   // Prompt for setting a username
   var username = user.username;
+  $usernameTitle.append($('<a href="#">'+username+'</a>'));
+
+
+
   var chatname;
   var iAmHost = false;
   var connected = false;
@@ -421,7 +431,6 @@ $(function() {
       addHostMessage(data[i]);
     }
   });
-
 
    // Whenever the server emits 'new message', update the chat body
   socket.on('update roomsList', function (data) {

@@ -118,7 +118,6 @@ var sockets = [];
 
       //socket.broadcast.to(socket.room).emit("new host message", {
 
-
 function getPeopleList () {
   var toReturn = "";
   var first = true;
@@ -381,11 +380,18 @@ io.on('connection', function (socket) {
       }
     });
 
-    
-
     socket.broadcast.emit("update", ourHero.username+" is now in room "+chatname+". There are now "+_.size(rooms)+" rooms: "+getRoomList());
     io.sockets.emit("update roomsList", rooms);
 
+  });
+
+  socket.on('end chat', function (data) {
+    if(ourHero.owns == socket.room) {
+      socket.emit("update", ourHero.username + "wants to end the chat");
+    }
+    else {
+      socket.emit("update", "ur not the own omg freakin buzz off");
+    }
   });
 
   // when the client emits 'typing', we broadcast it to others
