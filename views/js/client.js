@@ -137,6 +137,15 @@ $(function() {
     }
   }
 
+  // Adds link html around hyperlinks 
+  function linkify(text) {
+    var urlRegex = /(((https?:\/\/)|(www\.))[^\s]+)/g;
+    //var urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.replace(urlRegex, function(url,b,c) {
+        var url2 = (c == 'www.') ?  'http://' +url : url;
+        return '<a href="' +url2+ '" target="_blank">' + url + '</a>';
+    }) 
+} 
 
   // Adds the visual chat message to the message list
   function addHostMessage (data, options) {
@@ -159,8 +168,11 @@ $(function() {
       $messageBodyDiv = $('<span class="messageBody">')
       .append('<img src="' + data.base64Image + '"/>');
     } else {
+      var messagePlease = linkify(data.message);
+
       $messageBodyDiv = $('<span class="messageBody">')
-      .text(data.message);
+      .append(messagePlease);
+
     }
 
     var typingClass = data.typing ? 'typing' : '';
@@ -186,9 +198,12 @@ $(function() {
     $usernameDiv.click(function () {
       socket.emit('make host', data.username);
     });
+    
 
     var $messageBodyDiv = $('<span class="messageBody">')
       .text(data.message);
+
+
 
     //set up a listener so that if the host clicks this div itll get forwarded
     $messageBodyDiv.click(function () {
