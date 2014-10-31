@@ -168,10 +168,9 @@ $(function() {
       $messageBodyDiv = $('<span class="messageBody">')
       .append('<img src="' + data.base64Image + '"/>');
     } else {
-      var messagePlease = linkify(data.message);
-
+      var messageText = linkify(data.message);
       $messageBodyDiv = $('<span class="messageBody">')
-      .append(messagePlease);
+      .append(messageText);
 
     }
 
@@ -200,8 +199,9 @@ $(function() {
     });
     
 
-    var $messageBodyDiv = $('<span class="messageBody">')
-      .text(data.message);
+    var messageText = linkify(data.message);
+    $messageBodyDiv = $('<span class="messageBody">')
+      .append(messageText);
 
 
 
