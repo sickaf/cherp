@@ -301,29 +301,8 @@ io.on('connection', function (socket) {
     }
   });
 
-  // // when the client emits 'add user', this listens and executes
-  // socket.on('add user', function (user) {
-
-  //   addedUser = true;
-  //   ourHero = { "id" : user.id,
-  //               "socketID" : socket.id, 
-  //               "username" : user.username, 
-  //               "owns" : null, 
-  //               "inroom": null};
-  //   people.push(ourHero);
-
-  //   socket.emit("update", "ourhero is "+JSON.stringify(ourHero));
-
-  //   //messaging
-  //   io.sockets.emit("update", ourHero.username + " is online.");
-  //   socket.emit('login', "Welcome to the world. You have connected to the server. People are: "+getPeopleList()); //sets connected = true
-    
-  //   sockets.push(socket);
-
-  //   });
-
   // when the client emits 'add username', this listens and executes
-  socket.on('add username', function (username) {
+  socket.on('set username', function (username) {
     ourHero.username = username;
   });
 

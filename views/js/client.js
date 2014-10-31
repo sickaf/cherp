@@ -46,7 +46,7 @@ $(function() {
   $chatnamePage.show();
 
   // socket.emit('add user', user);
-  socket.emit('add username', username);
+  socket.emit('set username', username);
 
   //someone needs to get rid of this dumb function
   function addParticipantsMessage (data) {
