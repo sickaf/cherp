@@ -112,6 +112,7 @@ ul {
 
 /* Messages */
 
+
 .hostChatArea, .fanChatArea{
   height: 100%;
   width: 50%;
@@ -147,6 +148,8 @@ ul {
 
 .message.repost {
   margin-left: 30px;
+  padding-left: 15px;
+  border-left: 3px solid #ccc;
 }
 
 .username {

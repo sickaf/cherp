@@ -197,7 +197,8 @@ io.on('connection', function (socket) {
   console.log(socket.request.session);
 
   var ourHeroID;
-  if (socket.request.session) {
+  // if (socket.request.session) {
+  if (false) {
       if ("passport" in socket.request.session) {
           if ("user" in socket.request.session.passport) {
             console.log('socket connecton from logged in twitter user');
@@ -241,7 +242,6 @@ io.on('connection', function (socket) {
 
     if(ourHero.owns == socket.room) {
       io.sockets.in(socket.room).emit('new host message', fullMessage);
-      // getRoomWithName(socket.room).hostMessages.push(fullMessage);
       pushMessageToDB(getRoomWithID(socket.room).name, socket.room, fullMessage);
     }
     else  {
@@ -273,12 +273,16 @@ io.on('connection', function (socket) {
     if(ourHero.owns == socket.room) {
 
       var userToUpgrade = _.where(people, {username: username})[0];
-      var roomForUpgrade = getRoomWithID(ourHero.owns);
 
-      roomForUpgrade.promoteFanToHost(userToUpgrade.id);
-
-      socket.emit("update", "just made "+username+" a host.");
-      socket.broadcast.to(socket.room).emit("set iAmHost", username, true); 
+      if(userToUpgrade.owns == null ) {
+        var roomForUpgrade = getRoomWithID(ourHero.owns);
+        roomForUpgrade.promoteFanToHost(userToUpgrade.id);
+        socket.emit("update", "just made "+username+" a host.");
+        socket.broadcast.to(socket.room).emit("set iAmHost", username, true); 
+      }
+      else {
+        socket.emit("update", "that person is already a host hahahahahhahaha");
+      }
     }
     else {
       socket.emit("update", "ur not the host u cant upgrade people");
@@ -319,8 +323,8 @@ io.on('connection', function (socket) {
   //   });
 
   // when the client emits 'add username', this listens and executes
-  socket.on('add username', function (user) {
-    ourHero.username = user.username;
+  socket.on('add username', function (username) {
+    ourHero.username = username;
   });
 
   socket.on('enter chat', function (chatname) {
