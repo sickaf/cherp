@@ -129,15 +129,17 @@ $(function() {
 
   function updateRoomsList (data, options) {
     $roomsList.html("");
-    
     for (var i = 0; i <data.length; i++) {
-      var room = data[i];
-      var $roomDiv = $('<li><a href="#">'+room.name+' ('+room.peopleNum+')</a></li>');
-      $roomDiv.click(function () {
-        socket.emit('enter chat', room.name);
-      });
-      $roomsList.append($roomDiv);
+      addRoomToRoomsList(data[i]);
     }
+  }
+
+  function addRoomToRoomsList(room){
+    var $roomDiv = $('<li><a href="#">'+room.name+' ('+room.peopleNum+')</a></li>');
+    $roomDiv.click(function () {
+      socket.emit('enter chat', room.name);
+    });
+    $roomsList.append($roomDiv);
   }
 
   // Adds link html around hyperlinks 
@@ -148,7 +150,7 @@ $(function() {
         var url2 = (c == 'www.') ?  'http://' +url : url;
         return '<a href="' +url2+ '" target="_blank">' + url + '</a>';
     }) 
-} 
+  } 
 
   // Adds the visual chat message to the message list
   function addHostMessage (data, options) {

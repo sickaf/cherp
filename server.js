@@ -232,10 +232,9 @@ io.on('connection', function (socket) {
 
   people.push(ourHero);
 
-  socket.emit("update", "ourhero is "+JSON.stringify(ourHero));
-
   //messaging
-  socket.emit('login', "Welcome to the world. You have connected to the server. People are: "+getPeopleList()); //sets connected = true
+  socket.emit('login', "Welcome to the world. You have connected to the server. People are: "+getPeopleList()+". you are "+JSON.stringify(ourHero));
+//sets connected = true
   
   sockets.push(socket);
 
@@ -249,7 +248,7 @@ io.on('connection', function (socket) {
       image: true
     };
     if(!getRoomWithID(socket.room).isAvailable()){
-      socket.emit("update", "THIS ROOM IS FUCKING DEAD");
+      socket.emit("update", "THIS ROOM IS FUCKING ARCHIVED lol i think at least");
       return;
     }
 
@@ -266,7 +265,7 @@ io.on('connection', function (socket) {
   socket.on('new message', function (data) {
 
     if(!getRoomWithID(socket.room).isAvailable()){
-      socket.emit("update", "THIS ROOM IS FUCKING DEAD");
+      socket.emit("update", "THIS ROOM IS FUCKING ARCHIVED lol i think at least dont quote me on anything");
       return;
     }
 
@@ -337,7 +336,7 @@ io.on('connection', function (socket) {
     }
 
     //LETS DO THIS
-    //socket.emit("clear messages", {});
+    socket.emit("clear messages", {});
     
     socket.emit("update", "ourHero ("+ourHero.username + ") wants to enter chat: "+chatname);
    
@@ -429,28 +428,32 @@ io.on('connection', function (socket) {
     if (ourHero) {
       roomForDeletingUser = getRoomWithID(ourHero.inroom);
 
-      if(ourHero.hostof == null) { //fan
-        roomForDeletingUser.removeFan(ourHero.id);
-      } 
-      else if(ourHero.owns == null) { //host
-        var newHost = roomForDeletingUser.removeHost(ourHero.id);
-        if(newHost) {
-          socket.broadcast.to(socket.room).emit("set iAmHost", newHost.username, true); 
+      if(roomForDeletingUser){
+        if(ourHero.hostof == null) { //fan
+          roomForDeletingUser.removeFan(ourHero.id);
+        } 
+        else if(ourHero.owns == null) { //host
+          var newHost = roomForDeletingUser.removeHost(ourHero.id);
+          if(newHost) {
+            socket.broadcast.to(socket.room).emit("set iAmHost", newHost.username, true); 
+          }
+        }
+        else { //owner
+          roomForDeletingUser.killRoom();        
         }
       }
-      else { //owner
-        roomForDeletingUser.killRoom();        
-      }
 
 
-      // echo globally that this client has left
-      socket.broadcast.emit('user left', {
-        username: ourHero.username,
-        chatname: roomForDeletingUser.name,
-        numUsers: _.size(people) - 1,
-        numUsersInChat: roomForDeletingUser.peopleNum
-      });
+
+      // // echo globally that this client has left
+      // socket.broadcast.emit('user left', {
+      //   username: ourHero.username,
+      //   chatname: roomForDeletingUser.name,
+      //   numUsers: _.size(people) - 1,
+      //   numUsersInChat: roomForDeletingUser.peopleNum
+      // });
       io.sockets.emit("update roomsList", rooms);
+      io.sockets.emit("update", "brother "+ourHero.username+" is no longer with us");
 
 
       people = _.without(people, ourHero);
