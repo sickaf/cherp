@@ -10,11 +10,16 @@ function Room(name, id, owner) {
   this.status = "available";
   this.private = false;
   this.addHost(owner);
+
+  owner.owns = this.id;
+  owner.hostof = this.id;
+  owner.inroom = this.id;
 };
 
 Room.prototype.addFan = function(fan) {
   if (this.status === "available") {
     fan.owns = null;
+    fan.hostof = null;
     fan.inroom = this.id;
     this.fans.push(fan);
     this.peopleNum++;
@@ -22,6 +27,7 @@ Room.prototype.addFan = function(fan) {
 };
 
 Room.prototype.killRoom = function() {
+  this.status = "archived";
 //DEATH
 };
 
@@ -52,9 +58,25 @@ Room.prototype.getFan = function(personID) {
 
 Room.prototype.addHost = function(host) {
   if (this.status === "available") {
-    host.owns = this.id;
+    host.owns = null;
+    host.hostof = this.id;
     host.inroom = this.id;
     this.hosts.push(host);
+    this.peopleNum++;
+  }
+};
+
+Room.prototype.addOwner = function(owner) {
+  if (this.status === "available") {
+    if(this.owner) {
+      console.error("TRIED TO ADD OWNER BUT OWNER ALREADY EXISTS");
+      return false;
+    }
+    host.owns = this.id;
+    host.hostof = this.id;
+    host.inroom = this.id;
+    this.hosts.push(host);
+    this.owner = owner;
     this.peopleNum++;
   }
 };
@@ -76,12 +98,26 @@ Room.prototype.removeHost = function(personID) {
   }
 };
 
+Room.prototype.removePerson = function(personID) {
+  if(this.getFan(personID)) {
+    this.removeFan(personID);
+  }
+  else if(this.getHost(personID)) {
+    this.removeHost(personID);
+  }
+  else {
+    console.error("COULDNT FIND THE PERSON TO REMOVE (room.js)");
+    return false;
+  }
+  return true;
+}
+
 Room.prototype.promoteFanToHost = function(personID) {
     var newHost = this.getFan(personID);
     this.addHost(newHost);
     this.removeFan(newHost.id);
     return newHost;
-};
+}
 
 
 Room.prototype.getHost = function(personID) {
@@ -97,7 +133,7 @@ Room.prototype.getHost = function(personID) {
 
 
 Room.prototype.isAvailable = function() {
-  if (this.available === "available") {
+  if (this.status === "available") {
     return true;
   } else {
     return false;

@@ -24,23 +24,23 @@ $(function() {
 
 
   $endChatButton.click(function () {
-    socket.emit('end chat', {});
+    socket.emit('kill room', {});
   });
 
   // Prompt for setting a username
   var username = user.username;
   $usernameTitle.append($('<a href="#">'+username+'</a>'));
 
-
-
   var chatname;
   var iAmHost = false;
+  var roomAvailable = false;
   var connected = false;
   var typing = false;
   var lastTypingTime;
   var $currentInput = $chatnameInput.focus();
 
   var socket = io();
+  // socket = io('/balls'); //namespace stuff
 
   $chatnamePage.show();
 
@@ -98,6 +98,9 @@ $(function() {
       $inputMessage.val('');
       
       socket.emit('new message', message);
+      
+      if(!roomAvailable) return;
+
       if(iAmHost) {
         addHostMessage({
           username: username,
@@ -413,6 +416,10 @@ $(function() {
     if(username == username) {
       iAmHost = bool;
     }
+  });
+
+  socket.on('set roomAvailable', function (bool) {
+    roomAvailable = bool;
   });
 
   // Whenever the server emits 'clear messages', update the chat body
