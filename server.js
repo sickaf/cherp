@@ -118,7 +118,6 @@ var sockets = [];
 
       //socket.broadcast.to(socket.room).emit("new host message", {
 
-
 function getPeopleList () {
   var toReturn = "";
   var first = true;
@@ -201,12 +200,14 @@ io.on('connection', function (socket) {
   if (socket.request.session) {
       if ("passport" in socket.request.session) {
           if ("user" in socket.request.session.passport) {
+            
             console.log('socket connecton from logged in twitter user');
             var authorizedUser = socket.request.session.passport.user;
             ourHeroID = authorizedUser;
-          };
-      };
-  };
+
+          } else {console.error("NO USER io.on connection");}
+      } else {console.error("NO PASSPORT io.on connection");}
+  } else {console.error("NO SESSION io.on connection");}
 
   if (!ourHeroID) {
     console.log('socket connecton from anon user, generating temp ID');
@@ -242,7 +243,6 @@ io.on('connection', function (socket) {
 
     if(ourHero.owns == socket.room) {
       io.sockets.in(socket.room).emit('new host message', fullMessage);
-      // getRoomWithName(socket.room).hostMessages.push(fullMessage);
       pushMessageToDB(getRoomWithID(socket.room).name, socket.room, fullMessage);
     }
     else  {
@@ -274,12 +274,16 @@ io.on('connection', function (socket) {
     if(ourHero.owns == socket.room) {
 
       var userToUpgrade = _.where(people, {username: username})[0];
-      var roomForUpgrade = getRoomWithID(ourHero.owns);
 
-      roomForUpgrade.promoteFanToHost(userToUpgrade.id);
-
-      socket.emit("update", "just made "+username+" a host.");
-      socket.broadcast.to(socket.room).emit("set iAmHost", username, true); 
+      if(userToUpgrade.owns == null ) {
+        var roomForUpgrade = getRoomWithID(ourHero.owns);
+        roomForUpgrade.promoteFanToHost(userToUpgrade.id);
+        socket.emit("update", "just made "+username+" a host.");
+        socket.broadcast.to(socket.room).emit("set iAmHost", username, true); 
+      }
+      else {
+        socket.emit("update", "that person is already a host hahahahahhahaha");
+      }
     }
     else {
       socket.emit("update", "ur not the host u cant upgrade people");
@@ -298,30 +302,9 @@ io.on('connection', function (socket) {
     }
   });
 
-  // // when the client emits 'add user', this listens and executes
-  // socket.on('add user', function (user) {
-
-  //   addedUser = true;
-  //   ourHero = { "id" : user.id,
-  //               "socketID" : socket.id, 
-  //               "username" : user.username, 
-  //               "owns" : null, 
-  //               "inroom": null};
-  //   people.push(ourHero);
-
-  //   socket.emit("update", "ourhero is "+JSON.stringify(ourHero));
-
-  //   //messaging
-  //   io.sockets.emit("update", ourHero.username + " is online.");
-  //   socket.emit('login', "Welcome to the world. You have connected to the server. People are: "+getPeopleList()); //sets connected = true
-    
-  //   sockets.push(socket);
-
-  //   });
-
   // when the client emits 'add username', this listens and executes
-  socket.on('add username', function (user) {
-    ourHero.username = user.username;
+  socket.on('set username', function (username) {
+    ourHero.username = username;
   });
 
   socket.on('enter chat', function (chatname) {
@@ -381,11 +364,18 @@ io.on('connection', function (socket) {
       }
     });
 
-    
-
     socket.broadcast.emit("update", ourHero.username+" is now in room "+chatname+". There are now "+_.size(rooms)+" rooms: "+getRoomList());
     io.sockets.emit("update roomsList", rooms);
 
+  });
+
+  socket.on('end chat', function (data) {
+    if(ourHero.owns == socket.room) {
+      socket.emit("update", ourHero.username + "wants to end the chat");
+    }
+    else {
+      socket.emit("update", "ur not the own omg freakin buzz off");
+    }
   });
 
   // when the client emits 'typing', we broadcast it to others

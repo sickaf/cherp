@@ -21,18 +21,9 @@ Room.prototype.addFan = function(fan) {
   }
 };
 
-// probably the better way to do it
-// Room.prototype.removeFan = function(person) {
-//   var fanIndex = -1;
-//   for(var i = 0; i < this.fans.length; i++){
-//     if(this.fans[i].id === person.id){
-//       fanIndex = i;
-//       break;
-//     }
-//   }
-//   this.fans.remove(fanIndex);
-//   this.peopleNum--;
-// };
+Room.prototype.killRoom = function() {
+//DEATH
+};
 
 Room.prototype.removeFan = function(personID) {
   var fanIndex = -1;
@@ -44,7 +35,6 @@ Room.prototype.removeFan = function(personID) {
   }
   // this.fans.remove(fanIndex);
   this.fans.splice(fanIndex,1);
-
   this.peopleNum--;
 };
 
