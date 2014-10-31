@@ -333,7 +333,7 @@ io.on('connection', function (socket) {
 
     //LETS DO THIS
     //socket.emit("clear messages", {});
-
+    
     socket.emit("update", "ourHero ("+ourHero.username + ") wants to enter chat: "+chatname);
 
     if (ourHero.inroom) {
