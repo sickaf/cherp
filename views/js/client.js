@@ -25,7 +25,6 @@ $(function() {
 
   $endChatButton.click(function () {
     socket.emit('end chat', {});
-    log("clicked end chat");
   });
 
   // Prompt for setting a username

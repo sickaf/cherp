@@ -197,16 +197,17 @@ io.on('connection', function (socket) {
   console.log(socket.request.session);
 
   var ourHeroID;
-  // if (socket.request.session) {
-  if (false) {
+  if (socket.request.session) {
       if ("passport" in socket.request.session) {
           if ("user" in socket.request.session.passport) {
+            
             console.log('socket connecton from logged in twitter user');
             var authorizedUser = socket.request.session.passport.user;
             ourHeroID = authorizedUser;
-          };
-      };
-  };
+
+          } else {console.error("NO USER io.on connection");}
+      } else {console.error("NO PASSPORT io.on connection");}
+  } else {console.error("NO SESSION io.on connection");}
 
   if (!ourHeroID) {
     console.log('socket connecton from anon user, generating temp ID');
