@@ -12,25 +12,40 @@ $(function() {
 
   // Initialize varibles
   var $window = $(window);
-  var $hostMessages = $('#hostMessages'); // host messages area
-  var $fanMessages = $('#fanMessages'); // fan messages area
-  var $inputMessage = $('#chat_input'); // Input message input box
-  var $sendButton = $('#send_button');
-  var $chatRoomField = $('#chat-room-field');
+  var $chatnameInput = $('.chatnameInput'); // Input for chatname
+  var $hostMessages = $('.hostMessages'); // host messages area
+  var $fanMessages = $('.fanMessages'); // fan messages area
+  var $inputMessage = $('.inputMessage'); // Input message input box
+  var $chatnamePage = $('.chatname.page'); // The login page
+  var $chatPage = $('.chat.page'); // The chatroom page
+  var $roomsList = $('.roomsList'); // 
+  var $usernameTitle = $('.usernameTitle'); // 
+  var $endChatButton = $('.endChatButton'); // 
+
+
+  $endChatButton.click(function () {
+    socket.emit('end chat', {});
+  });
 
   // Prompt for setting a username
   var username = user.username;
+  $usernameTitle.append($('<a href="#">'+username+'</a>'));
+
+
+
   var chatname;
   var iAmHost = false;
   var connected = false;
   var typing = false;
   var lastTypingTime;
+  var $currentInput = $chatnameInput.focus();
 
   var socket = io();
 
-  socket.emit('add username', user);
+  $chatnamePage.show();
 
-  setChatname('default');
+  // socket.emit('add user', user);
+  socket.emit('set username', username);
 
   //someone needs to get rid of this dumb function
   function addParticipantsMessage (data) {
@@ -58,17 +73,30 @@ $(function() {
   }
 
   // Sets the chatname
-  function setChatname (name) {
+  function setChatname () {
+
+    chatname = cleanInput($chatnameInput.val().trim());
+
+    // If the username is valid
+    if (chatname) {
+      $chatnamePage.fadeOut();
+      $chatPage.show();
+      $chatnamePage.off('click');
+
       // Tell the server your chatname
-      socket.emit('enter chat', name);
+      socket.emit('enter chat', chatname);
+    }
   }
 
   // Sends a chat message
-  function sendMessage (message) {
+  function sendMessage () {
+    var message = $inputMessage.val();
     // Prevent markup from being injected into the message
     message = cleanInput(message);
     // if there is a non-empty message and a socket connection
-    if (message && connected) {      
+    if (message && connected) {
+      $inputMessage.val('');
+      
       socket.emit('new message', message);
       if(iAmHost) {
         addHostMessage({
@@ -84,20 +112,31 @@ $(function() {
     }
   }
 
-  // helper function for sending whatever is in the text field and for clearing it
-  function sendTextFieldMessage() {
-    sendMessage($inputMessage.val());
-    socket.emit('stop typing');
-    typing = false;
-    $inputMessage.val('');
-    $inputMessage.focus();
-  }
-
   // Log a message
   function log (message, options) {
-    var $el = $('<li class="list-group-item list-group-item-info log-message">').addClass('log').text(message);
+    var $el = $('<li>').addClass('log').text(message);
     addMessageElement($el, options);
   }
+
+  function clearMessages () {
+    $hostMessages.html("");
+    $fanMessages.html("");
+  }
+
+
+  function updateRoomsList (data, options) {
+    $roomsList.html("");
+    
+    for (var i = 0; i <data.length; i++) {
+      var room = data[i];
+      var $roomDiv = $('<li><a href="#">'+room.name+' ('+room.peopleNum+')</a></li>');
+      $roomDiv.click(function () {
+        socket.emit('enter chat', room.name);
+      });
+      $roomsList.append($roomDiv);
+    }
+  }
+
 
   // Adds the visual chat message to the message list
   function addHostMessage (data, options) {
@@ -127,7 +166,7 @@ $(function() {
     var typingClass = data.typing ? 'typing' : '';
     var repostClass = data.repost ? 'repost' : '';
 
-    var $messageDiv = $('<li class="list-group-item message"/>')
+    var $messageDiv = $('<li class="message"/>')
       .data('username', data.username)
       .addClass(typingClass)
       .addClass(repostClass)
@@ -140,7 +179,7 @@ $(function() {
   function addFanMessage (data, options) {
 
     var $usernameDiv = $('<span class="username"/>')
-      .text(data.username + ': ')
+      .text(data.username)
       .css('color', getUsernameColor(data.username));
     
     //set up a listener so that if the host clicks this div they will become the host
@@ -160,7 +199,7 @@ $(function() {
       }
     });
 
-    var $messageDiv = $('<li class="list-group-item message"/>')
+    var $messageDiv = $('<li class="message"/>')
       .data('username', data.username)
       .append($usernameDiv, $messageBodyDiv);
 
@@ -298,6 +337,7 @@ $(function() {
     return copy;
 }
 
+
   ///////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////
   ///////                                                  //////
@@ -306,30 +346,40 @@ $(function() {
   ///////                                                  //////
   ///////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////
+  $(function () {
+    $('#imagefile').bind('change', function(e){
+      var data = e.originalEvent.target.files[0];
+      var reader = new FileReader();
+      reader.onload = function(evt){
+          socket.emit('new image', evt.target.result);
+      };
+      reader.readAsDataURL(data);
+    });
+  });
+  ///////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////
 
-  $('#choose_image').click(function() {
-    alert('not implemented yet sorry');
-    return false;
-  })
-  ///////////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////
 
   // Keyboard events
 
   $window.keydown(function (event) {
     // Auto-focus the current input when a key is typed
     if (!(event.ctrlKey || event.metaKey || event.altKey)) {
-      // $inputMessage.focus();
+      $currentInput.focus();
     }
-
     // When the client hits ENTER on their keyboard
     if (event.which === 13) {
-      if ($chatRoomField.val()) {
-        var newChatRoomName = $chatRoomField.val();
-        setChatname(newChatRoomName);
+
+      //if the chatname is already set, we're good to go
+      if (chatname) {
+        sendMessage();
+        socket.emit('stop typing');
+        typing = false;
       }
+      //okay, the user has set a username, but hasn't chosen a chat, do that
       else {
-        sendTextFieldMessage();
+        setChatname();
+        $currentInput = $inputMessage.focus();
       }
     }
   });
@@ -339,27 +389,19 @@ $(function() {
   });
 
   // Click events
-  $sendButton.click(function() {
-    sendTextFieldMessage();
+
+  // Focus input when clicking on the message input's border
+  $inputMessage.click(function () {
+    $inputMessage.focus();
   });
+  
+
+  // Socket events
 
   // Whenever the server emits 'login', log the login message
   socket.on('login', function (data) {
     connected = true;
     log(data);
-  });
-
-
-  ///////////////////////////////////////////////////////////////
-  ///////                                                  //////
-  ///////  add messages from the database                  //////
-  ///////  THIS NEEDS TO BE UPDATED TO NOT BE SO SHITTY    //////
-  ///////                                                  //////
-  ///////////////////////////////////////////////////////////////
-  socket.on('add database messages', function(data) {
-    for (var i = 0; i < data.length; i++) {
-      addFanMessage(data[i]);
-    }
   });
 
   // Whenever the server emits 'new message', update the chat body
@@ -373,9 +415,26 @@ $(function() {
     }
   });
 
+  // Whenever the server emits 'clear messages', update the chat body
+  socket.on('clear messages', function (data) {
+    clearMessages();
+  });
+
   // Whenever the server emits 'new message', update the chat body
   socket.on('new host message', function (data) {
     addHostMessage(data);
+  });
+
+  // Whenever the server emits 'new message', update the chat body
+  socket.on('add database messages', function (data) {
+    for(var i = 0; i < data.length; i++) {
+      addHostMessage(data[i]);
+    }
+  });
+
+   // Whenever the server emits 'new message', update the chat body
+  socket.on('update roomsList', function (data) {
+    updateRoomsList(data);
   });
 
   // Whenever the server emits 'new fan message', update the chat body
@@ -395,7 +454,7 @@ $(function() {
 
   // Whenever the server emits 'user left', log it in the chat body
   socket.on('user left', function (data) {
-    log(data.username + ' left. they were in chatroom: '+data.chatname+". There are "+data.numUsers+" left, and "+data.numUsersInChat+" left in chatroom: "+data.chatname);
+    log(data.username + ' left. they were in chatroom: '+data.chatname+". "+data.numUsers+" left, and "+data.numUsersInChat+" left in chatroom: "+data.chatname);
     removeHostTyping(data); //data must include data.username
   });
 
