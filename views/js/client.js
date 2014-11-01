@@ -35,12 +35,12 @@ $(function() {
 
   // // sets correct chat name
   // setChatname('bieberfans');
-  socket.emit('join trending chat', {});
+  socket.emit('join trending chat', null);
 
 
   $('#create-room-button').click(function() {
       console.log("createroombutton pressed");
-      socket.emit('enter chat with id', {});
+      socket.emit('enter chat with id', null);
   });
 
   //someone needs to get rid of this dumb function

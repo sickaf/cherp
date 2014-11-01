@@ -424,7 +424,7 @@ io.on('connection', function (socket) {
     //LETS DO THIS
     socket.emit("clear messages", {});
     
-    socket.emit("update", "you ("+ourHero.username + ") want to enter chat with id: "+id);
+    socket.emit("update", "you ("+ourHero.username + ") want to enter chat with id: "+JSON.stringify(id));
    
     if (ourHero.inroom) {
       socket.emit("update", "You are already in a room.  Going to remove you from room "+ourHero.inroom);
