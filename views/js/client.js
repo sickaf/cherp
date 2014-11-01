@@ -33,19 +33,15 @@ $(function() {
   // socket.emit('add user', user);
   socket.emit('set username', username);
 
-  // sets correct chat name
-  setChatname('bieberfans');
+  // // sets correct chat name
+  // setChatname('bieberfans');
+  socket.emit('join trending chat', {});
 
-  $('#create-room-button').click(function(e) {
-      // joinRoomButtonPressed();
+
+  $('#create-room-button').click(function() {
       console.log("createroombutton pressed");
       socket.emit('enter chat with id', {});
-      e.preventDefault(); //keep the page from refreshing
   });
-
-  function joinRoomButtonPressed(){
-    socket.emit('enter chat', $('.joinRoomText').val().trim());
-  }
 
   //someone needs to get rid of this dumb function
   function addParticipantsMessage (data) {
@@ -83,12 +79,19 @@ $(function() {
   function addRoomToRoomsList(room){
     var $roomDiv = $('<li><a href="#">'+room.name+' ('+room.peopleNum+')</a></li>');
     $roomDiv.click(function () {
-      socket.emit('enter chat', room.name);
+      socket.emit('enter chat with id', room.id);
     });
     $trendingRoomsDiv.append($roomDiv);
   }
 
   // Sets the chatname
+  /*
+  * 
+  * 
+  * DEPRECATED
+  * 
+  * 
+  */
   function setChatname (name) {
       // Tell the server your chatname
       socket.emit('enter chat', name);
@@ -366,7 +369,7 @@ $(function() {
   $window.keydown(function (event) {
     // Auto-focus the current input when a key is typed
     if (!(event.ctrlKey || event.metaKey || event.altKey)) {
-      // $inputMessage.focus();
+      $inputMessage.focus();
     }
 
     // When the client hits ENTER on their keyboard

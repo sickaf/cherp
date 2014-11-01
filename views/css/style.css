@@ -20,6 +20,8 @@ body {
 .message.repost {
   margin-left: 30px;
   padding-left: 15px;
+  margin-top: 5px;
+  margin-bottom: 5px;
   border-left: 3px solid #ccc;
 }
 

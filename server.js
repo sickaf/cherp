@@ -240,6 +240,11 @@ io.on('connection', function (socket) {
 
   //Received an image: broadcast to all
   socket.on('new image', function (data) {
+    if(!getRoomWithID(socket.room)){
+      socket.emit("update", "ur not in a chatroom buddy.  go live or join one from the left if any exist.");
+      return;
+    }
+
     var fullMessage = {
       username: ourHero.username,
       base64Image: data,
@@ -261,6 +266,10 @@ io.on('connection', function (socket) {
 
   // when the client emits 'new host message', this listens and executes
   socket.on('new message', function (data) {
+    if(!getRoomWithID(socket.room)){
+      socket.emit("update", "ur not in a chatroom buddy.  go live or join one from the left if any exist.");
+      return;
+    }
 
     if(!getRoomWithID(socket.room).isAvailable()){
       socket.emit("update", "THIS ROOM IS FUCKING ARCHIVED lol i think at least dont quote me on anything");
@@ -387,8 +396,21 @@ io.on('connection', function (socket) {
     io.sockets.emit("update roomsList", rooms);
 
   });
+  
+  socket.on('join trending chat', function (data) {
+    if(rooms.length > 0) {
+      enterChatWithId(rooms[0].id);
+    } else  {
+      console.log("TRIED TO JOIN TRENDING CHAT BUT AINT NO ROOMS");
+    }
+  });
 
-  socket.on('enter chat with id', function (idParam) {
+
+  socket.on('enter chat with id', function (id) {
+    enterChatWithId(id);
+  });
+
+  function enterChatWithId(idParam) {
     var id = idParam;
     if (!id) {
       id = ourHero.id;
@@ -452,7 +474,7 @@ io.on('connection', function (socket) {
     socket.broadcast.emit("update", ourHero.username+" is now in room "+getRoomWithID(id).name+". There are now "+_.size(rooms)+" rooms: "+getRoomList());
     io.sockets.emit("update roomsList", rooms);
 
-  });
+  }
 
 
   socket.on('kill room', function (data) {
