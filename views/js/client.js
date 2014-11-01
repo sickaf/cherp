@@ -277,6 +277,12 @@ $(function() {
     $fanMessages[0].scrollTop = $fanMessages[0].scrollHeight;
   }
 
+  // Adds the visual chat typing message
+  function addHostTyping (data) {
+    data.typing = true;
+    data.message = 'is typing';
+    addHostMessage(data);
+  }
 
   // Removes the visual chat typing message
   function removeHostTyping (data) {
