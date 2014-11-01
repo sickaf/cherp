@@ -18,6 +18,7 @@ $(function() {
   var $sendButton = $('#send_button');
   var $chatRoomField = $('#chat-room-field');
   var $trendingRoomsDiv = $('#trending-rooms');
+  var $createRoomButton = $('#create-room-button');
 
   // Prompt for setting a username
   var username = user.username;
@@ -34,6 +35,17 @@ $(function() {
 
   // sets correct chat name
   setChatname('bieberfans');
+
+  $('#create-room-button').click(function(e) {
+      // joinRoomButtonPressed();
+      console.log("createroombutton pressed");
+      socket.emit('enter chat with id', {});
+      e.preventDefault(); //keep the page from refreshing
+  });
+
+  function joinRoomButtonPressed(){
+    socket.emit('enter chat', $('.joinRoomText').val().trim());
+  }
 
   //someone needs to get rid of this dumb function
   function addParticipantsMessage (data) {
