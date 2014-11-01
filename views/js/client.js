@@ -19,6 +19,8 @@ $(function() {
   var $chatRoomField = $('#chat-room-field');
   var $trendingRoomsDiv = $('#trending-rooms');
   var $createRoomButton = $('#create-room-button');
+  var $hostLabel = $("#host-label");
+  var $membersLabel = $("members-label");
 
   // Prompt for setting a username
   var username = user.username;
