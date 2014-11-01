@@ -22,30 +22,47 @@ $(function() {
   var $usernameTitle = $('.usernameTitle'); // 
   var $endChatButton = $('.endChatButton'); // 
 
-
   $endChatButton.click(function () {
-    socket.emit('end chat', {});
+    socket.emit('kill room', {});
   });
 
   // Prompt for setting a username
   var username = user.username;
   $usernameTitle.append($('<a href="#">'+username+'</a>'));
 
-
-
-  var chatname;
+  var chatname = "bieberfans";
   var iAmHost = false;
+  var roomAvailable = false;
   var connected = false;
   var typing = false;
   var lastTypingTime;
-  var $currentInput = $chatnameInput.focus();
+  // var $currentInput = $inputMessage.focus();
 
   var socket = io();
+  // socket = io('/balls'); //namespace stuff
 
-  $chatnamePage.show();
+  // $chatnamePage.show();
+  $chatPage.show();
+
+  var $currentInput = $inputMessage.focus();
+
+
 
   // socket.emit('add user', user);
   socket.emit('set username', username);
+
+  socket.emit('enter chat', chatname);
+
+
+
+  $('.joinRoomForm').submit(function(e) {
+      joinRoomButtonPressed();
+      e.preventDefault(); //keep the page from refreshing
+  });
+
+  function joinRoomButtonPressed(){
+    socket.emit('enter chat', $('.joinRoomText').val().trim());
+  }
 
   //someone needs to get rid of this dumb function
   function addParticipantsMessage (data) {
@@ -56,7 +73,7 @@ $(function() {
     if (data.numUsers === 1) {
       iAmHost = true;
       message += "you're the host";
-      log(message)
+      log(message);
     } 
   }
 
@@ -68,7 +85,7 @@ $(function() {
     if (data.numUsers === 1) {
       iAmHost = true;
       message += "you're the host";
-      log(message)
+      log(message);
     } 
   }
 
@@ -98,6 +115,9 @@ $(function() {
       $inputMessage.val('');
       
       socket.emit('new message', message);
+      
+      if(!roomAvailable) return;
+
       if(iAmHost) {
         addHostMessage({
           username: username,
@@ -126,17 +146,28 @@ $(function() {
 
   function updateRoomsList (data, options) {
     $roomsList.html("");
-    
     for (var i = 0; i <data.length; i++) {
-      var room = data[i];
-      var $roomDiv = $('<li><a href="#">'+room.name+' ('+room.peopleNum+')</a></li>');
-      $roomDiv.click(function () {
-        socket.emit('enter chat', room.name);
-      });
-      $roomsList.append($roomDiv);
+      addRoomToRoomsList(data[i]);
     }
   }
 
+  function addRoomToRoomsList(room){
+    var $roomDiv = $('<li><a href="#">'+room.name+' ('+room.peopleNum+')</a></li>');
+    $roomDiv.click(function () {
+      socket.emit('enter chat', room.name);
+    });
+    $roomsList.append($roomDiv);
+  }
+
+  // Adds link html around hyperlinks 
+  function linkify(text) {
+    var urlRegex = /(((https?:\/\/)|(www\.))[^\s]+)/g;
+    //var urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.replace(urlRegex, function(url,b,c) {
+        var url2 = (c == 'www.') ?  'http://' +url : url;
+        return '<a href="' +url2+ '" target="_blank">' + url + '</a>';
+    }) 
+  } 
 
   // Adds the visual chat message to the message list
   function addHostMessage (data, options) {
@@ -159,8 +190,10 @@ $(function() {
       $messageBodyDiv = $('<span class="messageBody">')
       .append('<img src="' + data.base64Image + '"/>');
     } else {
+      var messageText = linkify(data.message);
       $messageBodyDiv = $('<span class="messageBody">')
-      .text(data.message);
+      .append(messageText);
+
     }
 
     var typingClass = data.typing ? 'typing' : '';
@@ -187,8 +220,9 @@ $(function() {
       socket.emit('make host', data.username);
     });
 
-    var $messageBodyDiv = $('<span class="messageBody">')
-      .text(data.message);
+    var messageText = linkify(data.message);
+    $messageBodyDiv = $('<span class="messageBody">')
+      .append(messageText);
 
     //set up a listener so that if the host clicks this div itll get forwarded
     $messageBodyDiv.click(function () {
@@ -364,9 +398,10 @@ $(function() {
 
   $window.keydown(function (event) {
     // Auto-focus the current input when a key is typed
-    if (!(event.ctrlKey || event.metaKey || event.altKey)) {
-      $currentInput.focus();
-    }
+    // if (!(event.ctrlKey || event.metaKey || event.altKey)) {
+    //   $currentInput.focus();
+    // }
+
     // When the client hits ENTER on their keyboard
     if (event.which === 13) {
 
@@ -413,6 +448,10 @@ $(function() {
     if(username == username) {
       iAmHost = bool;
     }
+  });
+
+  socket.on('set roomAvailable', function (bool) {
+    roomAvailable = bool;
   });
 
   // Whenever the server emits 'clear messages', update the chat body

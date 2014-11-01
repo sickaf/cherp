@@ -30,12 +30,9 @@
             </div>
 
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-              <form class="navbar-form navbar-left" role="search">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="chat-room-field" placeholder="Enter room name">
-                </div>
-                <button type="submit" class="btn btn-default">Join</button>
-              </form>
+              <div class="navbar-form navbar-left" role="search">
+                  <button type="button" class="btn btn-success send-button" id="host_button">New</button>
+              </div>
               <ul class="nav navbar-nav navbar-right">
                 <li class="dropdown">
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown">Signed in as <%= user.username %> <span class="caret"></span></a>
@@ -52,16 +49,12 @@
           <div class="col-md-2"> <!-- Left column -->
 
             <div class="row trending-rooms"> <!-- Trending rooms row -->
-              <h4>Trending Rooms</h4>
+              <h4>Trending Conversations</h4>
               <li>Fart</li>
               <li>Weed</li>
               <li>Snowboarding</li>
               <li>Drugs</li>
               <li>Farting</li>
-            </div>
-
-            <div class="row trending-users"> <!-- Trending users row -->
-              <h4>Trending Users</h4>
               <li>codyk</li>
               <li>gubbs</li>
               <li>dev</li>
