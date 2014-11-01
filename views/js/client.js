@@ -80,6 +80,7 @@ $(function() {
     var $roomDiv = $('<li><a href="#">'+room.name+' ('+room.peopleNum+')</a></li>');
     $roomDiv.click(function () {
       socket.emit('enter chat with id', room.id);
+      return false;
     });
     $trendingRoomsDiv.append($roomDiv);
   }
