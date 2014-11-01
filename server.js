@@ -249,10 +249,6 @@ io.on('connection', function (socket) {
       base64Image: data,
       image: true
     };
-    if(!getRoomWithID(socket.room).isAvailable()){
-      socket.emit("update", "THIS ROOM IS FUCKING ARCHIVED lol i think at least");
-      return;
-    }
 
     if(ourHero.hostof == socket.room) {
       io.sockets.in(socket.room).emit('new host message', fullMessage);
@@ -267,11 +263,6 @@ io.on('connection', function (socket) {
   socket.on('new message', function (data) {
     if(!getRoomWithID(socket.room)){
       socket.emit("update", "ur not in a chatroom buddy.  go live or join one from the left if any exist.");
-      return;
-    }
-
-    if(!getRoomWithID(socket.room).isAvailable()){
-      socket.emit("update", "THIS ROOM IS FUCKING ARCHIVED lol i think at least dont quote me on anything");
       return;
     }
 
@@ -302,6 +293,7 @@ io.on('connection', function (socket) {
         roomForUpgrade.promoteFanToHost(userToUpgrade.id);
         socket.emit("update", "just made "+username+" a host.");
         socket.broadcast.to(socket.room).emit("set iAmHost", username, true);
+        io.to(socket.room).emit("update room metadata", roomForUpgrade);
       }
       else {
         socket.emit("update", "that person is already a host hahahahahhahaha");
@@ -363,7 +355,9 @@ io.on('connection', function (socket) {
     
     socket.emit("update", "you ("+ourHero.username + ") want to enter chat with id: "+JSON.stringify(id));
    
+    var oldRoom = null;
     if (ourHero.inroom) {
+      oldRoom = getRoomWithID(ourHero.inroom);
       socket.emit("update", "You are already in a room.  Going to remove you from room "+ourHero.inroom);
       getRoomWithID(ourHero.inroom).removePerson(ourHero.id);
     }
@@ -408,7 +402,9 @@ io.on('connection', function (socket) {
     socket.emit("set currentlyInRoom", true); //tell the client whats really good
     socket.broadcast.emit("update", ourHero.username+" is now in room "+getRoomWithID(id).name+". There are now "+_.size(rooms)+" rooms: "+getRoomList());
     io.sockets.emit("update roomsList", rooms);
-    io.to(socket.room).emit("update room peopleNum", getRoomWithID(id).peopleNum);
+
+    io.to(oldRoom.id).emit("update room metadata", oldRoom;
+    io.to(socket.room).emit("update room metadata", getRoomWithID(id));
 
   }
 
@@ -462,7 +458,7 @@ io.on('connection', function (socket) {
           console.log(ourHero.username+" was just a HOST so going to remove them from the room");
           roomForDeletingUser.removeHost(ourHero.id);
         }
-        io.to(socket.room).emit("update room peopleNum", roomForDeletingUser.peopleNum);
+        io.to(socket.room).emit("update room metadata", roomForDeletingUser);
 
         else { //owner
           // var newOwner = roomForDeletingUser.removeOwner(ourHero.id);

@@ -9,11 +9,7 @@ function Room(name, id, owner) {
   this.peopleNum = 0;
   this.status = "available";
   this.private = false;
-  this.addHost(owner);
-
-  owner.owns = this.id;
-  owner.hostof = this.id;
-  owner.inroom = this.id;
+  this.addOwner(owner);
 };
 
 Room.prototype.addFan = function(fan) {
@@ -72,6 +68,8 @@ Room.prototype.addHost = function(host) {
     this.peopleNum++;
   }
 };
+
+
 
 Room.prototype.addOwner = function(owner) {
   if (this.status === "available") {
@@ -172,6 +170,16 @@ Room.prototype.getHost = function(personID) {
     }
   }
   return host;
+};
+
+Room.prototype.getHostList = function() {
+  var toRet = this.owner.username;
+  for(var i = 0; i < this.hosts.length-1; i++) {
+      toRet += this.hosts[i].username+", ";
+    }
+  }
+  toRet += this.hosts[this.hosts.length-1];
+  return toRet;
 };
 
 
