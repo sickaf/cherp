@@ -517,10 +517,10 @@ io.on('connection', function (socket) {
       io.sockets.emit("update", "brother "+ourHero.username+" is no longer with us");
 
 
-      people = _.without(people, ourHero);
-      delete ourHero;
+    //   people = _.without(people, ourHero);
+    //   delete ourHero;
 
-    }
+     }
   });
 });
 

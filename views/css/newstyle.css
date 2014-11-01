@@ -1,0 +1,39 @@
+/*[class*="col-"] {
+  padding-top: 15px;
+  padding-bottom: 15px;
+}*/
+
+body {
+	padding-top: 10px;
+}
+
+#hostMessages, #fanMessages {
+	height:500px;
+    border: 3px solid #ddd;
+    -webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	margin: 0;
+	overflow-y: scroll;
+}
+
+.text-input {
+	padding-top: 20px;
+}
+
+.send-button {
+	width:100px;
+}
+
+.trending-users {
+	padding-top: 20px;
+}
+
+/* makes it so that list items break words to new line if they're too long */
+li {
+	word-wrap: break-word;
+}
+
+.log-message {
+	font-size: 12px;
+}
