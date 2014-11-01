@@ -22,6 +22,7 @@ $(function() {
   var $usernameTitle = $('.usernameTitle'); // 
   var $endChatButton = $('.endChatButton'); // 
 
+
   $endChatButton.click(function () {
     socket.emit('kill room', {});
   });
@@ -30,39 +31,21 @@ $(function() {
   var username = user.username;
   $usernameTitle.append($('<a href="#">'+username+'</a>'));
 
-  var chatname = "bieberfans";
+  var chatname;
   var iAmHost = false;
   var roomAvailable = false;
   var connected = false;
   var typing = false;
   var lastTypingTime;
-  // var $currentInput = $inputMessage.focus();
+  var $currentInput = $chatnameInput.focus();
 
   var socket = io();
   // socket = io('/balls'); //namespace stuff
 
-  // $chatnamePage.show();
-  $chatPage.show();
-
-  var $currentInput = $inputMessage.focus();
-
-
+  $chatnamePage.show();
 
   // socket.emit('add user', user);
   socket.emit('set username', username);
-
-  socket.emit('enter chat', chatname);
-
-
-
-  $('.joinRoomForm').submit(function(e) {
-      joinRoomButtonPressed();
-      e.preventDefault(); //keep the page from refreshing
-  });
-
-  function joinRoomButtonPressed(){
-    socket.emit('enter chat', $('.joinRoomText').val().trim());
-  }
 
   //someone needs to get rid of this dumb function
   function addParticipantsMessage (data) {
@@ -73,7 +56,7 @@ $(function() {
     if (data.numUsers === 1) {
       iAmHost = true;
       message += "you're the host";
-      log(message);
+      log(message)
     } 
   }
 
@@ -85,7 +68,7 @@ $(function() {
     if (data.numUsers === 1) {
       iAmHost = true;
       message += "you're the host";
-      log(message);
+      log(message)
     } 
   }
 
@@ -151,6 +134,7 @@ $(function() {
     }
   }
 
+
   function addRoomToRoomsList(room){
     var $roomDiv = $('<li><a href="#">'+room.name+' ('+room.peopleNum+')</a></li>');
     $roomDiv.click(function () {
@@ -159,13 +143,59 @@ $(function() {
     $roomsList.append($roomDiv);
   }
 
+
+  function getHostName(url) {
+    var match = url.match(/:\/\/(www[0-9]?\.)?(.[^/:]+)/i);
+    if (match != null && match.length > 2 &&
+        typeof match[2] === 'string' && match[2].length > 0) {
+    return match[2];
+    }
+    else {
+        return null;
+    }
+  }
+
+  function getDomain(url) {
+    var hostName = getHostName(url);
+    var domain = hostName;
+    
+    if (hostName != null) {
+        var parts = hostName.split('.').reverse();
+        
+      if (parts != null && parts.length > 1) {
+          domain = parts[1] + '.' + parts[0];
+            
+         if (hostName.toLowerCase().indexOf('.co.uk') != -1
+                 && parts.length > 2) {
+           domain = parts[2] + '.' + domain;
+         }
+      }
+    }
+    return domain;
+  }
+
+  //Creates the embed code from a url
+  function youtubify(url){
+    return '//www.youtube.com/embed/' + url.substring(url.indexOf('v=')+2);
+  }
+
   // Adds link html around hyperlinks 
-  function linkify(text) {
+  function linkify(text, amIHost) {
     var urlRegex = /(((https?:\/\/)|(www\.))[^\s]+)/g;
-    //var urlRegex = /(https?:\/\/[^\s]+)/g;
     return text.replace(urlRegex, function(url,b,c) {
-        var url2 = (c == 'www.') ?  'http://' +url : url;
-        return '<a href="' +url2+ '" target="_blank">' + url + '</a>';
+        var fullURL = (c == 'www.') ?  'http://' +url : url;
+
+        if (amIHost){
+
+          if (getHostName(fullURL) == 'youtube.com'){
+            return '<iframe width="420" height="315" src="'+ youtubify(fullURL) + '" frameborder="0" allowfullscreen></iframe>';
+          }
+
+          else if (getDomain(fullURL) == "imgur.com"){
+            return '<a class="embedly-card" href="' + fullURL + '" </a> <script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>';
+          }
+       } 
+      return '<a href="' +fullURL+ '" target="_blank">' + url + '</a>';
     }) 
   } 
 
@@ -190,7 +220,7 @@ $(function() {
       $messageBodyDiv = $('<span class="messageBody">')
       .append('<img src="' + data.base64Image + '"/>');
     } else {
-      var messageText = linkify(data.message);
+      var messageText = linkify(data.message, true);
       $messageBodyDiv = $('<span class="messageBody">')
       .append(messageText);
 
@@ -219,10 +249,13 @@ $(function() {
     $usernameDiv.click(function () {
       socket.emit('make host', data.username);
     });
+    
 
-    var messageText = linkify(data.message);
+    var messageText = linkify(data.message, false);
     $messageBodyDiv = $('<span class="messageBody">')
       .append(messageText);
+
+
 
     //set up a listener so that if the host clicks this div itll get forwarded
     $messageBodyDiv.click(function () {
@@ -398,10 +431,9 @@ $(function() {
 
   $window.keydown(function (event) {
     // Auto-focus the current input when a key is typed
-    // if (!(event.ctrlKey || event.metaKey || event.altKey)) {
-    //   $currentInput.focus();
-    // }
-
+    if (!(event.ctrlKey || event.metaKey || event.altKey)) {
+      $currentInput.focus();
+    }
     // When the client hits ENTER on their keyboard
     if (event.which === 13) {
 

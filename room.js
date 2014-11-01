@@ -68,7 +68,7 @@ Room.prototype.addHost = function(host) {
 Room.prototype.addOwner = function(owner) {
   if (this.status === "available") {
     if(this.owner) {
-      console.error("TRIED TO ADD OWNER BUT OWNER ALREADY EXISTS");
+      console.error("TRIED TO ADD OWNER ("+owner.username+") BUT OWNER ALREADY EXISTS ("+this.owner.username+")");
       return false;
     }
     owner.owns = this.id;
@@ -99,16 +99,20 @@ Room.prototype.removeHost = function(personID) {
 Room.prototype.removeOwner = function(personID) {
   this.owner = null;
   this.peopleNum--;
+  console.log("removing owner from room. peopleNum will be "+this.peopleNum);
+  if(this.peopleNum) { 
+      console.log("peopleNum returned true");
+  }
 
   //promote a fan if there are no hosts
   if(this.peopleNum) { 
     var newOwner;
     if(this.hosts.length > 0){
-      newOwner = this.getHost(this.hosts[0].id);
+      newOwner = this.hosts[0];
       this.addOwner(newOwner);
       this.removeHost(newOwner.id);
     } else {
-      newOwner = this.getFan(this.fans[0].id);
+      newOwner = this.fans[0];
       this.addOwner(newOwner);
       this.removeFan(newOwner.id);
     }
