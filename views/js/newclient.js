@@ -31,7 +31,8 @@ $(function() {
   // socket.emit('add user', user);
   socket.emit('set username', username);
 
-  socket.emit('enter chat', 'bieberfans');
+  // sets correct chat name
+  setChatname('bieberfans');
 
   //someone needs to get rid of this dumb function
   function addParticipantsMessage (data) {
@@ -65,12 +66,18 @@ $(function() {
   }
 
   // Sends a chat message
-  function sendMessage (message) {
+  function sendMessage () {
+    var message = $inputMessage.val();
     // Prevent markup from being injected into the message
     message = cleanInput(message);
     // if there is a non-empty message and a socket connection
-    if (message && connected) {      
+    if (message && connected) {
+      $inputMessage.val('');
+      
       socket.emit('new message', message);
+      
+      if(!roomAvailable) return;
+
       if(iAmHost) {
         addHostMessage({
           username: username,
@@ -85,6 +92,17 @@ $(function() {
     }
   }
 
+  // Log a message
+  function log (message, options) {
+    var $el = $('<li class="list-group-item list-group-item-info log-message">').addClass('log').text(message);
+    addMessageElement($el, options);
+  }
+
+  function clearMessages () {
+    $hostMessages.html("");
+    $fanMessages.html("");
+  }
+
   // helper function for sending whatever is in the text field and for clearing it
   function sendTextFieldMessage() {
     sendMessage($inputMessage.val());
@@ -92,12 +110,6 @@ $(function() {
     typing = false;
     $inputMessage.val('');
     $inputMessage.focus();
-  }
-
-  // Log a message
-  function log (message, options) {
-    var $el = $('<li class="list-group-item list-group-item-info log-message">').addClass('log').text(message);
-    addMessageElement($el, options);
   }
 
   // Adds the visual chat message to the message list
@@ -233,13 +245,6 @@ $(function() {
   }
 
 
-  // Adds the visual chat typing message
-  function addHostTyping (data) {
-    data.typing = true;
-    data.message = 'is typing';
-    addHostMessage(data);
-  }
-
   // Removes the visual chat typing message
   function removeHostTyping (data) {
     getTypingMessages(data).fadeOut(function () {
@@ -299,7 +304,7 @@ $(function() {
         if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
     }
     return copy;
-}
+  }
 
   ///////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////
@@ -346,24 +351,12 @@ $(function() {
     sendTextFieldMessage();
   });
 
+  // Socket stuff
+
   // Whenever the server emits 'login', log the login message
   socket.on('login', function (data) {
     connected = true;
     log(data);
-  });
-
-
-  ///////////////////////////////////////////////////////////////
-  ///////                                                  //////
-  ///////  add messages from the database                  //////
-  ///////  THIS NEEDS TO BE UPDATED TO NOT BE SO SHITTY    //////
-  ///////                                                  //////
-  ///////////////////////////////////////////////////////////////
-  // Whenever the server emits 'new message', update the chat body
-  socket.on('add database messages', function (data) {
-    for(var i = 0; i < data.length; i++) {
-      addHostMessage(data[i]);
-    }
   });
 
   // Whenever the server emits 'new message', update the chat body
@@ -377,9 +370,30 @@ $(function() {
     }
   });
 
+  socket.on('set roomAvailable', function (bool) {
+    roomAvailable = bool;
+  });
+
+  // Whenever the server emits 'clear messages', update the chat body
+  socket.on('clear messages', function (data) {
+    clearMessages();
+  });
+
   // Whenever the server emits 'new message', update the chat body
   socket.on('new host message', function (data) {
     addHostMessage(data);
+  });
+
+  // Whenever the server emits 'new message', update the chat body
+  socket.on('add database messages', function (data) {
+    for(var i = 0; i < data.length; i++) {
+      addHostMessage(data[i]);
+    }
+  });
+
+   // Whenever the server emits 'new message', update the chat body
+  socket.on('update roomsList', function (data) {
+    updateRoomsList(data);
   });
 
   // Whenever the server emits 'new fan message', update the chat body
@@ -399,7 +413,7 @@ $(function() {
 
   // Whenever the server emits 'user left', log it in the chat body
   socket.on('user left', function (data) {
-    log(data.username + ' left. they were in chatroom: '+data.chatname+". There are "+data.numUsers+" left, and "+data.numUsersInChat+" left in chatroom: "+data.chatname);
+    log(data.username + ' left. they were in chatroom: '+data.chatname+". "+data.numUsers+" left, and "+data.numUsersInChat+" left in chatroom: "+data.chatname);
     removeHostTyping(data); //data must include data.username
   });
 

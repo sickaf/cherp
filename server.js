@@ -336,7 +336,7 @@ io.on('connection', function (socket) {
     }
 
     //LETS DO THIS
-    socket.emit("clear messages", {});
+    // socket.emit("clear messages", {});
     
     socket.emit("update", "you ("+ourHero.username + ") want to enter chat: "+chatname);
    
