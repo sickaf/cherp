@@ -12,9 +12,11 @@ $(function() {
 
   // Initialize varibles
   var $window = $(window);
-  var $hostMessages = $('.hostMessages'); // host messages area
-  var $fanMessages = $('.fanMessages'); // fan messages area
+  var $hostMessages = $('#hostMessages'); // host messages area
+  var $fanMessages = $('#fanMessages'); // fan messages area
   var $inputMessage = $('#chat_input'); // Input message input box
+  var $sendButton = $('#send_button');
+  var $chatRoomField = $('#chat-room-field');
 
   // Prompt for setting a username
   var username = user.username;
@@ -26,9 +28,6 @@ $(function() {
 
   var socket = io();
 
-  // $chatnamePage.show();
-
-  // socket.emit('add user', user);
   socket.emit('add username', user);
 
   setChatname('default');
@@ -59,20 +58,17 @@ $(function() {
   }
 
   // Sets the chatname
-  function setChatname () {
+  function setChatname (name) {
       // Tell the server your chatname
-      socket.emit('enter chat', chatname);
+      socket.emit('enter chat', name);
   }
 
   // Sends a chat message
-  function sendMessage () {
-    var message = $inputMessage.val();
+  function sendMessage (message) {
     // Prevent markup from being injected into the message
     message = cleanInput(message);
     // if there is a non-empty message and a socket connection
-    if (message && connected) {
-      $inputMessage.val('');
-      
+    if (message && connected) {      
       socket.emit('new message', message);
       if(iAmHost) {
         addHostMessage({
@@ -88,9 +84,18 @@ $(function() {
     }
   }
 
+  // helper function for sending whatever is in the text field and for clearing it
+  function sendTextFieldMessage() {
+    sendMessage($inputMessage.val());
+    socket.emit('stop typing');
+    typing = false;
+    $inputMessage.val('');
+    $inputMessage.focus();
+  }
+
   // Log a message
   function log (message, options) {
-    var $el = $('<li>').addClass('log').text(message);
+    var $el = $('<li class="list-group-item list-group-item-info log-message">').addClass('log').text(message);
     addMessageElement($el, options);
   }
 
@@ -122,7 +127,7 @@ $(function() {
     var typingClass = data.typing ? 'typing' : '';
     var repostClass = data.repost ? 'repost' : '';
 
-    var $messageDiv = $('<li class="message"/>')
+    var $messageDiv = $('<li class="list-group-item message"/>')
       .data('username', data.username)
       .addClass(typingClass)
       .addClass(repostClass)
@@ -135,7 +140,7 @@ $(function() {
   function addFanMessage (data, options) {
 
     var $usernameDiv = $('<span class="username"/>')
-      .text(data.username)
+      .text(data.username + ': ')
       .css('color', getUsernameColor(data.username));
     
     //set up a listener so that if the host clicks this div they will become the host
@@ -155,11 +160,9 @@ $(function() {
       }
     });
 
-    var $messageDiv = $('<li class="message"/>')
+    var $messageDiv = $('<li class="list-group-item message"/>')
       .data('username', data.username)
       .append($usernameDiv, $messageBodyDiv);
-
-
 
     addFanMessageElement($messageDiv, options);
   }
@@ -295,7 +298,6 @@ $(function() {
     return copy;
 }
 
-
   ///////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////
   ///////                                                  //////
@@ -304,40 +306,30 @@ $(function() {
   ///////                                                  //////
   ///////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////
-  $(function () {
-    $('#imagefile').bind('change', function(e){
-      var data = e.originalEvent.target.files[0];
-      var reader = new FileReader();
-      reader.onload = function(evt){
-          socket.emit('new image', evt.target.result);
-      };
-      reader.readAsDataURL(data);
-    });
-  });
-  ///////////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////
 
+  $('#choose_image').click(function() {
+    alert('not implemented yet sorry');
+    return false;
+  })
+  ///////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////
 
   // Keyboard events
 
   $window.keydown(function (event) {
     // Auto-focus the current input when a key is typed
     if (!(event.ctrlKey || event.metaKey || event.altKey)) {
-      $currentInput.focus();
+      // $inputMessage.focus();
     }
+
     // When the client hits ENTER on their keyboard
     if (event.which === 13) {
-
-      //if the chatname is already set, we're good to go
-      if (chatname) {
-        sendMessage();
-        socket.emit('stop typing');
-        typing = false;
+      if ($chatRoomField.val()) {
+        var newChatRoomName = $chatRoomField.val();
+        setChatname(newChatRoomName);
       }
-      //okay, the user has set a username, but hasn't chosen a chat, do that
       else {
-        setChatname();
-        $currentInput = $inputMessage.focus();
+        sendTextFieldMessage();
       }
     }
   });
@@ -347,14 +339,9 @@ $(function() {
   });
 
   // Click events
-
-  // Focus input when clicking on the message input's border
-  $inputMessage.click(function () {
-    $inputMessage.focus();
+  $sendButton.click(function() {
+    sendTextFieldMessage();
   });
-  
-
-  // Socket events
 
   // Whenever the server emits 'login', log the login message
   socket.on('login', function (data) {
