@@ -12,40 +12,40 @@ $(function() {
 
   // Initialize varibles
   var $window = $(window);
-  var $chatnameInput = $('.chatnameInput'); // Input for chatname
-  var $hostMessages = $('.hostMessages'); // host messages area
-  var $fanMessages = $('.fanMessages'); // fan messages area
-  var $inputMessage = $('.inputMessage'); // Input message input box
-  var $chatnamePage = $('.chatname.page'); // The login page
-  var $chatPage = $('.chat.page'); // The chatroom page
-  var $roomsList = $('.roomsList'); // 
-  var $usernameTitle = $('.usernameTitle'); // 
-  var $endChatButton = $('.endChatButton'); // 
-
-
-  $endChatButton.click(function () {
-    socket.emit('kill room', {});
-  });
+  var $hostMessages = $('#hostMessages'); // host messages area
+  var $fanMessages = $('#fanMessages'); // fan messages area
+  var $inputMessage = $('#chat_input'); // Input message input box
+  var $sendButton = $('#send_button');
+  var $chatRoomField = $('#chat-room-field');
+  var $trendingRoomsDiv = $('#trending-rooms');
+  var $createRoomButton = $('#create-room-button');
 
   // Prompt for setting a username
   var username = user.username;
-  $usernameTitle.append($('<a href="#">'+username+'</a>'));
-
   var chatname;
   var iAmHost = false;
-  var roomAvailable = false;
   var connected = false;
   var typing = false;
   var lastTypingTime;
-  var $currentInput = $chatnameInput.focus();
 
   var socket = io();
-  // socket = io('/balls'); //namespace stuff
-
-  $chatnamePage.show();
 
   // socket.emit('add user', user);
   socket.emit('set username', username);
+
+  // sets correct chat name
+  setChatname('bieberfans');
+
+  $('#create-room-button').click(function(e) {
+      // joinRoomButtonPressed();
+      console.log("createroombutton pressed");
+      socket.emit('enter chat with id', {});
+      e.preventDefault(); //keep the page from refreshing
+  });
+
+  function joinRoomButtonPressed(){
+    socket.emit('enter chat', $('.joinRoomText').val().trim());
+  }
 
   //someone needs to get rid of this dumb function
   function addParticipantsMessage (data) {
@@ -72,20 +72,26 @@ $(function() {
     } 
   }
 
-  // Sets the chatname
-  function setChatname () {
-
-    chatname = cleanInput($chatnameInput.val().trim());
-
-    // If the username is valid
-    if (chatname) {
-      $chatnamePage.fadeOut();
-      $chatPage.show();
-      $chatnamePage.off('click');
-
-      // Tell the server your chatname
-      socket.emit('enter chat', chatname);
+  function updateRoomsList (data, options) {
+    $trendingRoomsDiv.html("");
+    for (var i = 0; i <data.length; i++) {
+      addRoomToRoomsList(data[i]);
     }
+  }
+
+
+  function addRoomToRoomsList(room){
+    var $roomDiv = $('<li><a href="#">'+room.name+' ('+room.peopleNum+')</a></li>');
+    $roomDiv.click(function () {
+      socket.emit('enter chat', room.name);
+    });
+    $trendingRoomsDiv.append($roomDiv);
+  }
+
+  // Sets the chatname
+  function setChatname (name) {
+      // Tell the server your chatname
+      socket.emit('enter chat', name);
   }
 
   // Sends a chat message
@@ -117,7 +123,7 @@ $(function() {
 
   // Log a message
   function log (message, options) {
-    var $el = $('<li>').addClass('log').text(message);
+    var $el = $('<li class="list-group-item list-group-item-info log-message">').addClass('log').text(message);
     addMessageElement($el, options);
   }
 
@@ -126,78 +132,14 @@ $(function() {
     $fanMessages.html("");
   }
 
-
-  function updateRoomsList (data, options) {
-    $roomsList.html("");
-    for (var i = 0; i <data.length; i++) {
-      addRoomToRoomsList(data[i]);
-    }
+  // helper function for sending whatever is in the text field and for clearing it
+  function sendTextFieldMessage() {
+    sendMessage($inputMessage.val());
+    socket.emit('stop typing');
+    typing = false;
+    $inputMessage.val('');
+    $inputMessage.focus();
   }
-
-
-  function addRoomToRoomsList(room){
-    var $roomDiv = $('<li><a href="#">'+room.name+' ('+room.peopleNum+')</a></li>');
-    $roomDiv.click(function () {
-      socket.emit('enter chat', room.name);
-    });
-    $roomsList.append($roomDiv);
-  }
-
-
-  function getHostName(url) {
-    var match = url.match(/:\/\/(www[0-9]?\.)?(.[^/:]+)/i);
-    if (match != null && match.length > 2 &&
-        typeof match[2] === 'string' && match[2].length > 0) {
-    return match[2];
-    }
-    else {
-        return null;
-    }
-  }
-
-  function getDomain(url) {
-    var hostName = getHostName(url);
-    var domain = hostName;
-    
-    if (hostName != null) {
-        var parts = hostName.split('.').reverse();
-        
-      if (parts != null && parts.length > 1) {
-          domain = parts[1] + '.' + parts[0];
-            
-         if (hostName.toLowerCase().indexOf('.co.uk') != -1
-                 && parts.length > 2) {
-           domain = parts[2] + '.' + domain;
-         }
-      }
-    }
-    return domain;
-  }
-
-  //Creates the embed code from a url
-  function youtubify(url){
-    return '//www.youtube.com/embed/' + url.substring(url.indexOf('v=')+2);
-  }
-
-  // Adds link html around hyperlinks 
-  function linkify(text, amIHost) {
-    var urlRegex = /(((https?:\/\/)|(www\.))[^\s]+)/g;
-    return text.replace(urlRegex, function(url,b,c) {
-        var fullURL = (c == 'www.') ?  'http://' +url : url;
-
-        if (amIHost){
-
-          if (getHostName(fullURL) == 'youtube.com'){
-            return '<iframe width="420" height="315" src="'+ youtubify(fullURL) + '" frameborder="0" allowfullscreen></iframe>';
-          }
-
-          else if (getDomain(fullURL) == "imgur.com"){
-            return '<a class="embedly-card" href="' + fullURL + '" </a> <script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>';
-          }
-       } 
-      return '<a href="' +fullURL+ '" target="_blank">' + url + '</a>';
-    }) 
-  } 
 
   // Adds the visual chat message to the message list
   function addHostMessage (data, options) {
@@ -210,7 +152,7 @@ $(function() {
     }
     
     var $usernameDiv = $('<span class="username"/>')
-      .text(data.username)
+      .text(data.username + ' ')
       .css('color', getUsernameColor(data.username));
 
     var $messageBodyDiv;
@@ -223,13 +165,12 @@ $(function() {
       var messageText = linkify(data.message, true);
       $messageBodyDiv = $('<span class="messageBody">')
       .append(messageText);
-
     }
 
     var typingClass = data.typing ? 'typing' : '';
     var repostClass = data.repost ? 'repost' : '';
 
-    var $messageDiv = $('<li class="message"/>')
+    var $messageDiv = $('<li class="list-group-item message"/>')
       .data('username', data.username)
       .addClass(typingClass)
       .addClass(repostClass)
@@ -242,20 +183,17 @@ $(function() {
   function addFanMessage (data, options) {
 
     var $usernameDiv = $('<span class="username"/>')
-      .text(data.username)
+      .text(data.username + ' ')
       .css('color', getUsernameColor(data.username));
     
     //set up a listener so that if the host clicks this div they will become the host
     $usernameDiv.click(function () {
       socket.emit('make host', data.username);
     });
-    
 
     var messageText = linkify(data.message, false);
     $messageBodyDiv = $('<span class="messageBody">')
       .append(messageText);
-
-
 
     //set up a listener so that if the host clicks this div itll get forwarded
     $messageBodyDiv.click(function () {
@@ -266,7 +204,7 @@ $(function() {
       }
     });
 
-    var $messageDiv = $('<li class="message"/>')
+    var $messageDiv = $('<li class="list-group-item message"/>')
       .data('username', data.username)
       .append($usernameDiv, $messageBodyDiv);
 
@@ -336,13 +274,6 @@ $(function() {
   }
 
 
-  // Adds the visual chat typing message
-  function addHostTyping (data) {
-    data.typing = true;
-    data.message = 'is typing';
-    addHostMessage(data);
-  }
-
   // Removes the visual chat typing message
   function removeHostTyping (data) {
     getTypingMessages(data).fadeOut(function () {
@@ -402,51 +333,50 @@ $(function() {
         if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
     }
     return copy;
-}
+  }
 
+  // Image uploader
+  
+  var opts = {
+    dragClass: "#hostMessages",
+    accept: 'image/*',
+    on: {
+      load: function(e, file) {
 
-  ///////////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////
-  ///////                                                  //////
-  ///////  dom manipulation code to send images            //////
-  ///////  THIS NEEDS TO BE UPDATED TO NOT LOOK SO BAD     //////
-  ///////                                                  //////
-  ///////////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////
-  $(function () {
-    $('#imagefile').bind('change', function(e){
-      var data = e.originalEvent.target.files[0];
-      var reader = new FileReader();
-      reader.onload = function(evt){
-          socket.emit('new image', evt.target.result);
-      };
-      reader.readAsDataURL(data);
-    });
-  });
-  ///////////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////
+        if (file.type.match(/image/)) {
+          socket.emit('new image', e.target.result);
+        }
 
+      },
+      error: function(e, file) {
+        alert("Sorry, there was an error");
+      },
+      groupstart: function(group) {
+      },
+      groupend: function(group) {
+      }
+    }
+  };
+
+  $("#imagefile, #dropzone").fileReaderJS(opts);
+  $("body").fileClipboard(opts);
 
   // Keyboard events
 
   $window.keydown(function (event) {
     // Auto-focus the current input when a key is typed
     if (!(event.ctrlKey || event.metaKey || event.altKey)) {
-      $currentInput.focus();
+      // $inputMessage.focus();
     }
+
     // When the client hits ENTER on their keyboard
     if (event.which === 13) {
-
-      //if the chatname is already set, we're good to go
-      if (chatname) {
-        sendMessage();
-        socket.emit('stop typing');
-        typing = false;
+      if ($chatRoomField.val()) {
+        var newChatRoomName = $chatRoomField.val();
+        setChatname(newChatRoomName);
       }
-      //okay, the user has set a username, but hasn't chosen a chat, do that
       else {
-        setChatname();
-        $currentInput = $inputMessage.focus();
+        sendTextFieldMessage();
       }
     }
   });
@@ -456,14 +386,11 @@ $(function() {
   });
 
   // Click events
-
-  // Focus input when clicking on the message input's border
-  $inputMessage.click(function () {
-    $inputMessage.focus();
+  $sendButton.click(function() {
+    sendTextFieldMessage();
   });
-  
 
-  // Socket events
+  // Socket stuff
 
   // Whenever the server emits 'login', log the login message
   socket.on('login', function (data) {
@@ -539,6 +466,67 @@ $(function() {
     removeHostTyping(data);
   });
 });
+
+  ///////////////////////////////////////////////////////////////
+  ///////                                                  //////
+  ///////  LINK HELPERS                                    //////
+  ///////                                                  //////
+  ///////////////////////////////////////////////////////////////
+
+  function getHostName(url) {
+    var match = url.match(/:\/\/(www[0-9]?\.)?(.[^/:]+)/i);
+    if (match != null && match.length > 2 &&
+        typeof match[2] === 'string' && match[2].length > 0) {
+    return match[2];
+    }
+    else {
+        return null;
+    }
+  }
+
+  function getDomain(url) {
+    var hostName = getHostName(url);
+    var domain = hostName;
+    
+    if (hostName != null) {
+        var parts = hostName.split('.').reverse();
+        
+      if (parts != null && parts.length > 1) {
+          domain = parts[1] + '.' + parts[0];
+            
+         if (hostName.toLowerCase().indexOf('.co.uk') != -1
+                 && parts.length > 2) {
+           domain = parts[2] + '.' + domain;
+         }
+      }
+    }
+    return domain;
+  }
+
+  //Creates the embed code from a url
+  function youtubify(url){
+    return '//www.youtube.com/embed/' + url.substring(url.indexOf('v=')+2);
+  }
+
+  // Adds link html around hyperlinks 
+  function linkify(text, shouldEmbed) {
+    var urlRegex = /(((https?:\/\/)|(www\.))[^\s]+)/g;
+    return text.replace(urlRegex, function(url,b,c) {
+        var fullURL = (c == 'www.') ?  'http://' +url : url;
+
+        if (shouldEmbed) {
+
+          if (getHostName(fullURL) == 'youtube.com'){
+            return '<iframe width="380" height="285" src="'+ youtubify(fullURL) + '" frameborder="0" allowfullscreen></iframe>';
+          }
+
+          else if (getDomain(fullURL) == "imgur.com"){
+            return '<a class="embedly-card" href="' + fullURL + '" </a> <script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>';
+          }
+       } 
+      return '<a href="' +fullURL+ '" target="_blank">' + url + '</a>';
+    }) 
+  } 
 
 /*
 

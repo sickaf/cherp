@@ -17,11 +17,24 @@ module.exports = function(app, passport) {
 
       		res.render('index', { user : user });
         }
-     });
+	});
+
 
 	app.get('/login', function(req, res) {
 		res.render('login', { message: req.flash('loginMessage') });
 	});
+
+
+	// =====================================
+	// LOGOUT ==============================
+	// =====================================
+	app.get('/logout', function(req, res) {
+		req.flash('loginMessage', 'Logged out');
+		req.session.destroy();
+		req.logout();
+  		res.redirect('/login');
+	});
+
 
 	// =====================================
 	// SIGNUP ==============================
@@ -63,29 +76,6 @@ module.exports = function(app, passport) {
 		});
 	});
 
-	app.get('/newhome', function(req, res) {
-		if (req.user) {
-			console.log('logged in user found in session');
-			res.render('newindex', { user : req.user });
-		} else {
-			console.log('no user found, creating anon user and saving to session');
-			
-			var user = new User();
-      		user.username = randomUsername();
-
-      		res.render('newindex', { user : user });
-        }
-	})
-
-	// =====================================
-	// LOGOUT ==============================
-	// =====================================
-	app.get('/logout', function(req, res) {
-		req.flash('loginMessage', 'Logged out');
-		req.session.destroy();
-		req.logout();
-  		res.redirect('/login');
-	});
 }
 
 // route middleware to make sure a user is logged in

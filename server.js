@@ -212,14 +212,12 @@ io.on('connection', function (socket) {
             var authorizedUser = socket.request.session.passport.user;
             ourHeroID = authorizedUser;
 
-          } else {console.error("NO USER io.on connection");}
+          } else {
+            console.log("socket connecton from anon user, generating temp ID");
+            ourHeroID = uuid.v4();
+          }
       } else {console.error("NO PASSPORT io.on connection");}
   } else {console.error("NO SESSION io.on connection");}
-
-  if (!ourHeroID) {
-    console.log('socket connecton from anon user, generating temp ID');
-    ourHeroID = uuid.v4();
-  }
 
   console.log('hero id: ' + ourHeroID);
 
@@ -233,7 +231,7 @@ io.on('connection', function (socket) {
   people.push(ourHero);
 
   //messaging
-  socket.emit('login', "Welcome to the world. You have connected to the server. People are: "+getPeopleList()+". you are "+JSON.stringify(ourHero));
+  socket.emit('login', "Welcome to the world. You have connected to the server. People ("+people.length+") are: "+getPeopleList()+". you are "+JSON.stringify(ourHero));
   //sets connected = true
   
   sockets.push(socket);
@@ -390,7 +388,11 @@ io.on('connection', function (socket) {
 
   });
 
-  socket.on('enter chat', function (id) {
+  socket.on('enter chat with id', function (idParam) {
+    var id = idParam;
+    if (!id) {
+      id = ourHero.id;
+    }
 
     if (ourHero.owns) {
       socket.emit("update", "You already own a room! This is madness!");
@@ -400,7 +402,7 @@ io.on('connection', function (socket) {
     //LETS DO THIS
     socket.emit("clear messages", {});
     
-    socket.emit("update", "you ("+ourHero.username + ") want to enter chat: "+getRoomWithID(id).name);
+    socket.emit("update", "you ("+ourHero.username + ") want to enter chat with id: "+id);
    
     if (ourHero.inroom) {
       socket.emit("update", "You are already in a room.  Going to remove you from room "+ourHero.inroom);
@@ -423,10 +425,10 @@ io.on('connection', function (socket) {
       // RoomModel.findOne({ 'id' :  getRoomWithName(chatname).id}, function(err, room) {
     }
     else { //room doesnt exist. create it
-      socket.emit("update", "the room "+getRoomWithID(id).name + " doesnt exist yet.  adding you as OWNER");
+      socket.emit("update", "the room with id "+ id + " doesnt exist yet.  adding you as OWNER");
 
       var id = uuid.v4();
-      var room = new Room("unnamed"+id.substr(0,7), id, ourHero);
+      var room = new Room(ourHero.username+"Room", id, ourHero);
       rooms.push(room);
       //add room to socket, and auto join the creator of the room
       socket.emit("set iAmHost", ourHero.username, true); 

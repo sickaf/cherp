@@ -1,81 +1,105 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Cherp Chat</title>  
-  <link rel="stylesheet" href="css/bootstrap.css">
-  <link rel="stylesheet" href="css/style.css">
-  <link href='http://fonts.googleapis.com/css?family=Inconsolata:400,700' rel='stylesheet' type='text/css'>
-</head>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Cherp chat">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
 
-<body>
+    <title>Cherp</title>
 
-  <ul class="pages">
-    <li class="chat page">
-      <nav class="navbar navbar-default" role="navigation">
-        <div class="container-fluid">
-          <!-- Brand and toggle get grouped for better mobile display -->
-          <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-              <span class="sr-only">Toggle navigation</span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="#">sick.af</a>
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="css/style.css" rel="stylesheet">
+
+  </head>
+
+  <body>
+
+    <div class="container">
+
+        <div class="col-md-12"> <!-- main column -->
+      
+          <nav class="navbar navbar-default" role="navigation">
+            <div class="navbar-header">
+              <a class="navbar-brand" href="#">Cherp</a>
+            </div>
+
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+              <div class="navbar-form navbar-left" role="search">
+                <button type="button" class="btn btn-success send-button" id="create-room-button">New</button>
+              </div>
+              <ul class="nav navbar-nav navbar-right">
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Signed in as <%= user.username %> <span class="caret"></span></a>
+                  <ul class="dropdown-menu" role="menu">
+                    <li><a href="/login">Login</a></li>
+                    <li><a href="/logout">Logout</a></li>
+                    <li><a href="/profile">Profile</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </nav>
+
+          <div class="col-md-2"> <!-- Left column -->
+            <h4>Trending Conversations</h4>
+            <div class="row" id="trending-rooms"> <!-- Trending rooms row -->
+              <li>test1</li>
+              <li>test2</li>
+              <li>test3</li>
+            </div>
+
+          </div>
+          
+          <div class="col-md-10 chat-container"> <!-- Chat column -->
+
+            <div class="row chat-windows"> <!-- chat windows row -->
+              <div class="col-md-6">
+                <ul class="list-group" id="hostMessages"></ul>
+              </div>
+              <div class="col-md-6">
+                <ul class="list-group" id="fanMessages"></ul>
+              </div>
+            </div>
+
+            <div class="row text-input"> <!-- text input row column -->
+              <div class="col-md-12">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="chat_input">
+                  <span class="input-group-btn">
+                  <!-- Split button -->
+                  <button type="button" class="btn btn-success send-button" id="send_button">Send</button>
+                  <button type="button" class="btn btn-success success-toggle" data-toggle="dropdown">
+                  <span class="caret"></span>
+                  <span class="sr-only">Toggle Dropdown</span>
+                  </button>
+                  <ul class="dropdown-menu" role="menu">
+                  <li><input type="file" id="imagefile" accept="image/*"></li>
+                  </ul>
+                  </span>
+              </div>
+            </div>
           </div>
 
-          <!-- Collect the nav links, forms, and other content for toggling -->
-          <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-            <ul class="nav navbar-nav">
-              <li class= "active"><a class="usernameTitle" href="#"></a></li>
-              <li><a href="http://sick.af">sick.af</a></li>
-              <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Rooms List<span class="caret"></span></a>
-                <ul class="dropdown-menu roomsList" role="menu">
-                </ul>
-              </li>
-            </ul>
-            <form class="navbar-form navbar-left joinRoomForm">
-              <div class="form-group">
-                <input type="text" class="form-control joinRoomText" placeholder="Room">
-              </div>
-              <button type="submit" class="btn btn-default joinRoomButton">Enter if u dare</button>
-            </form> 
-            <ul class="nav navbar-nav navbar-right">
-              <li><a class = "endChatButton" href="#">end chat</a></li>
-              <li><a href="/logout">logout</a></li>
-              <li><a href="/login">login</a></li>
-            </ul>
-          </div><!-- /.navbar-collapse -->
-        </div><!-- /.container-fluid -->
-      </nav>
-      <div class="hostChatArea">
-        <ul class="hostMessages"></ul>
-      </div>
-      <div class="fanChatArea">
-        <ul class="fanMessages"></ul>
-      </div>
-      <input class="inputMessage" placeholder="Type here..."/>
-      <div class="imageButton">Send image<input type="file" id="imagefile" accept="image/*"></div>
-    </li>
+        </div>
 
-    <li class="chatname page">
-      <div class="form">
-        <h3 class="title">Enter chatroom name</h3>
-        <input class="chatnameInput" type="text" maxlength="14" />
-      </div>
-    </li>
-  </ul>
+      </div> <!-- main column -->
 
-      <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    </div> <!-- container -->
+
+    <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>
-  <script src="/socket.io/socket.io.js"></script>
-  <script>
-  var user = <%- JSON.stringify(user) %>;
-  </script>
-  <script src="js/client.js"></script>
-</body>
+    <script src="/socket.io/socket.io.js"></script>
+    <script type='text/javascript' src='js/filereader.js'></script>
+    <script>
+    var user = <%- JSON.stringify(user) %>;
+    </script>
+    <script src="js/client.js"></script>
+  </body>
 </html>
