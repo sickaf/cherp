@@ -17,6 +17,7 @@ $(function() {
   var $inputMessage = $('#chat_input'); // Input message input box
   var $sendButton = $('#send_button');
   var $chatRoomField = $('#chat-room-field');
+  var $trendingRoomsDiv = $('#trending-rooms');
 
   // Prompt for setting a username
   var username = user.username;
@@ -57,6 +58,22 @@ $(function() {
       message += "you're the host";
       log(message)
     } 
+  }
+
+  function updateRoomsList (data, options) {
+    $trendingRoomsDiv.html("");
+    for (var i = 0; i <data.length; i++) {
+      addRoomToRoomsList(data[i]);
+    }
+  }
+
+
+  function addRoomToRoomsList(room){
+    var $roomDiv = $('<li><a href="#">'+room.name+' ('+room.peopleNum+')</a></li>');
+    $roomDiv.click(function () {
+      socket.emit('enter chat', room.name);
+    });
+    $trendingRoomsDiv.append($roomDiv);
   }
 
   // Sets the chatname

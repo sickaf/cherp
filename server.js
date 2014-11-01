@@ -212,14 +212,12 @@ io.on('connection', function (socket) {
             var authorizedUser = socket.request.session.passport.user;
             ourHeroID = authorizedUser;
 
-          } else {console.error("NO USER io.on connection");}
+          } else {
+            console.log("socket connecton from anon user, generating temp ID");
+            ourHeroID = uuid.v4();
+          }
       } else {console.error("NO PASSPORT io.on connection");}
   } else {console.error("NO SESSION io.on connection");}
-
-  if (!ourHeroID) {
-    console.log('socket connecton from anon user, generating temp ID');
-    ourHeroID = uuid.v4();
-  }
 
   console.log('hero id: ' + ourHeroID);
 
@@ -233,7 +231,7 @@ io.on('connection', function (socket) {
   people.push(ourHero);
 
   //messaging
-  socket.emit('login', "Welcome to the world. You have connected to the server. People are: "+getPeopleList()+". you are "+JSON.stringify(ourHero));
+  socket.emit('login', "Welcome to the world. You have connected to the server. People ("+people.length+") are: "+getPeopleList()+". you are "+JSON.stringify(ourHero));
   //sets connected = true
   
   sockets.push(socket);
@@ -390,7 +388,7 @@ io.on('connection', function (socket) {
 
   });
 
-  socket.on('enter chat', function (id) {
+  socket.on('enter chat with id', function (id) {
 
     if (ourHero.owns) {
       socket.emit("update", "You already own a room! This is madness!");
