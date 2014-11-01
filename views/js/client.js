@@ -22,7 +22,6 @@ $(function() {
   var $usernameTitle = $('.usernameTitle'); // 
   var $endChatButton = $('.endChatButton'); // 
 
-
   $endChatButton.click(function () {
     socket.emit('kill room', {});
   });
@@ -31,21 +30,39 @@ $(function() {
   var username = user.username;
   $usernameTitle.append($('<a href="#">'+username+'</a>'));
 
-  var chatname;
+  var chatname = "bieberfans";
   var iAmHost = false;
   var roomAvailable = false;
   var connected = false;
   var typing = false;
   var lastTypingTime;
-  var $currentInput = $chatnameInput.focus();
+  // var $currentInput = $inputMessage.focus();
 
   var socket = io();
   // socket = io('/balls'); //namespace stuff
 
-  $chatnamePage.show();
+  // $chatnamePage.show();
+  $chatPage.show();
+
+  var $currentInput = $inputMessage.focus();
+
+
 
   // socket.emit('add user', user);
   socket.emit('set username', username);
+
+  socket.emit('enter chat', chatname);
+
+
+
+  $('.joinRoomForm').submit(function(e) {
+      joinRoomButtonPressed();
+      e.preventDefault(); //keep the page from refreshing
+  });
+
+  function joinRoomButtonPressed(){
+    socket.emit('enter chat', $('.joinRoomText').val().trim());
+  }
 
   //someone needs to get rid of this dumb function
   function addParticipantsMessage (data) {
@@ -56,7 +73,7 @@ $(function() {
     if (data.numUsers === 1) {
       iAmHost = true;
       message += "you're the host";
-      log(message)
+      log(message);
     } 
   }
 
@@ -68,7 +85,7 @@ $(function() {
     if (data.numUsers === 1) {
       iAmHost = true;
       message += "you're the host";
-      log(message)
+      log(message);
     } 
   }
 
@@ -202,13 +219,10 @@ $(function() {
     $usernameDiv.click(function () {
       socket.emit('make host', data.username);
     });
-    
 
     var messageText = linkify(data.message);
     $messageBodyDiv = $('<span class="messageBody">')
       .append(messageText);
-
-
 
     //set up a listener so that if the host clicks this div itll get forwarded
     $messageBodyDiv.click(function () {
@@ -384,9 +398,10 @@ $(function() {
 
   $window.keydown(function (event) {
     // Auto-focus the current input when a key is typed
-    if (!(event.ctrlKey || event.metaKey || event.altKey)) {
-      $currentInput.focus();
-    }
+    // if (!(event.ctrlKey || event.metaKey || event.altKey)) {
+    //   $currentInput.focus();
+    // }
+
     // When the client hits ENTER on their keyboard
     if (event.which === 13) {
 

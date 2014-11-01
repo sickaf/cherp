@@ -28,7 +28,6 @@ Room.prototype.addFan = function(fan) {
 
 Room.prototype.killRoom = function() {
   this.status = "archived";
-//DEATH
 };
 
 Room.prototype.removeFan = function(personID) {
@@ -72,10 +71,9 @@ Room.prototype.addOwner = function(owner) {
       console.error("TRIED TO ADD OWNER BUT OWNER ALREADY EXISTS");
       return false;
     }
-    host.owns = this.id;
-    host.hostof = this.id;
-    host.inroom = this.id;
-    this.hosts.push(host);
+    owner.owns = this.id;
+    owner.hostof = this.id;
+    owner.inroom = this.id;
     this.owner = owner;
     this.peopleNum++;
   }
@@ -98,12 +96,38 @@ Room.prototype.removeHost = function(personID) {
   }
 };
 
+Room.prototype.removeOwner = function(personID) {
+  this.owner = null;
+  this.peopleNum--;
+
+  //promote a fan if there are no hosts
+  if(this.peopleNum) { 
+    var newOwner;
+    if(this.hosts.length > 0){
+      newOwner = this.getHost(this.hosts[0].id);
+      this.addOwner(newOwner);
+      this.removeHost(newOwner.id);
+    } else {
+      newOwner = this.getFan(this.fans[0].id);
+      this.addOwner(newOwner);
+      this.removeFan(newOwner.id);
+    }
+    return this.owner;
+  }
+}
+
+
 Room.prototype.removePerson = function(personID) {
   if(this.getFan(personID)) {
     this.removeFan(personID);
   }
   else if(this.getHost(personID)) {
     this.removeHost(personID);
+  }
+  else if(this.owner.id == personID){
+    this.owner.owns = null;
+    this.owner
+
   }
   else {
     console.error("COULDNT FIND THE PERSON TO REMOVE (room.js)");

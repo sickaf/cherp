@@ -439,19 +439,15 @@ io.on('connection', function (socket) {
           }
         }
         else { //owner
-          roomForDeletingUser.killRoom();        
+          // roomForDeletingUser.killRoom();
+          var newOwner = roomForDeletingUser.removeOwner(ourHero.id);
+          if(newOwner) {
+            socket.broadcast.to(socket.room).emit("set iAmHost", newOwner.username, true); 
+          }
         }
       }
 
 
-
-      // // echo globally that this client has left
-      // socket.broadcast.emit('user left', {
-      //   username: ourHero.username,
-      //   chatname: roomForDeletingUser.name,
-      //   numUsers: _.size(people) - 1,
-      //   numUsersInChat: roomForDeletingUser.peopleNum
-      // });
       io.sockets.emit("update roomsList", rooms);
       io.sockets.emit("update", "brother "+ourHero.username+" is no longer with us");
 
