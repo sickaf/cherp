@@ -14,7 +14,7 @@
     <!-- Bootstrap core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom styles for this template -->
-    <link href="css/style.css" rel="stylesheet">
+    <link href="css/newstyle.css" rel="stylesheet">
 
   </head>
 
@@ -31,7 +31,7 @@
 
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
               <div class="navbar-form navbar-left" role="search">
-                <button type="button" class="btn btn-success send-button" id="create-room-button">Go live! lol or dont im just a button</button>
+                  <button type="button" class="btn btn-success send-button" id="host_button">New</button>
               </div>
               <ul class="nav navbar-nav navbar-right">
                 <li class="dropdown">
@@ -47,11 +47,19 @@
           </nav>
 
           <div class="col-md-2"> <!-- Left column -->
-            <h4>Trending Conversations</h4>
-            <div class="row" id="trending-rooms"> <!-- Trending rooms row -->
-              <li>test1</li>
-              <li>test2</li>
-              <li>test3</li>
+
+            <div class="row trending-rooms"> <!-- Trending rooms row -->
+              <h4>Trending Conversations</h4>
+              <li>Fart</li>
+              <li>Weed</li>
+              <li>Snowboarding</li>
+              <li>Drugs</li>
+              <li>Farting</li>
+              <li>codyk</li>
+              <li>gubbs</li>
+              <li>dev</li>
+              <li>marcus</li>
+              <li>hitler</li>
             </div>
 
           </div>
@@ -95,11 +103,11 @@
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
     <script type='text/javascript' src='js/filereader.js'></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script>
     var user = <%- JSON.stringify(user) %>;
     </script>
-    <script src="js/client.js"></script>
+    <script src="js/newclient.js"></script>
   </body>
 </html>

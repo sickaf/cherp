@@ -413,16 +413,31 @@ $(function() {
   ///////                                                  //////
   ///////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////
-  $(function () {
-    $('#imagefile').bind('change', function(e){
-      var data = e.originalEvent.target.files[0];
-      var reader = new FileReader();
-      reader.onload = function(evt){
-          socket.emit('new image', evt.target.result);
-      };
-      reader.readAsDataURL(data);
-    });
-  });
+
+  var opts = {
+    dragClass: "#hostMessages",
+    accept: 'image/*',
+    on: {
+      load: function(e, file) {
+
+        if (file.type.match(/image/)) {
+          socket.emit('new image', e.target.result);
+        }
+
+      },
+      error: function(e, file) {
+        alert("Sorry, there was an error");
+      },
+      groupstart: function(group) {
+      },
+      groupend: function(group) {
+      }
+    }
+  };
+
+  $("#imagefile, #dropzone").fileReaderJS(opts);
+  $("body").fileClipboard(opts);
+
   ///////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////
 

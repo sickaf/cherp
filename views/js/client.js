@@ -335,21 +335,31 @@ $(function() {
     return copy;
   }
 
-  ///////////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////
-  ///////                                                  //////
-  ///////  dom manipulation code to send images            //////
-  ///////  THIS NEEDS TO BE UPDATED TO NOT LOOK SO BAD     //////
-  ///////                                                  //////
-  ///////////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////
+  // Image uploader
+  
+  var opts = {
+    dragClass: "#hostMessages",
+    accept: 'image/*',
+    on: {
+      load: function(e, file) {
 
-  $('#choose_image').click(function() {
-    alert('not implemented yet sorry');
-    return false;
-  })
-  ///////////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////
+        if (file.type.match(/image/)) {
+          socket.emit('new image', e.target.result);
+        }
+
+      },
+      error: function(e, file) {
+        alert("Sorry, there was an error");
+      },
+      groupstart: function(group) {
+      },
+      groupend: function(group) {
+      }
+    }
+  };
+
+  $("#imagefile, #dropzone").fileReaderJS(opts);
+  $("body").fileClipboard(opts);
 
   // Keyboard events
 
