@@ -80,6 +80,7 @@ $(function() {
     var $roomDiv = $('<li><a href="#">'+room.name+' ('+room.peopleNum+')</a></li>');
     $roomDiv.click(function () {
       socket.emit('enter chat with id', room.id);
+      return false;
     });
     $trendingRoomsDiv.append($roomDiv);
   }
@@ -173,7 +174,7 @@ $(function() {
     var typingClass = data.typing ? 'typing' : '';
     var repostClass = data.repost ? 'repost' : '';
 
-    var $messageDiv = $('<li class="list-group-item message"/>')
+    var $messageDiv = $('<li class="list-group-item message">')
       .data('username', data.username)
       .addClass(typingClass)
       .addClass(repostClass)
@@ -339,7 +340,7 @@ $(function() {
   }
 
   // Image uploader
-  
+
   var opts = {
     dragClass: "#hostMessages",
     accept: 'image/*',
@@ -468,9 +469,8 @@ $(function() {
   socket.on('stop typing', function (data) {
     removeHostTyping(data);
   });
-});
 
-  ///////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////
   ///////                                                  //////
   ///////  LINK HELPERS                                    //////
   ///////                                                  //////
@@ -520,7 +520,9 @@ $(function() {
         if (shouldEmbed) {
 
           if (getHostName(fullURL) == 'youtube.com'){
-            return '<iframe width="380" height="285" src="'+ youtubify(fullURL) + '" frameborder="0" allowfullscreen></iframe>';
+            var divWidth = $hostMessages.width() - 40;
+            var divHeight = divWidth * 0.75;
+            return '<iframe width=' + '"' + divWidth + '"' + 'height=' + '"' + divHeight + '"' + 'src="'+ youtubify(fullURL) + '" frameborder="0" allowfullscreen></iframe>';
           }
 
           else if (getDomain(fullURL) == "imgur.com"){
@@ -530,6 +532,7 @@ $(function() {
       return '<a href="' +fullURL+ '" target="_blank">' + url + '</a>';
     }) 
   } 
+});
 
 /*
 
