@@ -17,18 +17,29 @@ body {
 	overflow-y: scroll;
 }
 
-.message.repost {
+.message {
+	border-left: 0px;
+	border-right: 0px;
+	border-radius: 0px;
+}
+
+.repost {
   margin-left: 30px;
   padding-left: 15px;
-  border-left: 3px solid #ccc;
+  border-left: 1px solid #ccc;
+  list-style-type: none;
 }
 
 .text-input {
 	padding-top: 20px;
 }
 
+.new-chat-button {
+	width: 180px;
+}
+
 .send-button {
-	width:240px;
+	width: 120px;
 }
 
 .trending-users {

@@ -170,7 +170,7 @@ $(function() {
     var typingClass = data.typing ? 'typing' : '';
     var repostClass = data.repost ? 'repost' : '';
 
-    var $messageDiv = $('<li class="list-group-item message"/>')
+    var $messageDiv = $('<li class="list-group-item message">')
       .data('username', data.username)
       .addClass(typingClass)
       .addClass(repostClass)
@@ -336,7 +336,7 @@ $(function() {
   }
 
   // Image uploader
-  
+
   var opts = {
     dragClass: "#hostMessages",
     accept: 'image/*',
