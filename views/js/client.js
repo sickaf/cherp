@@ -24,7 +24,7 @@ $(function() {
   var username = user.username;
   var chatname;
   var iAmHost = false;
-  var connected = false;
+  var currentlyInRoom = false;
   var typing = false;
   var lastTypingTime;
 
@@ -75,7 +75,6 @@ $(function() {
     }
   }
 
-
   function addRoomToRoomsList(room){
     var $roomDiv = $('<li><a href="#">'+room.name+' ('+room.peopleNum+')</a></li>');
     $roomDiv.click(function () {
@@ -104,24 +103,24 @@ $(function() {
     // Prevent markup from being injected into the message
     message = cleanInput(message);
     // if there is a non-empty message and a socket connection
-    if (message && connected) {
-      $inputMessage.val('');
-      
+    if (message) {
+      $inputMessage.val('');  
       socket.emit('new message', message);
-      
-      if(!roomAvailable) return;
 
-      if(iAmHost) {
-        addHostMessage({
-          username: username,
-          message: message
-        });
-      } else {
-        addFanMessage({
-          username: username,
-          message: message
-        });
-      }
+      if(currentlyInRoom) {
+
+        if(iAmHost) {
+          addHostMessage({
+            username: username,
+            message: message
+          });
+        } else {
+          addFanMessage({
+            username: username,
+            message: message
+          });
+        }
+      } 
     }
   }
 
@@ -298,7 +297,7 @@ $(function() {
 
   // Updates the typing event
   function updateTyping () {
-    if (connected) {
+    if (currentlyInRoom) {
       if (!typing) {
         typing = true;
         socket.emit('typing');
@@ -402,10 +401,17 @@ $(function() {
 
   // Socket stuff
 
+  // // Whenever the server emits 'login', log the login message
+  // socket.on('login', function (data) {
+  //   currentlyInRoom = true;
+  //   log(data);
+  // });
+
   // Whenever the server emits 'login', log the login message
-  socket.on('login', function (data) {
-    connected = true;
-    log(data);
+  socket.on('tell client owner left', function (msg) {
+    currentlyInRoom = false;
+    iAmHost = false;
+    log(msg);
   });
 
   // Whenever the server emits 'new message', update the chat body
@@ -419,8 +425,8 @@ $(function() {
     }
   });
 
-  socket.on('set roomAvailable', function (bool) {
-    roomAvailable = bool;
+  socket.on('set currentlyInRoom', function (bool) {
+    currentlyInRoom = bool;
   });
 
   // Whenever the server emits 'clear messages', update the chat body

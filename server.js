@@ -230,7 +230,7 @@ io.on('connection', function (socket) {
   people.push(ourHero);
 
   //messaging
-  socket.emit('login', "Welcome to the world. You have connected to the server. People ("+people.length+") are: "+getPeopleList()+". you are "+JSON.stringify(ourHero));
+  socket.emit('update', "Welcome to the world. You have connected to the server. People ("+people.length+") are: "+getPeopleList()+". you are "+JSON.stringify(ourHero));
   //sets connected = true
   
   sockets.push(socket);
@@ -301,7 +301,7 @@ io.on('connection', function (socket) {
         var roomForUpgrade = getRoomWithID(ourHero.hostof);
         roomForUpgrade.promoteFanToHost(userToUpgrade.id);
         socket.emit("update", "just made "+username+" a host.");
-        socket.broadcast.to(socket.room).emit("set iAmHost", username, true); 
+        socket.broadcast.to(socket.room).emit("set iAmHost", username, true);
       }
       else {
         socket.emit("update", "that person is already a host hahahahahhahaha");
@@ -405,7 +405,7 @@ io.on('connection', function (socket) {
       }
     });
     
-    socket.emit("set roomAvailable", true); //tell the client whats really good
+    socket.emit("set currentlyInRoom", true); //tell the client whats really good
     socket.broadcast.emit("update", ourHero.username+" is now in room "+getRoomWithID(id).name+". There are now "+_.size(rooms)+" rooms: "+getRoomList());
     io.sockets.emit("update roomsList", rooms);
 
@@ -462,15 +462,23 @@ io.on('connection', function (socket) {
           roomForDeletingUser.removeHost(ourHero.id);
         }
         else { //owner
-          var newOwner = roomForDeletingUser.removeOwner(ourHero.id);
-          if(newOwner) {
-            socket.broadcast.to(socket.room).emit("set iAmHost", newOwner.username, true); 
-          } else {
-            //the owner was the only person in the room so we're going to delete it
-            rooms = _.without(rooms, roomForDeletingUser);
-            // roomForDeletingUser.killRoom();  //this would be to archive it. revisit this when we build profile pages
-            delete roomForDeletingUser;
-          }
+          // var newOwner = roomForDeletingUser.removeOwner(ourHero.id);
+          io.to(socket.room).emit("tell client owner left", ourHero.username+" left, so this room is now dead.  Join another room or start your own conversation");
+          roomForDeletingUser.killRoom();
+
+          //the owner was the only person in the room so we're going to delete it
+          rooms = _.without(rooms, roomForDeletingUser);
+          // roomForDeletingUser.killRoom();  //this would be to archive it. revisit this when we build profile pages
+          delete roomForDeletingUser;
+
+          // if(newOwner) {
+          //   socket.broadcast.to(socket.room).emit("set iAmHost", newOwner.username, true); 
+          // } else {
+          //   //the owner was the only person in the room so we're going to delete it
+          //   rooms = _.without(rooms, roomForDeletingUser);
+          //   // roomForDeletingUser.killRoom();  //this would be to archive it. revisit this when we build profile pages
+          //   delete roomForDeletingUser;
+          // }
         }
       }
 
