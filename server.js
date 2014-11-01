@@ -83,29 +83,6 @@ app.use(function(req, res, next) {
     next(err);
 });
 
-// //
-// // error handlers
-// //
-// // development error handler -- will print stacktrace
-// if (app.get('env') === 'development') {
-//     app.use(function(err, req, res, next) {
-//         res.status(err.status || 500);
-//         res.render('error', {
-//             message: err.message,
-//             error: err
-//         });
-//     });
-// }
-
-// // production error handler -- no stacktraces leaked to user
-// app.use(function(err, req, res, next) {
-//     res.status(err.status || 500);
-//     res.render('error', {
-//         message: err.message,
-//         error: {}
-//     });
-// });
-
 //
 // Chatroom
 //
@@ -355,11 +332,11 @@ io.on('connection', function (socket) {
     
     socket.emit("update", "you ("+ourHero.username + ") want to enter chat with id: "+JSON.stringify(id));
    
-    var oldRoom = null;
-    if (ourHero.inroom) {
-      oldRoom = getRoomWithID(ourHero.inroom);
+    var oldRoom = getRoomWithID(ourHero.inroom);;
+    if (oldRoom) {
       socket.emit("update", "You are already in a room.  Going to remove you from room "+ourHero.inroom);
       getRoomWithID(ourHero.inroom).removePerson(ourHero.id);
+      io.to(oldRoom.id).emit("update room metadata", oldRoom;
     }
 
     //what if the chatroom already exists!!
@@ -403,9 +380,7 @@ io.on('connection', function (socket) {
     socket.broadcast.emit("update", ourHero.username+" is now in room "+getRoomWithID(id).name+". There are now "+_.size(rooms)+" rooms: "+getRoomList());
     io.sockets.emit("update roomsList", rooms);
 
-    io.to(oldRoom.id).emit("update room metadata", oldRoom;
     io.to(socket.room).emit("update room metadata", getRoomWithID(id));
-
   }
 
 
