@@ -315,10 +315,30 @@ $(function() {
   ///////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////
 
-  $('#choose_image').click(function() {
-    alert('not implemented yet sorry');
-    return false;
-  })
+  var opts = {
+    dragClass: "#hostMessages",
+    accept: 'image/*',
+    on: {
+      load: function(e, file) {
+
+        if (file.type.match(/image/)) {
+          socket.emit('new image', e.target.result);
+        }
+
+      },
+      error: function(e, file) {
+        alert("Sorry, there was an error");
+      },
+      groupstart: function(group) {
+      },
+      groupend: function(group) {
+      }
+    }
+  };
+
+  $("#imagefile, #dropzone").fileReaderJS(opts);
+  $("body").fileClipboard(opts);
+
   ///////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////
 

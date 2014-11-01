@@ -87,7 +87,7 @@
                   <span class="sr-only">Toggle Dropdown</span>
                   </button>
                   <ul class="dropdown-menu" role="menu">
-                  <li><a href="#" id="choose_image">Choose Image</a></li>
+                  <li><input type="file" id="imagefile" accept="image/*"></li>
                   </ul>
                   </span>
               </div>
@@ -103,6 +103,7 @@
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
+    <script type='text/javascript' src='js/filereader.js'></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
     var user = <%- JSON.stringify(user) %>;
