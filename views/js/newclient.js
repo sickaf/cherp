@@ -28,9 +28,10 @@ $(function() {
 
   var socket = io();
 
-  socket.emit('add username', user);
+  // socket.emit('add user', user);
+  socket.emit('set username', username);
 
-  setChatname('default');
+  socket.emit('enter chat', 'bieberfans');
 
   //someone needs to get rid of this dumb function
   function addParticipantsMessage (data) {
@@ -110,7 +111,7 @@ $(function() {
     }
     
     var $usernameDiv = $('<span class="username"/>')
-      .text(data.username)
+      .text(data.username + ' ')
       .css('color', getUsernameColor(data.username));
 
     var $messageBodyDiv;
@@ -140,7 +141,7 @@ $(function() {
   function addFanMessage (data, options) {
 
     var $usernameDiv = $('<span class="username"/>')
-      .text(data.username + ': ')
+      .text(data.username + ' ')
       .css('color', getUsernameColor(data.username));
     
     //set up a listener so that if the host clicks this div they will become the host
@@ -356,9 +357,10 @@ $(function() {
   ///////  THIS NEEDS TO BE UPDATED TO NOT BE SO SHITTY    //////
   ///////                                                  //////
   ///////////////////////////////////////////////////////////////
-  socket.on('add database messages', function(data) {
-    for (var i = 0; i < data.length; i++) {
-      addFanMessage(data[i]);
+  // Whenever the server emits 'new message', update the chat body
+  socket.on('add database messages', function (data) {
+    for(var i = 0; i < data.length; i++) {
+      addHostMessage(data[i]);
     }
   });
 
