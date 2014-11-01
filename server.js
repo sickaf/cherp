@@ -234,7 +234,7 @@ io.on('connection', function (socket) {
 
   //messaging
   socket.emit('login', "Welcome to the world. You have connected to the server. People are: "+getPeopleList()+". you are "+JSON.stringify(ourHero));
-//sets connected = true
+  //sets connected = true
   
   sockets.push(socket);
 
@@ -338,7 +338,7 @@ io.on('connection', function (socket) {
     //LETS DO THIS
     socket.emit("clear messages", {});
     
-    socket.emit("update", "ourHero ("+ourHero.username + ") wants to enter chat: "+chatname);
+    socket.emit("update", "you ("+ourHero.username + ") want to enter chat: "+chatname);
    
     if (ourHero.inroom) {
       socket.emit("update", "You are already in a room.  Going to remove you from room "+ourHero.inroom);
@@ -390,6 +390,69 @@ io.on('connection', function (socket) {
 
   });
 
+  socket.on('enter chat', function (id) {
+
+    if (ourHero.owns) {
+      socket.emit("update", "You already own a room! This is madness!");
+      return;
+    }
+
+    //LETS DO THIS
+    socket.emit("clear messages", {});
+    
+    socket.emit("update", "you ("+ourHero.username + ") want to enter chat: "+getRoomWithID(id).name);
+   
+    if (ourHero.inroom) {
+      socket.emit("update", "You are already in a room.  Going to remove you from room "+ourHero.inroom);
+      getRoomWithID(ourHero.inroom).removePerson(ourHero.id);
+    }
+
+    //what if the chatroom already exists!!
+    if(getRoomWithID(id)) {
+      var existingRoom = getRoomWithID(id);
+      if(existingRoom.peopleNum == 0) { //TODO: change to .available
+        getRoomWithID(id).addOwner(ourHero);
+        socket.emit("set iAmHost", ourHero.username, true); 
+        socket.emit("update", "the room "+getRoomWithID(id).name + " already exists but no one is in it.  adding you as OWNER. now "+getRoomWithID(id).name + " has "+getRoomWithID(id).peopleNum+" people");
+      }
+      else {
+        getRoomWithID(id).addFan(ourHero);
+        socket.emit("update", "the room "+getRoomWithID(id).name + " already exists.  adding you as a FAN. now "+getRoomWithID(id).name + " has "+getRoomWithID(id).peopleNum+" people");
+      }
+
+      // RoomModel.findOne({ 'id' :  getRoomWithName(chatname).id}, function(err, room) {
+    }
+    else { //room doesnt exist. create it
+      socket.emit("update", "the room "+getRoomWithID(id).name + " doesnt exist yet.  adding you as OWNER");
+
+      var id = uuid.v4();
+      var room = new Room("unnamed"+id.substr(0,7), id, ourHero);
+      rooms.push(room);
+      //add room to socket, and auto join the creator of the room
+      socket.emit("set iAmHost", ourHero.username, true); 
+    }
+    socket.leave(socket.room);
+    socket.room = id;
+    socket.join(socket.room);
+
+    RoomModel.findOne({'name' : getRoomWithID(id).name}, function(err, room) {
+      if (err)
+        console.log("database ERR getting hostMessages: "+err);
+      if (room) {
+        console.log("database found room with name: "+room.name);
+        socket.emit("add database messages", room.hostMessages);
+      } else {
+        console.log("database couldnt find "+getRoomWithID(id).name+" to load messages from");
+      }
+    });
+    
+    socket.emit("set roomAvailable", true); //tell the client whats really good
+    socket.broadcast.emit("update", ourHero.username+" is now in room "+getRoomWithID(id).name+". There are now "+_.size(rooms)+" rooms: "+getRoomList());
+    io.sockets.emit("update roomsList", rooms);
+
+  });
+
+
   socket.on('kill room', function (data) {
     if(ourHero.owns == socket.room) {
       socket.emit("update", ourHero.username + "wants to end the chat");
@@ -429,6 +492,8 @@ io.on('connection', function (socket) {
       roomForDeletingUser = getRoomWithID(ourHero.inroom);
 
       if(roomForDeletingUser){
+        console.log("roomForDeletingUser exists");
+
         if(ourHero.hostof == null) { //fan
           roomForDeletingUser.removeFan(ourHero.id);
         } 
