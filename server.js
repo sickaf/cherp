@@ -399,36 +399,36 @@ io.on('connection', function (socket) {
 
   // when the user disconnects.. perform this
   socket.on('disconnect', function () {
-    // remove the username from global people list
-    var roomForDeletingUser;
-    console.log("ourHero ("+ourHero.username+") is disconnecting");
-    if (ourHero) {
-      roomForDeletingUser = getRoomWithID(ourHero.inroom);
+    // // remove the username from global people list
+    // var roomForDeletingUser;
+    // console.log("ourHero ("+ourHero.username+") is disconnecting");
+    // if (ourHero) {
+    //   roomForDeletingUser = getRoomWithID(ourHero.inroom);
 
-      if(ourHero.owns == null) {
-        roomForDeletingUser.removeFan(ourHero.id);
-      } else {
-        var newHost = roomForDeletingUser.removeHost(ourHero.id);
-        if(newHost) {
-          socket.broadcast.to(socket.room).emit("set iAmHost", newHost.username, true); 
-        }
-      }
-
-
-      // echo globally that this client has left
-      socket.broadcast.emit('user left', {
-        username: ourHero.username,
-        chatname: roomForDeletingUser.name,
-        numUsers: _.size(people) - 1,
-        numUsersInChat: roomForDeletingUser.peopleNum
-      });
-      io.sockets.emit("update roomsList", rooms);
+    //   if(ourHero.owns == null) {
+    //     //roomForDeletingUser.removeFan(ourHero.id);
+    //   } else {
+    //     var newHost = roomForDeletingUser.removeHost(ourHero.id);
+    //     if(newHost) {
+    //       socket.broadcast.to(socket.room).emit("set iAmHost", newHost.username, true); 
+    //     }
+    //   }
 
 
-      people = _.without(people, ourHero);
-      delete ourHero;
+    //   // echo globally that this client has left
+    //   socket.broadcast.emit('user left', {
+    //     username: ourHero.username,
+    //     chatname: roomForDeletingUser.name,
+    //     numUsers: _.size(people) - 1,
+    //     numUsersInChat: roomForDeletingUser.peopleNum
+    //   });
+    //   io.sockets.emit("update roomsList", rooms);
 
-    }
+
+    //   people = _.without(people, ourHero);
+    //   delete ourHero;
+
+    // }
   });
 });
 

@@ -63,6 +63,20 @@ module.exports = function(app, passport) {
 		});
 	});
 
+	app.get('/newhome', function(req, res) {
+		if (req.user) {
+			console.log('logged in user found in session');
+			res.render('newindex', { user : req.user });
+		} else {
+			console.log('no user found, creating anon user and saving to session');
+			
+			var user = new User();
+      		user.username = randomUsername();
+
+      		res.render('newindex', { user : user });
+        }
+	})
+
 	// =====================================
 	// LOGOUT ==============================
 	// =====================================
