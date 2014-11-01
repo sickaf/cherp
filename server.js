@@ -153,12 +153,11 @@ function getRoomWithID (id) {
 
 // function pushMessageToDB(roomID, fullMessage){
 function pushMessageToDB(name, roomID, fullMessage){
-  // RoomModel.findOne({ 'id' : roomID }, function(err, room) {
-  RoomModel.findOne({ 'name' : name }, function(err, room) {
+  RoomModel.findOne({ 'id' : roomID }, function(err, room) {
   if (err)
     console.log("database ERR: "+err);
   if (room) {
-    console.log("database found room with name: "+room.name);
+    console.log("database found room with id: "+room.id);
     room.hostMessages.push(fullMessage);
     room.save(function(err) {
       if (err)
@@ -330,10 +329,10 @@ io.on('connection', function (socket) {
     }
   });
 
-  // // when the client emits 'add username', this listens and executes
-  // socket.on('set username', function (username) {
-  //   ourHero.username = username;
-  // });
+  // when the client emits 'add username', this listens and executes
+  socket.on('set username', function (username) {
+    ourHero.username = username;
+  });
 
   // socket.on('enter chat', function (chatname) {
 
@@ -443,8 +442,6 @@ io.on('connection', function (socket) {
         getRoomWithID(id).addFan(ourHero);
         socket.emit("update", "the room "+getRoomWithID(id).name + " already exists.  adding you as a FAN. now "+getRoomWithID(id).name + " has "+getRoomWithID(id).peopleNum+" people");
       }
-
-      // RoomModel.findOne({ 'id' :  getRoomWithName(chatname).id}, function(err, room) {
     }
     else { //room doesnt exist. create it
       socket.emit("update", "the room with id "+ id + " doesnt exist yet.  adding you as OWNER");
@@ -459,14 +456,24 @@ io.on('connection', function (socket) {
     socket.room = id;
     socket.join(socket.room);
 
-    RoomModel.findOne({'name' : getRoomWithID(id).name}, function(err, room) {
+    // RoomModel.findOne({'name' : getRoomWithID(id).name}, function(err, room) {
+    //   if (err)
+    //     console.log("database ERR getting hostMessages: "+err);
+    //   if (room) {
+    //     console.log("database found room with name: "+room.name);
+    //     socket.emit("add database messages", room.hostMessages);
+    //   } else {
+    //     console.log("database couldnt find "+getRoomWithID(id).name+" to load messages from");
+    //   }
+    // });
+    RoomModel.findOne({'id' : id}, function(err, room) {
       if (err)
         console.log("database ERR getting hostMessages: "+err);
       if (room) {
-        console.log("database found room with name: "+room.name);
+        console.log("database found room with id: "+room.id);
         socket.emit("add database messages", room.hostMessages);
       } else {
-        console.log("database couldnt find "+getRoomWithID(id).name+" to load messages from");
+        console.log("database couldnt find "+id+" to load messages from");
       }
     });
     
