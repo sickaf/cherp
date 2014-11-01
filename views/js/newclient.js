@@ -121,8 +121,9 @@ $(function() {
       $messageBodyDiv = $('<span class="messageBody">')
       .append('<img src="' + data.base64Image + '"/>');
     } else {
+      var messageText = linkify(data.message, true);
       $messageBodyDiv = $('<span class="messageBody">')
-      .text(data.message);
+      .append(messageText);
     }
 
     var typingClass = data.typing ? 'typing' : '';
@@ -149,8 +150,9 @@ $(function() {
       socket.emit('make host', data.username);
     });
 
-    var $messageBodyDiv = $('<span class="messageBody">')
-      .text(data.message);
+    var messageText = linkify(data.message, false);
+    $messageBodyDiv = $('<span class="messageBody">')
+      .append(messageText);
 
     //set up a listener so that if the host clicks this div itll get forwarded
     $messageBodyDiv.click(function () {
@@ -411,6 +413,67 @@ $(function() {
     removeHostTyping(data);
   });
 });
+
+function getHostName(url) {
+    var match = url.match(/:\/\/(www[0-9]?\.)?(.[^/:]+)/i);
+    if (match != null && match.length > 2 &&
+        typeof match[2] === 'string' && match[2].length > 0) {
+    return match[2];
+    }
+    else {
+        return null;
+    }
+  }
+
+  ///////////////////////////////////////////////////////////////
+  ///////                                                  //////
+  ///////  LINK HELPERS                                    //////
+  ///////                                                  //////
+  ///////////////////////////////////////////////////////////////
+
+  function getDomain(url) {
+    var hostName = getHostName(url);
+    var domain = hostName;
+    
+    if (hostName != null) {
+        var parts = hostName.split('.').reverse();
+        
+      if (parts != null && parts.length > 1) {
+          domain = parts[1] + '.' + parts[0];
+            
+         if (hostName.toLowerCase().indexOf('.co.uk') != -1
+                 && parts.length > 2) {
+           domain = parts[2] + '.' + domain;
+         }
+      }
+    }
+    return domain;
+  }
+
+  //Creates the embed code from a url
+  function youtubify(url){
+    return '//www.youtube.com/embed/' + url.substring(url.indexOf('v=')+2);
+  }
+
+  // Adds link html around hyperlinks 
+  function linkify(text, shouldEmbed) {
+    var urlRegex = /(((https?:\/\/)|(www\.))[^\s]+)/g;
+    return text.replace(urlRegex, function(url,b,c) {
+        var fullURL = (c == 'www.') ?  'http://' +url : url;
+
+        if (shouldEmbed) {
+
+          if (getHostName(fullURL) == 'youtube.com'){
+            return '<iframe width="380" height="285" src="'+ youtubify(fullURL) + '" frameborder="0" allowfullscreen></iframe>';
+          }
+
+          else if (getDomain(fullURL) == "imgur.com"){
+            return '<a class="embedly-card" href="' + fullURL + '" </a> <script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>';
+          }
+       } 
+      return '<a href="' +fullURL+ '" target="_blank">' + url + '</a>';
+    }) 
+  } 
 
 /*
 
