@@ -469,9 +469,8 @@ $(function() {
   socket.on('stop typing', function (data) {
     removeHostTyping(data);
   });
-});
 
-  ///////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////
   ///////                                                  //////
   ///////  LINK HELPERS                                    //////
   ///////                                                  //////
@@ -521,7 +520,9 @@ $(function() {
         if (shouldEmbed) {
 
           if (getHostName(fullURL) == 'youtube.com'){
-            return '<iframe width="380" height="285" src="'+ youtubify(fullURL) + '" frameborder="0" allowfullscreen></iframe>';
+            var divWidth = $hostMessages.width() - 40;
+            var divHeight = divWidth * 0.75;
+            return '<iframe width=' + '"' + divWidth + '"' + 'height=' + '"' + divHeight + '"' + 'src="'+ youtubify(fullURL) + '" frameborder="0" allowfullscreen></iframe>';
           }
 
           else if (getDomain(fullURL) == "imgur.com"){
@@ -531,6 +532,7 @@ $(function() {
       return '<a href="' +fullURL+ '" target="_blank">' + url + '</a>';
     }) 
   } 
+});
 
 /*
 
