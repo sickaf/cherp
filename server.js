@@ -258,28 +258,51 @@ io.on('connection', function (socket) {
     }
   });
 
+
   // when the client emits 'make host', this listens and executes
-  socket.on('make host', function (username) {
-    
-    if(ourHero.hostof == socket.room) {
-
-      var userToUpgrade = _.where(people, {username: username})[0];
-
-      if(userToUpgrade.hostof == null ) {
-        var roomForUpgrade = getRoomWithID(ourHero.hostof);
-        roomForUpgrade.promoteFanToHost(userToUpgrade.id);
-        socket.emit("update", "just made "+username+" a host.");
-        socket.broadcast.to(socket.room).emit("set iAmHost", username, true);
-        io.to(socket.room).emit("update room metadata", roomForUpgrade);
-      }
-      else {
-        socket.emit("update", "that person is already a host hahahahahhahaha");
-      }
-    }
-    else {
-      socket.emit("update", "ur not the host u cant upgrade people");
-    }
+  socket.on('promote fan', function (username) {
+    changeStatus(username, true);
   });
+
+  // when the client emits 'make host', this listens and executes
+  socket.on('demote host', function (username) {
+    changeStatus(username, false);
+  });
+
+  function changeStatus(username, promoteUp) {
+    if(ourHero.owns != socket.room) {
+      socket.emit("update", "ur not the owner u cant change peoples status go make ur own room");
+      return;
+    }
+    var userToChange = _.where(people, {username: username})[0];
+    var roomForChange = getRoomWithID(ourHero.owns);
+
+    if(promoteUp) { //PROMOTION (yay)
+      if(userToChange.hostof != null) {
+        socket.emit("update", "that person is already a host hahahahahhahaha");
+        return;
+      }
+      roomForChange.promoteFanToHost(userToChange.id);
+      socket.emit("update", "just made "+username+" a host.");
+      io.to(socket.room).emit("update room metadata", roomForChange);
+    }
+    else { //DEMOTION :(
+      if(userToChange.owns == socket.room) {
+        socket.emit("update", "you cant demote urself!");
+        return;
+      }
+      else if(userToChange.hostof != socket.room ) {
+        socket.emit("update", "that person is not a host hahahahahhahaha");
+        return;
+      }
+
+      roomForChange.demoteHostToFan(userToChange.id);
+      socket.emit("update", "just demoted "+username+".");
+      io.to(socket.room).emit("update room metadata", roomForChange);
+    }
+    socket.broadcast.to(socket.room).emit("set iAmHost", username, promoteUp);
+  }
+
 
   // when the client emits 'host repost', this listens and executes
   socket.on('host repost', function (data) {

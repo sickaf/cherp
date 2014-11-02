@@ -32,16 +32,11 @@ $(function() {
 
   var socket = io();
 
-  // socket.emit('add user', user);
   socket.emit('set username', username);
-
-  // // sets correct chat name
-  // setChatname('bieberfans');
   socket.emit('join trending chat', null);
 
 
   $('#create-room-button').click(function() {
-      console.log("createroombutton pressed");
       socket.emit('enter chat with id', null);
   });
 
@@ -129,7 +124,7 @@ $(function() {
   // Log a message
   function log (message, options) {
     var $el = $('<li class="list-group-item list-group-item-info log-message">').addClass('log').text(message);
-    addMessageElement($el, options);
+    addHostMessageElement($el, options);
   }
 
   function clearMessages () {
@@ -160,6 +155,11 @@ $(function() {
       .text(data.username + ' ')
       .css('color', getUsernameColor(data.username));
 
+    //set up a listener so that if the own clicks this div they will become demoted to a fan
+    $usernameDiv.click(function () {
+      socket.emit('demote host', data.username);
+    });
+
     var $messageBodyDiv;
     
     //if it's an image, do that
@@ -172,6 +172,15 @@ $(function() {
       .append(messageText);
     }
 
+    //set up a listener so that if the host clicks this div itll get forwarded
+    $messageBodyDiv.click(function () {
+      data.repost = true;
+      socket.emit('host repost', data);
+      if(iAmHost){
+        addHostMessage(data);
+      }
+    });
+
     var typingClass = data.typing ? 'typing' : '';
     var repostClass = data.repost ? 'repost' : '';
 
@@ -181,7 +190,7 @@ $(function() {
       .addClass(repostClass)
       .append($usernameDiv, $messageBodyDiv);
 
-    addMessageElement($messageDiv, options);
+    addHostMessageElement($messageDiv, options);
   }
 
  // Adds the visual fan message to the message list
@@ -193,7 +202,7 @@ $(function() {
     
     //set up a listener so that if the host clicks this div they will become the host
     $usernameDiv.click(function () {
-      socket.emit('make host', data.username);
+      socket.emit('promote fan', data.username);
     });
 
     var messageText = linkify(data.message, false);
@@ -216,43 +225,16 @@ $(function() {
     addFanMessageElement($messageDiv, options);
   }
 
-  // Adds a message element to the messages and scrolls to the bottom
-  // el - The element to add as a message
-  // options.fade - If the element should fade-in (default = true)
-  // options.prepend - If the element should prepend
-  //   all other messages (default = false)
-  function addMessageElement (el, options) {
-    var $el = $(el);
-
-    // Setup default options
-    if (!options) {
-      options = {};
-    }
-    if (typeof options.fade === 'undefined') {
-      options.fade = true;
-    }
-    if (typeof options.prepend === 'undefined') {
-      options.prepend = false;
-    }
-
-    // Apply options
-    if (options.fade) {
-      $el.hide().fadeIn(FADE_TIME);
-    }
-    if (options.prepend) {
-      $hostMessages.prepend($el);
-    } else {
-      $hostMessages.append($el);
-    }
-    $hostMessages[0].scrollTop = $hostMessages[0].scrollHeight;
+  function addHostMessageElement (el, options) {
+    addMessageElement(el, $hostMessages, options);
   }
 
- // Adds a message element to the messages and scrolls to the bottom
-  // el - The element to add as a message
-  // options.fade - If the element should fade-in (default = true)
-  // options.prepend - If the element should prepend
-  //   all other messages (default = false)
   function addFanMessageElement (el, options) {
+    addMessageElement(el, $fanMessages, options);
+  }
+
+
+  function addMessageElement (el, div, options) {
     var $el = $(el);
 
     // Setup default options
@@ -271,11 +253,11 @@ $(function() {
       $el.hide().fadeIn(FADE_TIME);
     }
     if (options.prepend) {
-      $fanMessages.prepend($el);
+      div.prepend($el);
     } else {
-      $fanMessages.append($el);
+      div.append($el);
     }
-    $fanMessages[0].scrollTop = $fanMessages[0].scrollHeight;
+    div[0].scrollTop = div[0].scrollHeight;
   }
 
   // Adds the visual chat typing message
@@ -336,18 +318,22 @@ $(function() {
     return COLORS[index];
   }
 
-  //this wont work for dates or arrays
-  function clone(obj) {
-    if (null == obj || "object" != typeof obj) return obj;
-    var copy = obj.constructor();
-    for (var attr in obj) {
-        if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
-    }
-    return copy;
-  }
+  // //this wont work for dates or arrays
+  // /*
+  // *
+  // * DEPRECATED
+  // *
+  // */
+  // function clone(obj) {
+  //   if (null == obj || "object" != typeof obj) return obj;
+  //   var copy = obj.constructor();
+  //   for (var attr in obj) {
+  //       if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
+  //   }
+  //   return copy;
+  // }
 
   // Image uploader
-
   var opts = {
     dragClass: "#hostMessages",
     accept: 'image/*',
@@ -403,12 +389,6 @@ $(function() {
 
   // Socket stuff
 
-  // // Whenever the server emits 'login', log the login message
-  // socket.on('login', function (data) {
-  //   currentlyInRoom = true;
-  //   log(data);
-  // });
-
   // Whenever the server emits 'login', log the login message
   socket.on('tell client owner left', function (msg) {
     currentlyInRoom = false;
@@ -421,8 +401,8 @@ $(function() {
     log(data);
   });
 
-  socket.on('set iAmHost', function (username, bool) {
-    if(username == username) {
+  socket.on('set iAmHost', function (usrname, bool) {
+    if(username == usrname) {
       iAmHost = bool;
     }
   });
