@@ -34,13 +34,9 @@ $(function() {
 
   socket.emit('set username', username);
 
-  var ownerName = user.wantsToJoin;
-
-  if (ownerName) {
-    console.log("OWNER NAME EXISTS");
-    socket.emit('join chat by owner', ownerName);
+  if (user.wantsToJoin) {
+    socket.emit('join chat by owner', user.wantsToJoin);
   } else {
-    console.log("NEITHER EXISTS");
     socket.emit('join trending chat', null);
   }
 
@@ -89,19 +85,6 @@ $(function() {
     });
     $trendingRoomsDiv.append($roomDiv);
   }
-
-  // Sets the chatname
-  /*
-  * 
-  * 
-  * DEPRECATED
-  * 
-  * 
-  */
-  // function setChatname (name) {
-  //     // Tell the server your chatname
-  //     socket.emit('enter chat', name);
-  // }
 
   // Sends a chat message
   function sendMessage () {
