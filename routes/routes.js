@@ -19,12 +19,6 @@ module.exports = function(app, passport) {
         }
 	});
 
-	app.get('/live/:ownerName', function(req, res) {
-		req.flash('wantsToJoin', req.params.ownerName);
-		res.redirect('/');
-	});
-
-
 
 	app.get('/login', function(req, res) {
 		res.render('login', { message: req.flash('loginMessage') });
@@ -81,6 +75,22 @@ module.exports = function(app, passport) {
 		res.render('profile', {
 			user : req.user // get the user out of session and pass to template
 		});
+	});
+
+	app.get('/:ownerName', function(req, res) {
+		if (req.user) {
+			console.log('logged in user found in session');
+			req.user.wantsToJoin = req.params.ownerName;
+			res.render('index', { user : req.user });
+		} else {
+			console.log('no user found, creating anon user and saving to session');
+			var user = new User();
+      		user.username = randomUsername();
+      		user.wantsToJoin = req.params.ownerName;
+      		res.render('index', { user : user });
+        }
+		// req.flash('wantsToJoin', req.params.ownerName);
+		// res.redirect('/');
 	});
 
 }
