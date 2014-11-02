@@ -426,15 +426,16 @@ io.on('connection', function (socket) {
         console.log("roomForDeletingUser exists");
 
         if(ourHero.hostof == null) { //fan
-          roomForDeletingUser.removeFan(ourHero.id);
           console.log(ourHero.username+" was just a FAN so going to remove them from the room");
+          roomForDeletingUser.removeFan(ourHero.id);
+          io.to(socket.room).emit("update room metadata", roomForDeletingUser);
+
         } 
         else if(ourHero.owns == null) { //host
           console.log(ourHero.username+" was just a HOST so going to remove them from the room");
           roomForDeletingUser.removeHost(ourHero.id);
+          io.to(socket.room).emit("update room metadata", roomForDeletingUser);
         }
-        io.to(socket.room).emit("update room metadata", roomForDeletingUser);
-
         else { //owner
           // var newOwner = roomForDeletingUser.removeOwner(ourHero.id);
           io.to(socket.room).emit("tell client owner left", ourHero.username+" left, so this room is now dead.  Join another room or start your own conversation");
