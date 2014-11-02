@@ -172,6 +172,15 @@ $(function() {
       .append(messageText);
     }
 
+    //set up a listener so that if the host clicks this div itll get forwarded
+    $messageBodyDiv.click(function () {
+      data.repost = true;
+      socket.emit('host repost', data);
+      if(iAmHost){
+        addHostMessage(data);
+      }
+    });
+
     var typingClass = data.typing ? 'typing' : '';
     var repostClass = data.repost ? 'repost' : '';
 
