@@ -81,10 +81,16 @@ $(function() {
   function addRoomToRoomsList(room){
     var $roomDiv = $('<li><a href="#">'+room.name+' ('+room.peopleNum+')</a></li>');
     $roomDiv.click(function () {
-      socket.emit('enter chat with id', room.id);
+      switchToRoom(room.id);
       return false;
     });
     $trendingRoomsDiv.append($roomDiv);
+  }
+
+  function switchToRoom(roomID) {
+    currentHosts = null;
+    currentRoomID = null;
+    socket.emit('enter chat with id', roomID);
   }
 
   // Sends a chat message
@@ -528,7 +534,7 @@ $(function() {
       }
     }
     else {
-      currentHosts = [];
+      currentHosts = null;
     }
 
     currentHosts = room.hosts.slice();
