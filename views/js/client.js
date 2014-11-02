@@ -14,6 +14,7 @@ $(function() {
   var $window = $(window);
   var $hostMessages = $('#hostMessages'); // host messages area
   var $fanMessages = $('#fanMessages'); // fan messages area
+  var $chatRoom = $('#chatRoom'); // fan messages area
   var $inputMessage = $('#chat_input'); // Input message input box
   var $sendButton = $('#send_button');
   var $chatRoomField = $('#chat-room-field');
@@ -431,6 +432,7 @@ $(function() {
    // Whenever the server emits 'new message', update the chat body
   socket.on('update roomsList', function (data) {
     updateRoomsList(data);
+    $chatRoom.show();  //this isn't the best long term place for this
   });
 
   //TODO this needs to work with the browser's back and forward buttons

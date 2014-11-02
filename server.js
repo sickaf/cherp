@@ -338,6 +338,7 @@ io.on('connection', function (socket) {
   function joinTrendingChat () {
     if(rooms.length > 0) {
       enterChatWithId(rooms[0].id);
+
     } else  {
       console.log("TRIED TO JOIN TRENDING CHAT BUT AINT NO ROOMS");
     }
@@ -424,6 +425,7 @@ io.on('connection', function (socket) {
       if (room) {
         console.log("database found room with id: "+room.id);
         socket.emit("add database messages", room.hostMessages);
+        
       } else {
         console.log("database couldnt find "+id+" to load messages from");
       }
@@ -513,8 +515,6 @@ io.on('connection', function (socket) {
     people = _.without(people, ourHero);
     delete ourHero; 
   });
-
-
 
 });
 
