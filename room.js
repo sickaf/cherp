@@ -175,8 +175,7 @@ Room.prototype.getHost = function(personID) {
 Room.prototype.getHostList = function() {
   var toRet = this.owner.username;
   for(var i = 0; i < this.hosts.length-1; i++) {
-      toRet += this.hosts[i].username+", ";
-    }
+    toRet += this.hosts[i].username+", ";
   }
   toRet += this.hosts[this.hosts.length-1];
   return toRet;
