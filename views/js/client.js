@@ -392,6 +392,8 @@ $(function() {
     currentlyInRoom = false;
     iAmHost = false;
     dangerLog(msg);
+    $membersLabel.text('');
+    $hostLabel.text("This room is archived.");
   });
 
   // Whenever the server emits 'new message', update the chat body

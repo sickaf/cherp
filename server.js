@@ -503,7 +503,6 @@ io.on('connection', function (socket) {
 
         //the owner left so were going to delete the room
         rooms = _.without(rooms, roomForDeletingUser);
-        // roomForDeletingUser.killRoom();  //this would be to archive it. revisit this when we build profile pages
         delete roomForDeletingUser;
       }
     }
