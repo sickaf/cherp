@@ -416,8 +416,8 @@ $(function() {
     log(data);
   });
 
-  socket.on('set iAmHost', function (username, bool) {
-    if(username == username) {
+  socket.on('set iAmHost', function (usrname, bool) {
+    if(username == usrname) {
       iAmHost = bool;
     }
   });
