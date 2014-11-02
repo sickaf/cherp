@@ -284,7 +284,6 @@ io.on('connection', function (socket) {
       }
       roomForChange.promoteFanToHost(userToChange.id);
       socket.emit("update", "just made "+username+" a host.");
-      io.to(socket.room).emit("update room metadata", roomForChange);
     }
     else { //DEMOTION :(
       if(userToChange.owns == socket.room) {
@@ -298,8 +297,8 @@ io.on('connection', function (socket) {
 
       roomForChange.demoteHostToFan(userToChange.id);
       socket.emit("update", "just demoted "+username+".");
-      io.to(socket.room).emit("update room metadata", roomForChange);
     }
+    io.to(socket.room).emit("update room metadata", roomForChange);
     socket.broadcast.to(socket.room).emit("set iAmHost", username, promoteUp);
   }
 
@@ -455,43 +454,50 @@ io.on('connection', function (socket) {
     // remove the username from global people list
     var roomForDeletingUser;
     console.log("ourHero ("+ourHero.username+") is disconnecting");
-    if (ourHero) {
-      roomForDeletingUser = getRoomWithID(ourHero.inroom);
+    if (!ourHero) {
+      console.log("ourHero doesnt exist! Adios!");
+      return;
+    }
 
-      if(roomForDeletingUser){
-        console.log("roomForDeletingUser exists");
+    roomForDeletingUser = getRoomWithID(ourHero.inroom);
+    console.log("ourhero.inroom is "+ourHero.inroom);
 
-        if(ourHero.hostof == null) { //fan
-          console.log(ourHero.username+" was just a FAN so going to remove them from the room");
-          roomForDeletingUser.removeFan(ourHero.id);
-          io.to(socket.room).emit("update room metadata", roomForDeletingUser);
 
-        } 
-        else if(ourHero.owns == null) { //host
-          console.log(ourHero.username+" was just a HOST so going to remove them from the room");
-          roomForDeletingUser.removeHost(ourHero.id);
-          io.to(socket.room).emit("update room metadata", roomForDeletingUser);
-        }
-        else { //owner
-          // var newOwner = roomForDeletingUser.removeOwner(ourHero.id);
-          io.to(socket.room).emit("tell client owner left", ourHero.username+" left, so this room is now dead.  Join another room or start your own conversation");
-          roomForDeletingUser.killRoom();
+    if(roomForDeletingUser){
+      console.log("roomForDeletingUser exists");
 
-          //the owner left so were going to delete the room
-          rooms = _.without(rooms, roomForDeletingUser);
-          // roomForDeletingUser.killRoom();  //this would be to archive it. revisit this when we build profile pages
-          delete roomForDeletingUser;
-        }
+      if(ourHero.hostof == null) { //fan
+        console.log(ourHero.username+" was just a FAN so going to remove them from the room");
+        roomForDeletingUser.removeFan(ourHero.id);
+        io.to(socket.room).emit("update room metadata", roomForDeletingUser);
+
+      } 
+      else if(ourHero.owns == null) { //host
+        console.log(ourHero.username+" was just a HOST so going to remove them from the room");
+        roomForDeletingUser.removeHost(ourHero.id);
+        io.to(socket.room).emit("update room metadata", roomForDeletingUser);
       }
+      else { //owner
+        // var newOwner = roomForDeletingUser.removeOwner(ourHero.id);
+        io.to(socket.room).emit("tell client owner left", ourHero.username+" left, so this room is now dead.  Join another room or start your own conversation");
+        roomForDeletingUser.killRoom();
 
-      io.sockets.emit("update roomsList", rooms);
-      io.sockets.emit("update", "brother "+ourHero.username+" is no longer with us");
+        //the owner left so were going to delete the room
+        rooms = _.without(rooms, roomForDeletingUser);
+        // roomForDeletingUser.killRoom();  //this would be to archive it. revisit this when we build profile pages
+        delete roomForDeletingUser;
+      }
+    }
 
-      people = _.without(people, ourHero);
-      delete ourHero;
+    io.sockets.emit("update roomsList", rooms);
+    io.sockets.emit("update", "brother "+ourHero.username+" is no longer with us");
 
-     }
+    people = _.without(people, ourHero);
+    delete ourHero; 
   });
+
+
+
 });
 
 module.exports = app; 
