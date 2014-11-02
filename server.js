@@ -277,6 +277,16 @@ io.on('connection', function (socket) {
     var userToChange = _.where(people, {username: username})[0];
     var roomForChange = getRoomWithID(ourHero.owns);
 
+    if(!userToChange) {
+      socket.emit("update", username+" is no longer with us :(");
+      return;
+    }
+
+    if(userToChange.inroom != socket.room) {
+      socket.emit("update", username+" is no longer in this chat");
+      return;
+    }
+
     if(promoteUp) { //PROMOTION (yay)
       if(userToChange.hostof != null) {
         socket.emit("update", "that person is already a host hahahahahhahaha");
@@ -356,14 +366,22 @@ io.on('connection', function (socket) {
       id = ourHero.id;
     }
 
-    if (ourHero.owns) {
-      socket.emit("update", "You already own a room! This is madness!");
+    if(id == ourHero.inroom) {
+      socket.emit("update", "youre already in that room");
       return;
     }
 
     //LETS DO THIS
     socket.emit("clear messages", {});
-    
+
+    if (ourHero.owns) {
+      socket.emit("update", "You already own a room! KILLING THAT ROOM!");
+      var roomSetToDie = getRoomWithID(ourHero.owns);
+      roomSetToDie.killRoom();
+      rooms = _.without(rooms, roomSetToDie);
+      delete roomSetToDie;
+    }
+
     socket.emit("update", "you ("+ourHero.username + ") want to enter chat with id: "+JSON.stringify(id));
    
     var oldRoom = getRoomWithID(ourHero.inroom);;
@@ -376,20 +394,21 @@ io.on('connection', function (socket) {
     //what if the chatroom already exists!!
     if(getRoomWithID(id)) {
       var existingRoom = getRoomWithID(id);
-      if(existingRoom.peopleNum == 0) { //TODO: change to .available
-        getRoomWithID(id).addOwner(ourHero);
-        socket.emit("set iAmHost", ourHero.username, true); 
-        socket.emit("update", "the room "+getRoomWithID(id).name + " already exists but no one is in it.  adding you as OWNER. now "+getRoomWithID(id).name + " has "+getRoomWithID(id).peopleNum+" people");
-      }
-      else {
+      // if(existingRoom.peopleNum == 0) { //TODO: change to .available
+      //   getRoomWithID(id).addOwner(ourHero);
+      //   socket.emit("set iAmHost", ourHero.username, true); 
+      //   socket.emit("update", "the room "+getRoomWithID(id).name + " already exists but no one is in it.  adding you as OWNER. now "+getRoomWithID(id).name + " has "+getRoomWithID(id).peopleNum+" people");
+      // }
+      // else {
         getRoomWithID(id).addFan(ourHero);
         socket.emit("update", "the room "+getRoomWithID(id).name + " already exists.  adding you as a FAN. now "+getRoomWithID(id).name + " has "+getRoomWithID(id).peopleNum+" people");
-      }
+        socket.emit("set iAmHost", ourHero.username, false); 
+      // }
     }
     else { //room doesnt exist. create it
       socket.emit("update", "the room with id "+ id + " doesnt exist yet.  adding you as OWNER");
 
-      var id = uuid.v4();
+      //var id = uuid.v4();
       var room = new Room(ourHero.username+"Room", id, ourHero);
       rooms.push(room);
       //add room to socket, and auto join the creator of the room
