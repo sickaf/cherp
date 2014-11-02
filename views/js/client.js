@@ -491,13 +491,13 @@ $(function() {
       var usersRemoved = currentHosts.filter(function(current) {
         return room.hosts.filter(function(current_b) {
           return current_b.id == current.id
-        });
+        }).length == 0;
       });
 
       var usersAdded = room.hosts.filter(function(current) {
         return currentHosts.filter(function(current_a) {
           return current_a.id == current.id
-        });
+        }).length == 0;
       });
 
       for (var i = usersAdded.length - 1; i >= 0; i--) {
