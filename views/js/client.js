@@ -193,7 +193,7 @@ $(function() {
     
     //set up a listener so that if the host clicks this div they will become the host
     $usernameDiv.click(function () {
-      socket.emit('make host', data.username);
+      socket.emit('promote fan', data.username);
     });
 
     var messageText = linkify(data.message, false);

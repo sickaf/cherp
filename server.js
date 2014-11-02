@@ -259,7 +259,7 @@ io.on('connection', function (socket) {
   });
 
   // when the client emits 'make host', this listens and executes
-  socket.on('make host', function (username) {
+  socket.on('promote fan', function (username) {
     
     if(ourHero.owns == socket.room) {
 
@@ -281,7 +281,7 @@ io.on('connection', function (socket) {
     }
   });
 
-    // when the client emits 'make host', this listens and executes
+    // when the client emits 'promote fan', this listens and executes
   socket.on('demote host', function (username) {
     
     if(ourHero.owns == socket.room) {
