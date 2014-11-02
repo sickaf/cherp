@@ -336,7 +336,7 @@ io.on('connection', function (socket) {
     if (oldRoom) {
       socket.emit("update", "You are already in a room.  Going to remove you from room "+ourHero.inroom);
       getRoomWithID(ourHero.inroom).removePerson(ourHero.id);
-      io.to(oldRoom.id).emit("update room metadata", oldRoom;
+      io.to(oldRoom.id).emit("update room metadata", oldRoom);
     }
 
     //what if the chatroom already exists!!

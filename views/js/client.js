@@ -484,6 +484,12 @@ $(function() {
     removeHostTyping(data);
   });
 
+  // Whenever the server emits 'stop typing', kill the typing message
+  socket.on('update room metadata', function (room) {
+    $membersLabel.val('Members: ' + room.peopleNum);
+    $hostLabel.val(room.getHostList());
+  });
+
     ///////////////////////////////////////////////////////////////
   ///////                                                  //////
   ///////  LINK HELPERS                                    //////
