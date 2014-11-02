@@ -127,6 +127,14 @@ $(function() {
     addHostMessageElement($el, options);
   }
 
+  function showNotification(message) {
+    smoke.signal(message, function(e){
+    }, {
+      duration: 2000,
+      classname: "custom-class"
+    });
+  }
+
   function clearMessages () {
     $hostMessages.html("");
     $fanMessages.html("");
@@ -404,6 +412,13 @@ $(function() {
   socket.on('set iAmHost', function (usrname, bool) {
     if(username == usrname) {
       iAmHost = bool;
+    }
+
+    if (iAmHost) {
+      showNotification('You are now a host of this room!');
+    }
+    else {
+      showNotification('You got demoted :(');
     }
   });
 
