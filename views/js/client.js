@@ -540,6 +540,9 @@ $(function() {
           else if (getDomain(fullURL) == "imgur.com"){
             return '<a class="embedly-card" href="' + fullURL + '" </a> <script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>';
           }
+         else if (getDomain(fullURL) == "soundcloud.com"){
+            return '<a class="embedly-card" href="' + fullURL + '"></a> <script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>';
+          }
        } 
       return '<a href="' +fullURL+ '" target="_blank">' + url + '</a>';
     }) 
