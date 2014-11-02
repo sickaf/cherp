@@ -83,29 +83,6 @@ app.use(function(req, res, next) {
     next(err);
 });
 
-// //
-// // error handlers
-// //
-// // development error handler -- will print stacktrace
-// if (app.get('env') === 'development') {
-//     app.use(function(err, req, res, next) {
-//         res.status(err.status || 500);
-//         res.render('error', {
-//             message: err.message,
-//             error: err
-//         });
-//     });
-// }
-
-// // production error handler -- no stacktraces leaked to user
-// app.use(function(err, req, res, next) {
-//     res.status(err.status || 500);
-//     res.render('error', {
-//         message: err.message,
-//         error: {}
-//     });
-// });
-
 //
 // Chatroom
 //
@@ -230,7 +207,7 @@ io.on('connection', function (socket) {
   people.push(ourHero);
 
   //messaging
-  socket.emit('login', "Welcome to the world. You have connected to the server. People ("+people.length+") are: "+getPeopleList()+". you are "+JSON.stringify(ourHero));
+  socket.emit('update', "Welcome to the world. You have connected to the server. People ("+people.length+") are: "+getPeopleList()+". you are "+JSON.stringify(ourHero));
   //sets connected = true
   
   sockets.push(socket);
@@ -249,10 +226,6 @@ io.on('connection', function (socket) {
       base64Image: data,
       image: true
     };
-    if(!getRoomWithID(socket.room).isAvailable()){
-      socket.emit("update", "THIS ROOM IS FUCKING ARCHIVED lol i think at least");
-      return;
-    }
 
     if(ourHero.hostof == socket.room) {
       io.sockets.in(socket.room).emit('new host message', fullMessage);
@@ -267,11 +240,6 @@ io.on('connection', function (socket) {
   socket.on('new message', function (data) {
     if(!getRoomWithID(socket.room)){
       socket.emit("update", "ur not in a chatroom buddy.  go live or join one from the left if any exist.");
-      return;
-    }
-
-    if(!getRoomWithID(socket.room).isAvailable()){
-      socket.emit("update", "THIS ROOM IS FUCKING ARCHIVED lol i think at least dont quote me on anything");
       return;
     }
 
@@ -301,7 +269,8 @@ io.on('connection', function (socket) {
         var roomForUpgrade = getRoomWithID(ourHero.hostof);
         roomForUpgrade.promoteFanToHost(userToUpgrade.id);
         socket.emit("update", "just made "+username+" a host.");
-        socket.broadcast.to(socket.room).emit("set iAmHost", username, true); 
+        socket.broadcast.to(socket.room).emit("set iAmHost", username, true);
+        io.to(socket.room).emit("update room metadata", roomForUpgrade);
       }
       else {
         socket.emit("update", "that person is already a host hahahahahhahaha");
@@ -363,9 +332,11 @@ io.on('connection', function (socket) {
     
     socket.emit("update", "you ("+ourHero.username + ") want to enter chat with id: "+JSON.stringify(id));
    
-    if (ourHero.inroom) {
+    var oldRoom = getRoomWithID(ourHero.inroom);;
+    if (oldRoom) {
       socket.emit("update", "You are already in a room.  Going to remove you from room "+ourHero.inroom);
       getRoomWithID(ourHero.inroom).removePerson(ourHero.id);
+      io.to(oldRoom.id).emit("update room metadata", oldRoom;
     }
 
     //what if the chatroom already exists!!
@@ -405,10 +376,11 @@ io.on('connection', function (socket) {
       }
     });
     
-    socket.emit("set roomAvailable", true); //tell the client whats really good
+    socket.emit("set currentlyInRoom", true); //tell the client whats really good
     socket.broadcast.emit("update", ourHero.username+" is now in room "+getRoomWithID(id).name+". There are now "+_.size(rooms)+" rooms: "+getRoomList());
     io.sockets.emit("update roomsList", rooms);
 
+    io.to(socket.room).emit("update room metadata", getRoomWithID(id));
   }
 
 
@@ -461,16 +433,17 @@ io.on('connection', function (socket) {
           console.log(ourHero.username+" was just a HOST so going to remove them from the room");
           roomForDeletingUser.removeHost(ourHero.id);
         }
+        io.to(socket.room).emit("update room metadata", roomForDeletingUser);
+
         else { //owner
-          var newOwner = roomForDeletingUser.removeOwner(ourHero.id);
-          if(newOwner) {
-            socket.broadcast.to(socket.room).emit("set iAmHost", newOwner.username, true); 
-          } else {
-            //the owner was the only person in the room so we're going to delete it
-            rooms = _.without(rooms, roomForDeletingUser);
-            // roomForDeletingUser.killRoom();  //this would be to archive it. revisit this when we build profile pages
-            delete roomForDeletingUser;
-          }
+          // var newOwner = roomForDeletingUser.removeOwner(ourHero.id);
+          io.to(socket.room).emit("tell client owner left", ourHero.username+" left, so this room is now dead.  Join another room or start your own conversation");
+          roomForDeletingUser.killRoom();
+
+          //the owner left so were going to delete the room
+          rooms = _.without(rooms, roomForDeletingUser);
+          // roomForDeletingUser.killRoom();  //this would be to archive it. revisit this when we build profile pages
+          delete roomForDeletingUser;
         }
       }
 
