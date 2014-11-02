@@ -1,7 +1,6 @@
 function Room(name, id, owner) {
   this.name = name;
   this.id = id;
-  this.owner = owner;
   this.hosts = [];
   this.hostMessages = [];
   this.fans = [];
