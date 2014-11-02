@@ -33,7 +33,16 @@ $(function() {
   var socket = io();
 
   socket.emit('set username', username);
-  socket.emit('join trending chat', null);
+
+  var ownerName = user.wantsToJoin;
+
+  if (ownerName) {
+    console.log("OWNER NAME EXISTS");
+    socket.emit('join chat by owner', ownerName);
+  } else {
+    console.log("NEITHER EXISTS");
+    socket.emit('join trending chat', null);
+  }
 
 
   $('#create-room-button').click(function() {
