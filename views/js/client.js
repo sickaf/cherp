@@ -318,18 +318,22 @@ $(function() {
     return COLORS[index];
   }
 
-  //this wont work for dates or arrays
-  function clone(obj) {
-    if (null == obj || "object" != typeof obj) return obj;
-    var copy = obj.constructor();
-    for (var attr in obj) {
-        if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
-    }
-    return copy;
-  }
+  // //this wont work for dates or arrays
+  // /*
+  // *
+  // * DEPRECATED
+  // *
+  // */
+  // function clone(obj) {
+  //   if (null == obj || "object" != typeof obj) return obj;
+  //   var copy = obj.constructor();
+  //   for (var attr in obj) {
+  //       if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
+  //   }
+  //   return copy;
+  // }
 
   // Image uploader
-
   var opts = {
     dragClass: "#hostMessages",
     accept: 'image/*',
@@ -384,12 +388,6 @@ $(function() {
   });
 
   // Socket stuff
-
-  // // Whenever the server emits 'login', log the login message
-  // socket.on('login', function (data) {
-  //   currentlyInRoom = true;
-  //   log(data);
-  // });
 
   // Whenever the server emits 'login', log the login message
   socket.on('tell client owner left', function (msg) {
