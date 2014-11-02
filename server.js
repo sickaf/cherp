@@ -326,16 +326,28 @@ io.on('connection', function (socket) {
     ourHero.username = username;
   });
 
-  socket.on('join trending chat', function (data) {
+  function joinTrendingChat () {
     if(rooms.length > 0) {
       enterChatWithId(rooms[0].id);
     } else  {
       console.log("TRIED TO JOIN TRENDING CHAT BUT AINT NO ROOMS");
     }
+  }
+
+  socket.on('join trending chat', function (data) {
+    joinTrendingChat();
   });
 
+  socket.on('join chat by owner', function (ownerName) {
+    var roomToJoin = getRoomWithName(ownerName+"Room");
+    if (roomToJoin) {
+      enterChatWithId(roomToJoin.id);
+    } else {
+      joinTrendingChat();
+    }
+  });
 
-  socket.on('enter chat with id', function (id) {
+  socket.on('enter chat with id', function (id) { //used when you click the trending rooms link
     enterChatWithId(id);
   });
 

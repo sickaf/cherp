@@ -8,16 +8,22 @@ module.exports = function(app, passport) {
 	app.get('/', function(req, res) {
 		if (req.user) {
 			console.log('logged in user found in session');
+			req.user.wantsToJoin = req.flash('wantsToJoin');
 			res.render('index', { user : req.user });
 		} else {
 			console.log('no user found, creating anon user and saving to session');
-			
 			var user = new User();
       		user.username = randomUsername();
-
+      		user.wantsToJoin = req.flash('wantsToJoin');
       		res.render('index', { user : user });
         }
 	});
+
+	app.get('/live/:ownerName', function(req, res) {
+		req.flash('wantsToJoin', req.params.ownerName);
+		res.redirect('/');
+	});
+
 
 
 	app.get('/login', function(req, res) {
@@ -34,6 +40,7 @@ module.exports = function(app, passport) {
 		req.logout();
   		res.redirect('/login');
 	});
+
 
 
 	// =====================================
