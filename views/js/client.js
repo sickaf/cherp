@@ -20,7 +20,7 @@ $(function() {
   var $trendingRoomsDiv = $('#trending-rooms');
   var $createRoomButton = $('#create-room-button');
   var $hostLabel = $("#host-label");
-  var $membersLabel = $("members-label");
+  var $membersLabel = $("#members-label");
 
   // Prompt for setting a username
   var username = user.username;
@@ -477,6 +477,16 @@ $(function() {
   // Whenever the server emits 'stop typing', kill the typing message
   socket.on('stop typing', function (data) {
     removeHostTyping(data);
+  });
+
+  // Whenever the server emits 'stop typing', kill the typing message
+  socket.on('update room metadata', function (room) {
+    $membersLabel.text('Members: ' + room.peopleNum);
+    var st = "Hosts: " + room.owner.username;
+    for(var i = 0; i < room.hosts.length; i++) {
+      st += ', ' + room.hosts[i].username;
+    }
+    $hostLabel.text(st);
   });
 
     ///////////////////////////////////////////////////////////////
