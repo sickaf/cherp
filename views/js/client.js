@@ -89,10 +89,10 @@ $(function() {
   * 
   * 
   */
-  function setChatname (name) {
-      // Tell the server your chatname
-      socket.emit('enter chat', name);
-  }
+  // function setChatname (name) {
+  //     // Tell the server your chatname
+  //     socket.emit('enter chat', name);
+  // }
 
   // Sends a chat message
   function sendMessage () {
@@ -376,13 +376,7 @@ $(function() {
 
     // When the client hits ENTER on their keyboard
     if (event.which === 13) {
-      if ($chatRoomField.val()) {
-        var newChatRoomName = $chatRoomField.val();
-        setChatname(newChatRoomName);
-      }
-      else {
-        sendTextFieldMessage();
-      }
+      sendTextFieldMessage();
     }
   });
 
