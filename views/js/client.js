@@ -124,7 +124,7 @@ $(function() {
   // Log a message
   function log (message, options) {
     var $el = $('<li class="list-group-item list-group-item-info log-message">').addClass('log').text(message);
-    addMessageElement($el, options);
+    addHostMessageElement($el, options);
   }
 
   function clearMessages () {
@@ -190,7 +190,7 @@ $(function() {
       .addClass(repostClass)
       .append($usernameDiv, $messageBodyDiv);
 
-    addMessageElement($messageDiv, options);
+    addHostMessageElement($messageDiv, options);
   }
 
  // Adds the visual fan message to the message list
@@ -225,43 +225,16 @@ $(function() {
     addFanMessageElement($messageDiv, options);
   }
 
-  // Adds a message element to the messages and scrolls to the bottom
-  // el - The element to add as a message
-  // options.fade - If the element should fade-in (default = true)
-  // options.prepend - If the element should prepend
-  //   all other messages (default = false)
-  function addMessageElement (el, options) {
-    var $el = $(el);
-
-    // Setup default options
-    if (!options) {
-      options = {};
-    }
-    if (typeof options.fade === 'undefined') {
-      options.fade = true;
-    }
-    if (typeof options.prepend === 'undefined') {
-      options.prepend = false;
-    }
-
-    // Apply options
-    if (options.fade) {
-      $el.hide().fadeIn(FADE_TIME);
-    }
-    if (options.prepend) {
-      $hostMessages.prepend($el);
-    } else {
-      $hostMessages.append($el);
-    }
-    $hostMessages[0].scrollTop = $hostMessages[0].scrollHeight;
+  function addHostMessageElement (el, options) {
+    addMessageElement(el, $hostMessages, options);
   }
 
- // Adds a message element to the messages and scrolls to the bottom
-  // el - The element to add as a message
-  // options.fade - If the element should fade-in (default = true)
-  // options.prepend - If the element should prepend
-  //   all other messages (default = false)
   function addFanMessageElement (el, options) {
+    addMessageElement(el, $fanMessages, options);
+  }
+
+
+  function addMessageElement (el, div, options) {
     var $el = $(el);
 
     // Setup default options
@@ -280,11 +253,11 @@ $(function() {
       $el.hide().fadeIn(FADE_TIME);
     }
     if (options.prepend) {
-      $fanMessages.prepend($el);
+      div.prepend($el);
     } else {
-      $fanMessages.append($el);
+      div.append($el);
     }
-    $fanMessages[0].scrollTop = $fanMessages[0].scrollHeight;
+    div[0].scrollTop = div[0].scrollHeight;
   }
 
   // Adds the visual chat typing message
