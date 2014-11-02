@@ -29,6 +29,7 @@ $(function() {
   var currentlyInRoom = false;
   var typing = false;
   var lastTypingTime;
+  var currentHosts;
 
   var socket = io();
 
@@ -399,13 +400,6 @@ $(function() {
     if(username == usrname) {
       iAmHost = bool;
     }
-
-    if (iAmHost) {
-      showNotification('You are now a host of this room!');
-    }
-    else {
-      showNotification('You got demoted :(');
-    }
   });
 
   socket.on('set currentlyInRoom', function (bool) {
@@ -467,12 +461,56 @@ $(function() {
 
   // Whenever the server emits 'stop typing', kill the typing message
   socket.on('update room metadata', function (room) {
-    $membersLabel.text('Members: ' + room.peopleNum);
+
+    // Update total members label
+    var totalPeopleInRoom = room.peopleNum;
+    $membersLabel.text('Members: ' + totalPeopleInRoom);
+
+    // Update hosts label
     var st = "Hosts: " + room.owner.username;
     for(var i = 0; i < room.hosts.length; i++) {
       st += ', ' + room.hosts[i].username;
     }
     $hostLabel.text(st);
+
+    // Notify of any promotions or demotions
+    if (currentHosts) {
+
+      var usersRemoved = currentHosts.filter(function(current) {
+        return room.hosts.filter(function(current_b) {
+          return current_b.id == current.id
+        });
+      });
+
+      var usersAdded = room.hosts.filter(function(current) {
+        return currentHosts.filter(function(current_a) {
+          return current_a.id == current.id
+        });
+      });
+
+      for (var i = usersAdded.length - 1; i >= 0; i--) {
+        var user = usersAdded[i];
+        if (user.username == username) {
+          showNotification('You have been added as a host of this conversation!');
+        }
+        else {
+          showNotification(user.username + ' has been added as a host of this conversation!');
+        }
+      };
+
+      for (var i = usersRemoved.length - 1; i >= 0; i--) {
+        var user = usersRemoved[i];
+        if (user.username == username) {
+          showNotification('You have been demoted :(');
+        }
+        else {
+          showNotification(user.username + ' has been demoted :(');
+        }
+      }
+    }
+
+    currentHosts = room.hosts.slice();
+
   });
 
     ///////////////////////////////////////////////////////////////
