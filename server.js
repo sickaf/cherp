@@ -414,6 +414,7 @@ io.on('connection', function (socket) {
     socket.emit("set currentlyInRoom", true); //tell the client whats really good
     socket.broadcast.emit("update", ourHero.username+" is now in room "+getRoomWithID(id).name+". There are now "+_.size(rooms)+" rooms: "+getRoomList());
     io.sockets.emit("update roomsList", rooms);
+    socket.emit("push state", getRoomWithID(id).owner.username);
 
     io.to(socket.room).emit("update room metadata", getRoomWithID(id));
   }

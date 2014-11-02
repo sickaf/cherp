@@ -41,7 +41,6 @@ $(function() {
     socket.emit('join trending chat', null);
   }
 
-
   $('#create-room-button').click(function() {
       socket.emit('enter chat with id', null);
   });
@@ -426,6 +425,13 @@ $(function() {
    // Whenever the server emits 'new message', update the chat body
   socket.on('update roomsList', function (data) {
     updateRoomsList(data);
+  });
+
+  //TODO this needs to work with the browser's back and forward buttons
+  //this is so that when you enter a room it says that rooms name in the browser
+  socket.on('push state', function (suffix) {
+    var stateObj = { ownerName : suffix };
+    history.pushState(stateObj, "", suffix);
   });
 
   // Whenever the server emits 'new fan message', update the chat body
