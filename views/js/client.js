@@ -32,16 +32,11 @@ $(function() {
 
   var socket = io();
 
-  // socket.emit('add user', user);
   socket.emit('set username', username);
-
-  // // sets correct chat name
-  // setChatname('bieberfans');
   socket.emit('join trending chat', null);
 
 
   $('#create-room-button').click(function() {
-      console.log("createroombutton pressed");
       socket.emit('enter chat with id', null);
   });
 
