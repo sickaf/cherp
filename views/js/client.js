@@ -30,6 +30,7 @@ $(function() {
   var typing = false;
   var lastTypingTime;
   var currentHosts;
+  var currentRoomID;
 
   var socket = io();
 
@@ -49,24 +50,24 @@ $(function() {
   function addParticipantsMessage (data) {
     var message = '';
 
-    log("there are " + data.numUsers + " people in this room.");
+    normalLog("there are " + data.numUsers + " people in this room.");
 
     if (data.numUsers === 1) {
       iAmHost = true;
       message += "you're the host";
-      log(message)
+      normalLog(message)
     } 
   }
 
   function addChatroomUpdate (data) {
     var message = '';
 
-    log("there are " + data.numUsers + " people in this room.");
+    normalLog("there are " + data.numUsers + " people in this room.");
 
     if (data.numUsers === 1) {
       iAmHost = true;
       message += "you're the host";
-      log(message)
+      normalLog(message)
     } 
   }
 
@@ -80,10 +81,16 @@ $(function() {
   function addRoomToRoomsList(room){
     var $roomDiv = $('<li><a href="#">'+room.name+' ('+room.peopleNum+')</a></li>');
     $roomDiv.click(function () {
-      socket.emit('enter chat with id', room.id);
+      switchToRoom(room.id);
       return false;
     });
     $trendingRoomsDiv.append($roomDiv);
+  }
+
+  function switchToRoom(roomID) {
+    currentHosts = null;
+    currentRoomID = null;
+    socket.emit('enter chat with id', roomID);
   }
 
   // Sends a chat message
@@ -114,8 +121,20 @@ $(function() {
   }
 
   // Log a message
-  function log (message, options) {
-    var $el = $('<li class="list-group-item list-group-item-info log-message">').addClass('log').text(message);
+  function normalLog (message, options) {
+    log('list-group-item-info', message, options);
+  }
+
+  function dangerLog (message, options) {
+    log('list-group-item-danger', message, options);
+  }
+
+  function successLog(message, options) {
+    log('list-group-item-success', message, options);
+  }
+
+  function log (type, message, options) {
+    var $el = $('<li class="list-group-item ' + type +  ' log-message">').addClass('log').text(message);
     addHostMessageElement($el, options);
   }
 
@@ -387,12 +406,12 @@ $(function() {
   socket.on('tell client owner left', function (msg) {
     currentlyInRoom = false;
     iAmHost = false;
-    log(msg);
+    dangerLog(msg);
   });
 
   // Whenever the server emits 'new message', update the chat body
   socket.on('update', function (data) {
-    log(data);
+    normalLog(data);
   });
 
   socket.on('set iAmHost', function (usrname, bool) {
@@ -446,12 +465,12 @@ $(function() {
 
   // Whenever the server emits 'user joined chat', log it in the chat body
   socket.on('user joined chat', function (data) {
-    log(data.username + ' joined chatroom '+data.chatname);
+    successLog(data.username + ' joined chatroom '+data.chatname);
   });
 
   // Whenever the server emits 'user left', log it in the chat body
   socket.on('user left', function (data) {
-    log(data.username + ' left. they were in chatroom: '+data.chatname+". "+data.numUsers+" left, and "+data.numUsersInChat+" left in chatroom: "+data.chatname);
+    dangerLog(data.username + ' left. they were in chatroom: '+data.chatname+". "+data.numUsers+" left, and "+data.numUsersInChat+" left in chatroom: "+data.chatname);
     removeHostTyping(data); //data must include data.username
   });
 
@@ -480,7 +499,7 @@ $(function() {
     $hostLabel.text(st);
 
     // Notify of any promotions or demotions
-    if (currentHosts) {
+    if (currentHosts && currentRoomID == room.id) {
 
       var usersRemoved = currentHosts.filter(function(current) {
         return room.hosts.filter(function(current_b) {
@@ -514,8 +533,12 @@ $(function() {
         }
       }
     }
+    else {
+      currentHosts = null;
+    }
 
     currentHosts = room.hosts.slice();
+    currentRoomID = room.id;
 
   });
 
