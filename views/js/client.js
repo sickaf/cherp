@@ -155,6 +155,11 @@ $(function() {
       .text(data.username + ' ')
       .css('color', getUsernameColor(data.username));
 
+    //set up a listener so that if the own clicks this div they will become demoted to a fan
+    $usernameDiv.click(function () {
+      socket.emit('demote host', data.username);
+    });
+
     var $messageBodyDiv;
     
     //if it's an image, do that

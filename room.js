@@ -159,6 +159,13 @@ Room.prototype.promoteFanToHost = function(personID) {
     return newHost;
 };
 
+Room.prototype.demoteHostToFan = function(personID) {
+    var newFan = this.getHost(personID);
+    this.addFan(newFan);
+    this.removeHost(newFan.id);
+    return newFan;
+};
+
 
 Room.prototype.getHost = function(personID) {
   var host = null;

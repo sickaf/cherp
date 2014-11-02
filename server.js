@@ -261,7 +261,7 @@ io.on('connection', function (socket) {
   // when the client emits 'make host', this listens and executes
   socket.on('make host', function (username) {
     
-    if(ourHero.hostof == socket.room) {
+    if(ourHero.owns == socket.room) {
 
       var userToUpgrade = _.where(people, {username: username})[0];
 
@@ -278,6 +278,32 @@ io.on('connection', function (socket) {
     }
     else {
       socket.emit("update", "ur not the host u cant upgrade people");
+    }
+  });
+
+    // when the client emits 'make host', this listens and executes
+  socket.on('demote host', function (username) {
+    
+    if(ourHero.owns == socket.room) {
+
+      var userToDemote = _.where(people, {username: username})[0];
+
+      if(userToDemote.owns == socket.room) {
+        socket.emit("update", "you cant demote urself!");
+      }
+      else if(userToDemote.hostof == socket.room ) {
+        var roomForDemotion = getRoomWithID(ourHero.owns);
+        roomForDemotion.demoteHostToFan(userToDemote.id);
+        socket.emit("update", "just demoted "+username+".");
+        socket.broadcast.to(socket.room).emit("set iAmHost", username, false);
+        io.to(socket.room).emit("update room metadata", roomForDemotion);
+      }
+      else {
+        socket.emit("update", "that person is not a host hahahahahhahaha");
+      }
+    }
+    else {
+      socket.emit("update", "ur not the owner u cant demote people");
     }
   });
 
