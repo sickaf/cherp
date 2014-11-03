@@ -49,7 +49,7 @@
                  <li class="dropdown" id="profile-dropdown">
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown" id="username-label">Signed in as <%= user.username %> <span class="caret"></span></a>
                   <ul class="dropdown-menu" role="menu">
-                    <li><a href="/profile">Profile</a></li>
+                    <li><a href="/profile" id="profile-link">Profile</a></li>
                     <li><a href="/logout">Logout</a></li>
                   </ul>
                 </li>
@@ -109,7 +109,7 @@
 
         <!-- PROFILE -->
 
-        <div class="modal fade">
+        <div class="modal fade" id="profile-modal">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
@@ -117,11 +117,13 @@
                 <h4 class="modal-title">Modal title</h4>
               </div>
               <div class="modal-body">
-                <p>One fine body&hellip;</p>
+                <h4>Archived Chats:</h4>
+                <ul class="archived-chats-list">
+                  <li id="loading">Loading...</li>
+                </ul>
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
               </div>
             </div><!-- /.modal-content -->
           </div><!-- /.modal-dialog -->

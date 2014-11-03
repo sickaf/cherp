@@ -1,4 +1,5 @@
 var User = require('../user');
+var RoomModel = require('../roommodel');
 
 module.exports = function(app, passport) {
 
@@ -35,7 +36,17 @@ module.exports = function(app, passport) {
   		res.redirect('/');
 	});
 
+	app.get('/profile/archives/:userid', function(req, res) {
+		RoomModel.find({ owner: req.params.userid }, function (err, docs) {
+			res.send(docs);
+		});
+	});
 
+	app.get('/archives/:id', function(req, res) {
+		RoomModel.findOne({'id' : req.params.id}, function(err, docs) {
+			res.send(docs);
+		});
+	});
 
 	// =====================================
 	// SIGNUP ==============================
