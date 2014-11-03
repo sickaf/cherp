@@ -49,16 +49,12 @@ $(function() {
 
   $('#create-room-button').click(function() {
     smoke.prompt("Name your room", function(e){
-      if (e){
         socket.emit('enter chat with id', { id : null, name : e});
-      } else{
-        // nothing
-      }
       }, {
       ok: "Create Conversation",
       cancel: "Cancel",
       classname: "room-name-field",
-      value: "Enter room name"
+      value: ""
     });
   });
 

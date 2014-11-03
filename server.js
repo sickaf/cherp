@@ -433,7 +433,7 @@ io.on('connection', function (socket) {
 
     var roomName = name;
     if (!roomName) {
-      roomName = 'Archived Room';
+      roomName = 'Untitled';
     }
 
     //check if this socket is already in the room
