@@ -110,7 +110,9 @@ function isLoggedIn(req, res, next) {
 function randomUsername() {
 	var nouns = ['fart','weed','420','snowboard','longboarding','blaze','pussy'];
 	var descriptors = ['fan','dude','man','doctor','expert','thug'];
+	var numbers = ['420','69'];
     var noun = nouns[Math.floor(Math.random() * nouns.length)];
     var descriptor = descriptors[Math.floor(Math.random() * descriptors.length)];
-    return noun+descriptor;
+    var number = numbers[Math.floor(Math.random() * numbers.length)];
+    return noun+descriptor+numbers;
 }
