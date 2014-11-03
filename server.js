@@ -130,10 +130,15 @@ function getRoomWithID (id) {
   else return null;
 }   
 
-function getRoomWithID (idParam) {
-  var toRet = _.where(users, {id: idParam});
-  if(toRet.length > 0) return toRet[0];
-  else return null;
+function getUserWithId (idParam) {
+  for(var i = 0; i < users.length; i++) {
+    if (users[i].id == idParam) {
+      console.log("MATCH "+users[i].id +" with "+idParam);
+      return users[i];
+    }
+    console.log("NO MATCH "+users[i].id +" with "+idParam);
+  }
+  return null;
 }   
 
 function getSocketWithId(socketId) {
@@ -239,17 +244,16 @@ io.on('connection', function (socket) {
           if ("user" in socket.request.session.passport) {
             console.log('socket connection from logged in twitter user');
             
-            ourUserId = socket.request.session.passport.user.id;
+            ourUserId = socket.request.session.passport.user._id;
             ourUser = getUserWithId(ourUserId);
             if (ourUser) { //user already exists
               ourUser.sockets.push(socket.id);
-            } else {  //wooo lets make a new user object
-
+            } else {  //wooo lets start fresh
               ourUser = socket.request.session.passport.user;
+              ourUser.id = ourUserId;
               ourUser.sockets.push(socket.id);
               users.push(ourUser);
             }
-
           } else { //anon user wooo
             console.log("socket connecton from anon user, generating uuid");
             ourUser = new User();
@@ -261,7 +265,7 @@ io.on('connection', function (socket) {
   } else {console.error("NO SESSION io.on connection");}
 
   //messaging
-  socket.emit('update', "Welcome to the world. You have connected to the server. Users ("+users.length+") are: "+getUsersList()+". you are "+JSON.stringify(ourUser)+" and your id is "+ourUser._id);  
+  socket.emit('update', "Welcome to the world. You have connected to the server. Users ("+users.length+") are: "+getUsersList()+". you are "+JSON.stringify(ourUser)+" and your id is "+ourUser.id);  
   sockets.push(socket);
 
   //Received an image: broadcast to all
@@ -427,12 +431,12 @@ io.on('connection', function (socket) {
         return;
       }
     }
-
+    console.log("trying to join room with id "+id);
     //LETS DO THIS
     // socket.emit("clear messages", {});
    
     var oldRoom = getRoomWithID(socket.room);
-    if (oldRoom) { 
+    if (oldRoom && socket.room) { 
       
       socket.emit("update", "Your socket is already in a room.  Going to remove the socket from room " + socket.room);
       removeSocketFromRoom(socket, ourUser, oldRoom);
@@ -442,9 +446,14 @@ io.on('connection', function (socket) {
     //what if the chatroom already exists!!
     if(getRoomWithID(id)) {
       var existingRoom = getRoomWithID(id);
-      existingRoom.addFan(ourUser);
-      socket.emit("update", "the room "+getRoomWithID(id).name + " already exists.  adding you as a FAN. now "+getRoomWithID(id).name + " has "+getRoomWithID(id).usersNum+" users");
-      socket.emit("set iAmHost", ourUser.username, false); 
+      if(!existingRoom.addFan(ourUser)) { //user is already in the room
+        if(isThisUserAtLeastHostOfThisRoom(ourUser, existingRoom.id)){
+          socket.emit("set iAmHost", ourUser.username, true); 
+        }
+      } else {
+        socket.emit("update", "the room "+getRoomWithID(id).name + " already exists.  adding you as a FAN. now "+getRoomWithID(id).name + " has "+getRoomWithID(id).usersNum+" users");
+        socket.emit("set iAmHost", ourUser.username, false); 
+      }
     }
     else { //room doesnt exist. create it
       socket.emit("update", "the room with id "+ id + " doesnt exist yet.  adding you as OWNER");

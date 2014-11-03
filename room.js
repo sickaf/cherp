@@ -16,7 +16,7 @@ function Room(name, id, owner) {
 
 Room.prototype.addFan = function(fan) {
   //dont add anyone if this user already exists
-  if(this.getUser(fan.id)) return;
+  if(this.getUser(fan.id)) return null;
   this.fans.push(fan);
   this.peopleNum++;
 };
