@@ -248,8 +248,15 @@ $(function() {
   }
 
   function showToastNotification (type, title, message) {
-    toastr.options.timeout = 2;
-    toastr.options.positionClass = 'toast-bottom-left';
+    toastr.options: {
+      "debug": false,
+      "positionClass": "toast-bottom-left",
+      "onclick": null,
+      "fadeIn": 300,
+      "fadeOut": 300,
+      "timeOut": 2000,
+      "extendedTimeOut": 1000
+    }
     switch (type) {
       case 'info':
         toastr.info(message, title);
