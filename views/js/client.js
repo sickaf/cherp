@@ -248,7 +248,7 @@ $(function() {
   }
 
   function showToastNotification (type, title, message) {
-    toastr.options: {
+    toastr.options = {
       "debug": false,
       "positionClass": "toast-bottom-left",
       "onclick": null,
