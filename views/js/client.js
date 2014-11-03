@@ -47,6 +47,7 @@ $(function() {
       socket.emit('enter chat with id', null);
   });
 
+
   //someone needs to get rid of this dumb function
   function addParticipantsMessage (data) {
     var message = '';
@@ -337,6 +338,16 @@ $(function() {
     var index = Math.abs(hash % COLORS.length);
     return COLORS[index];
   }
+
+  function randomUsername() {
+    var nouns = ['fart','weed','420','snowboard','longboarding','blaze','pussy'];
+    var descriptors = ['fan','dude','man','doctor','expert','thug'];
+    var numbers = ['420','69'];
+    var noun = nouns[Math.floor(Math.random() * nouns.length)];
+    var descriptor = descriptors[Math.floor(Math.random() * descriptors.length)];
+    var number = numbers[Math.floor(Math.random() * numbers.length)];
+    return noun+descriptor+number;
+}
 
   // Image uploader
   var opts = {

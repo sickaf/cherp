@@ -11,10 +11,12 @@ var passport = require('passport');
 var io = require('socket.io')(server);
 var flash    = require('connect-flash');
 var path = require('path');
-var logger = require('morgan'); //hoping this will make debugging easier
 var _ = require('underscore')._; //tool for doing things like calling .size on an array
+var logger = require('morgan'); //hoping this will make debugging easier
 var uuid = require('node-uuid'); //for generating IDs for things like rooms
 var RoomModel = require('./roommodel');
+var User = require('./user');
+
 
 
 //
@@ -87,9 +89,9 @@ app.use(function(req, res, next) {
 // Chatroom
 //
 
-// people which are currently connected to the chat
+// users which are currently connected to the chat
 var Room = require('./room.js');
-var people = []; 
+var users = []; 
 var rooms = [];
 var sockets = [];
 
@@ -102,15 +104,15 @@ nsp.on('connection', function(socket){
 // nsp.emit('hi', 'everyone!');
 
 
-function getPeopleList () {
+function getUsersList () {
   var toReturn = "";
   var first = true;
-  for (var i = 0; i < people.length; i++) {
+  for (var i = 0; i < users.length; i++) {
     if (first) {
-      toReturn = people[i].username;
+      toReturn = users[i].username;
       first = false;
     } else {
-      toReturn += ", " + people[i].username;
+      toReturn += ", " + users[i].username;
     }
   }
   return toReturn;
@@ -126,40 +128,113 @@ function getRoomWithID (id) {
   var toRet = _.where(rooms, {id: id});
   if(toRet.length > 0) return toRet[0];
   else return null;
+}   
+
+function getSocketWithId(socketId) {
+  var toRet = _.where(sockets, {id: socketId});
+  if(toRet.length > 0) return toRet[0];
+  else return null;
 }
 
 // function pushMessageToDB(roomID, fullMessage){
 function pushMessageToDB(name, roomID, fullMessage){
   RoomModel.findOne({ 'id' : roomID }, function(err, room) {
-  if (err)
-    console.log("database ERR: "+err);
-  if (room) {
-    console.log("database found room with id: "+room.id);
-    room.hostMessages.push(fullMessage);
-    room.save(function(err) {
-      if (err)
-          throw err;
-      else {
-        console.log("no error saving room obj to db");
-      }
-    });
-  } else {
-    console.log("database did not find room");
-    var newRoom = new RoomModel();
-    newRoom.id = roomID;
-    newRoom.name = name;
-    newRoom.hostMessages = [];
-    newRoom.hostMessages.push(fullMessage);
-    newRoom.save(function(err) {
-      if (err)
-          throw err;
-      else {
-        console.log("no error saving room obj to db");
-      }
-    });
-  }
-});
+    if (err)
+      console.log("database ERR: "+err);
+    if (room) {
+      console.log("database found room with id: "+room.id);
+      room.hostMessages.push(fullMessage);
+      room.save(function(err) {
+        if (err)
+            throw err;
+        else {
+          console.log("no error saving room obj to db");
+        }
+      });
+    } else {
+      console.log("database did not find room");
+      var newRoom = new RoomModel();
+      newRoom.id = roomID;
+      newRoom.name = name;
+      newRoom.hostMessages = [];
+      newRoom.hostMessages.push(fullMessage);
+      newRoom.save(function(err) {
+        if (err)
+            throw err;
+        else {
+          console.log("no error saving room obj to db");
+        }
+      });
+    }
+  });
 }
+function getUserWithId () {
+  return null;
+}
+
+// function isThisUserInThisRoom (userParam, roomID) {
+//     var inRoomList = userParam.inRooms;
+//     for(var i = 0; i < inRoomList.length; i++) {
+//       if(inRoomList[i] == roomID){
+//         return true;
+//       }
+//     }
+//     return false;
+// } 
+
+function isThisUserInThisRoom (userParam, roomId) {
+  var room = getRoomWithID(roomId);
+  if(room.getUser(userParam.id)) return true;
+  return false;
+} 
+
+
+// function isThisUserHostOfThisRoom (userParam, roomId) {
+//     var hostOfList = userParam.hostOf;
+//     for(var i = 0; i < hostOfList.length; i++) {
+//       if(hostOfList[i] == roomId){
+//         return true;
+//       }
+//     }
+//     return false;
+// } 
+
+function isThisUserHostOfThisRoom (userParam, roomId) {
+  var room = getRoomWithID(roomId);
+  if(room.getHost(userParam.id)) return true;
+  return false;
+} 
+
+function removeSocketFromRoom(socket, user, room) {
+  var otherSocketForThisUserIsInThisRoom = false;
+  for(var i = 0; i < user.sockets.length; i++) {
+    var ourUsersSocket = getSocketWithId(user.sockets[i]);
+    if(ourUsersSocket.room == socket.room && (ourUsersSocket.id != socket.id)) {
+      otherSocketForThisUserIsInThisRoom = true;
+      console.log("setting otherSocketForThisUserIsInThisRoom TRUE");
+    }
+  }
+  if(!otherSocketForThisUserIsInThisRoom){
+    if(room.isOwner(user.id)){ //this guy is owner, so killing the room
+      io.to(socket.room).emit("tell client owner left", " left, so this room is now dead.  Join another room or start your own conversation");
+      room.killRoom();
+      rooms = _.without(rooms, room);
+      delete room;
+    } else {
+      room.removeUser(user.id);
+      io.to(room.id).emit("update room metadata", room);  
+    }
+  }
+}
+
+
+function isThisUserAtLeastHostOfThisRoom (userParam, roomId) {
+  if (isThisUserHostOfThisRoom(userParam, roomId)) return true;
+  return getRoomWithID(roomId).isOwner(userParam.id);
+}
+
+
+
 
 function getRoomList () {
   var toReturn = "";
@@ -179,35 +254,48 @@ io.on('connection', function (socket) {
 
   console.log(socket.request.session);
 
-  var ourHeroID;
+
+
+  var ourUser = null;
+  var ourUserId;
   if (socket.request.session) {
       if ("passport" in socket.request.session) {
           if ("user" in socket.request.session.passport) {
+            console.log('socket connection from logged in twitter user');
             
-            console.log('socket connecton from logged in twitter user');
-            var authorizedUser = socket.request.session.passport.user;
-            ourHeroID = authorizedUser;
+            ourUserId = getUserWithId(socket.request.session.passport.user);
+            ourUser = getUserWithId(ourUserId);
+            if (ourUser) { //user already exists
+              ourUser.sockets.push(socket.id);
+            } else {  //wooo lets make a new user object
+              ourUser = new User();
+              ourUser.id = ourUserId;
+              ourUser.username = "LOGGEDIN_USERNAME_NOT_SET_420";
+              ourUser.sockets.push(socket.id);
+              users.push(ourUser);
+            }
 
-          } else {
-            console.log("socket connecton from anon user, generating temp ID");
-            ourHeroID = uuid.v4();
+          } else { //anon user wooo
+            console.log("socket connecton from anon user, generating uuid");
+            ourUserId = uuid.v4();
+
+            ourUser = new User();
+            ourUser.id = ourUserId;
+            ourUser.username = "ANON_USERNAME_NOT_SET_420";
+            ourUser.owns = null;
+            ourUser.hostOf = [];
+            ourUser.inRooms = [];
+            ourUser.sockets.push(socket.id);
+            users.push(ourUser);
+
           }
       } else {console.error("NO PASSPORT io.on connection");}
   } else {console.error("NO SESSION io.on connection");}
 
-  console.log('hero id: ' + ourHeroID);
 
-  var ourHero = { "id" : ourHeroID,
-                  "socketID" : socket.id, 
-                  "username" : "usernamenotset", 
-                  "owns" : null,
-                  "hostof" : null, 
-                  "inroom": null};
-
-  people.push(ourHero);
 
   //messaging
-  socket.emit('update', "Welcome to the world. You have connected to the server. People ("+people.length+") are: "+getPeopleList()+". you are "+JSON.stringify(ourHero));
+  socket.emit('update', "Welcome to the world. You have connected to the server. Users ("+users.length+") are: "+getUsersList()+". you are "+JSON.stringify(ourUser));
   //sets connected = true
   
   sockets.push(socket);
@@ -217,17 +305,17 @@ io.on('connection', function (socket) {
   //Received an image: broadcast to all
   socket.on('new image', function (data) {
     if(!getRoomWithID(socket.room)){
-      socket.emit("update", "ur not in a chatroom buddy.  go live or join one from the left if any exist.");
+      socket.emit("update", "ur socket is not in a chatroom buddy.  go live or join one from the left if any exist.");
       return;
     }
 
     var fullMessage = {
-      username: ourHero.username,
+      username: ourUser.username,
       base64Image: data,
       image: true
     };
 
-    if(ourHero.hostof == socket.room) {
+    if(isThisUserHostOfThisRoom(ourUser, socket.room)) {
       io.sockets.in(socket.room).emit('new host message', fullMessage);
       pushMessageToDB(getRoomWithID(socket.room).name, socket.room, fullMessage);
     }
@@ -239,17 +327,16 @@ io.on('connection', function (socket) {
   // when the client emits 'new host message', this listens and executes
   socket.on('new message', function (data) {
     if(!getRoomWithID(socket.room)){
-      socket.emit("update", "ur not in a chatroom buddy.  go live or join one from the left if any exist.");
+      socket.emit("update", "ur socket is not in a chatroom buddy.  go live or join one from the left if any exist.");
       return;
     }
 
     var fullMessage = {
-      username: ourHero.username,
+      username: ourUser.username,
       message: data
     };
 
-    if(ourHero.hostof == socket.room) {
-      console.log(" ourhero owns : socket.room : "+ourHero.hostof+" : "+socket.room);
+    if(isThisUserAtLeastHostOfThisRoom(ourUser, socket.room)) {
       socket.broadcast.to(socket.room).emit("new host message", fullMessage);
       pushMessageToDB(getRoomWithID(socket.room).name, socket.room, fullMessage);
     }
@@ -270,25 +357,27 @@ io.on('connection', function (socket) {
   });
 
   function changeStatus(username, promoteUp) {
-    if(ourHero.owns != socket.room) {
-      socket.emit("update", "ur not the owner u cant change peoples status go make ur own room");
+
+    var userToChange = _.where(users, {username: username})[0];
+    var roomForChange = getRoomWithID(socket.room);
+
+    if(!roomForChange.isOwner(ourUser.id)) {
+      socket.emit("update", "ur not the owner u cant change users status go make ur own room");
       return;
     }
-    var userToChange = _.where(people, {username: username})[0];
-    var roomForChange = getRoomWithID(ourHero.owns);
 
     if(!userToChange) {
       socket.emit("update", username+" is no longer with us :(");
       return;
     }
 
-    if(userToChange.inroom != socket.room) {
+    if(!isThisUserInThisRoom(userToChange, socket.room)) {
       socket.emit("update", username+" is no longer in this chat");
       return;
     }
 
     if(promoteUp) { //PROMOTION (yay)
-      if(userToChange.hostof != null) {
+      if(isThisUserAtLeastHostOfThisRoom(userToChange, socket.room)) {
         socket.emit("update", "that person is already a host hahahahahhahaha");
         return;
       }
@@ -296,11 +385,11 @@ io.on('connection', function (socket) {
       socket.emit("update", "just made "+username+" a host.");
     }
     else { //DEMOTION :(
-      if(userToChange.owns == socket.room) {
+      if(roomForChange.isOwner(userToChange.id)) {
         socket.emit("update", "you cant demote urself!");
         return;
       }
-      else if(userToChange.hostof != socket.room ) {
+      else if(!isThisUserAtLeastHostOfThisRoom(userToChange, socket.room)) {
         socket.emit("update", "that person is not a host hahahahahhahaha");
         return;
       }
@@ -316,12 +405,14 @@ io.on('connection', function (socket) {
   // when the client emits 'host repost', this listens and executes
   socket.on('host repost', function (data) {
 
-    if(!getRoomWithID(socket.room).isAvailable()){
-      socket.emit("update", "THIS ROOM IS FUCKING DEAD");
-      return;
-    }
-    if(ourHero.hostof == socket.room) {
-      console.log(" hostrepost ourhero owns : socket.room : "+ourHero.hostof+" : "+socket.room);
+    //DEPRECATED////////////////////////////////////////////////
+    if(!getRoomWithID(socket.room).isAvailable()){ /////////////
+      socket.emit("update", "THIS ROOM IS FUCKING DEAD"); //////
+      return; //////////////////////////////////////////////////
+    } //////////////////////////////////////////////////////////
+
+    if(isThisUserAtLeastHostOfThisRoom(ourUser, socket.room)) {
+      console.log("hostrepost ourUser owns this room! yay");
       socket.broadcast.to(socket.room).emit('host repost', data);
       pushMessageToDB(getRoomWithID(socket.room).name, socket.room, data);
     }
@@ -332,13 +423,12 @@ io.on('connection', function (socket) {
 
   // when the client emits 'add username', this listens and executes
   socket.on('set username', function (username) {
-    ourHero.username = username;
+    ourUser.username = username;
   });
 
   function joinTrendingChat () {
     if(rooms.length > 0) {
       enterChatWithId(rooms[0].id);
-
     } else  {
       console.log("TRIED TO JOIN TRENDING CHAT BUT AINT NO ROOMS");
     }
@@ -364,56 +454,43 @@ io.on('connection', function (socket) {
   function enterChatWithId(idParam) {
     var id = idParam;
     if (!id) {
-      id = ourHero.id;
+      id = ourUser.id;
     }
 
-    if(id == ourHero.inroom) {
-      socket.emit("update", "youre already in that room");
-      return;
+    //check if this socket is already in the room
+    var roomToEnter = getRoomWithID(id);
+    if(roomToEnter) {
+      if(roomToEnter.id == socket.room) {
+        socket.emit("update", "this socket is already in that room so going to return");
+        return;
+      }
     }
 
     //LETS DO THIS
-    socket.emit("clear messages", {});
-
-    if (ourHero.owns) {
-      socket.emit("update", "You already own a room! KILLING THAT ROOM!");
-      var roomSetToDie = getRoomWithID(ourHero.owns);
-      roomSetToDie.killRoom();
-      rooms = _.without(rooms, roomSetToDie);
-      delete roomSetToDie;
-    }
-
-    socket.emit("update", "you ("+ourHero.username + ") want to enter chat with id: "+JSON.stringify(id));
+    // socket.emit("clear messages", {});
    
-    var oldRoom = getRoomWithID(ourHero.inroom);;
-    if (oldRoom) {
-      socket.emit("update", "You are already in a room.  Going to remove you from room "+ourHero.inroom);
-      getRoomWithID(ourHero.inroom).removePerson(ourHero.id);
-      io.to(oldRoom.id).emit("update room metadata", oldRoom);
+    var oldRoom = getRoomWithID(socket.room);
+    if (oldRoom) { 
+      
+      socket.emit("update", "Your socket is already in a room.  Going to remove the socket from room " + socket.room);
+      removeSocketFromRoom(socket, ourUser, oldRoom);
+      // io.to(oldRoom.id).emit("update room metadata", oldRoom);     
     }
 
     //what if the chatroom already exists!!
     if(getRoomWithID(id)) {
       var existingRoom = getRoomWithID(id);
-      // if(existingRoom.peopleNum == 0) { //TODO: change to .available
-      //   getRoomWithID(id).addOwner(ourHero);
-      //   socket.emit("set iAmHost", ourHero.username, true); 
-      //   socket.emit("update", "the room "+getRoomWithID(id).name + " already exists but no one is in it.  adding you as OWNER. now "+getRoomWithID(id).name + " has "+getRoomWithID(id).peopleNum+" people");
-      // }
-      // else {
-        getRoomWithID(id).addFan(ourHero);
-        socket.emit("update", "the room "+getRoomWithID(id).name + " already exists.  adding you as a FAN. now "+getRoomWithID(id).name + " has "+getRoomWithID(id).peopleNum+" people");
-        socket.emit("set iAmHost", ourHero.username, false); 
-      // }
+      existingRoom.addFan(ourUser);
+      socket.emit("update", "the room "+getRoomWithID(id).name + " already exists.  adding you as a FAN. now "+getRoomWithID(id).name + " has "+getRoomWithID(id).usersNum+" users");
+      socket.emit("set iAmHost", ourUser.username, false); 
     }
     else { //room doesnt exist. create it
       socket.emit("update", "the room with id "+ id + " doesnt exist yet.  adding you as OWNER");
 
-      //var id = uuid.v4();
-      var room = new Room(ourHero.username, id, ourHero);
+      var room = new Room(ourUser.username, id, ourUser);
       rooms.push(room);
       //add room to socket, and auto join the creator of the room
-      socket.emit("set iAmHost", ourHero.username, true); 
+      socket.emit("set iAmHost", ourUser.username, true); 
     }
     socket.leave(socket.room);
     socket.room = id;
@@ -432,17 +509,17 @@ io.on('connection', function (socket) {
     });
     
     socket.emit("set currentlyInRoom", true); //tell the client whats really good
-    socket.broadcast.emit("update", ourHero.username+" is now in room "+getRoomWithID(id).name+". There are now "+_.size(rooms)+" rooms: "+getRoomList());
+    socket.broadcast.emit("update", ourUser.username+" is now in room "+getRoomWithID(id).name+". There are now "+_.size(rooms)+" rooms: "+getRoomList());
     io.sockets.emit("update roomsList", rooms);
-    socket.emit("push state", getRoomWithID(id).owner.username);
+    socket.emit("push state", getRoomWithID(id).owner.username); //updates the address bar
 
     io.to(socket.room).emit("update room metadata", getRoomWithID(id));
   }
 
 
   socket.on('kill room', function (data) {
-    if(ourHero.owns == socket.room) {
-      socket.emit("update", ourHero.username + "wants to end the chat");
+    if(getRoomWithID(socket.room).isOwner(ourUser.id)) {
+      socket.emit("update", ourUser.username + " wants to end the chat");
       io.to(socket.room).emit("set roomAvailable", false);
       getRoomWithID(socket.room).killRoom();
     }
@@ -453,9 +530,9 @@ io.on('connection', function (socket) {
 
   // when the client emits 'typing', we broadcast it to others
   socket.on('typing', function () {
-    if(ourHero.hostof == socket.room) { //we only give a shit if they are a host
+    if(isThisUserAtLeastHostOfThisRoom(ourUser, socket.room)) { //we only give a shit if they are a host
       socket.broadcast.to(socket.room).emit('typing', {
-        username: ourHero.username
+        username: ourUser.username
       });
     }
   });
@@ -463,57 +540,39 @@ io.on('connection', function (socket) {
   // when the client emits 'stop typing', we broadcast it to others
   socket.on('stop typing', function () {
 
-    if(ourHero.hostof == socket.room) { //we only give a shit if they are a host
+    if(isThisUserAtLeastHostOfThisRoom(ourUser, socket.room)) { //we only give a shit if they are a host
       socket.broadcast.to(socket.room).emit('stop typing', {
-        username: ourHero.username
+        username: ourUser.username
       });
     }
   });
 
-  // when the user disconnects.. perform this
+  // when the socket disconnects.. perform this
   socket.on('disconnect', function () {
-    // remove the username from global people list
+    // remove the username from global users list
     var roomForDeletingUser;
-    console.log("ourHero ("+ourHero.username+") is disconnecting");
-    if (!ourHero) {
-      console.log("ourHero doesnt exist! Adios!");
+    console.log("socket belonging to ("+ourUser.username+") is disconnecting");
+    if (!ourUser) {
+      console.log("ourUser doesnt exist! Adios!");
       return;
     }
 
-    roomForDeletingUser = getRoomWithID(ourHero.inroom);
-    console.log("ourhero.inroom is "+ourHero.inroom);
-
+    console.log("socket.room is "+socket.room);
+    roomForDeletingUser = getRoomWithID(socket.room);
 
     if(roomForDeletingUser){
-      console.log("roomForDeletingUser exists");
-
-      if(ourHero.hostof == null) { //fan
-        console.log(ourHero.username+" was just a FAN so going to remove them from the room");
-        roomForDeletingUser.removeFan(ourHero.id);
-        io.to(socket.room).emit("update room metadata", roomForDeletingUser);
-
-      } 
-      else if(ourHero.owns == null) { //host
-        console.log(ourHero.username+" was just a HOST so going to remove them from the room");
-        roomForDeletingUser.removeHost(ourHero.id);
-        io.to(socket.room).emit("update room metadata", roomForDeletingUser);
-      }
-      else { //owner
-        // var newOwner = roomForDeletingUser.removeOwner(ourHero.id);
-        io.to(socket.room).emit("tell client owner left", ourHero.username+" left, so this room is now dead.  Join another room or start your own conversation");
-        roomForDeletingUser.killRoom();
-
-        //the owner left so were going to delete the room
-        rooms = _.without(rooms, roomForDeletingUser);
-        delete roomForDeletingUser;
-      }
+      console.log("roomForDeletingUser exists. ");
+      removeSocketFromRoom(socket, ourUser, roomForDeletingUser);
     }
 
     io.sockets.emit("update roomsList", rooms);
-    io.sockets.emit("update", "brother "+ourHero.username+" is no longer with us");
+    io.sockets.emit("update", ourUser.username+" closed a tab");
+    ourUser.sockets = _.without(ourUser.sockets, socket.id);
 
-    people = _.without(people, ourHero);
-    delete ourHero; 
+    if(ourUser.sockets.length == 0) {
+      users = _.without(users, ourUser);
+      delete ourUser; 
+    }
   });
 
 });

@@ -1,3 +1,6 @@
+var _ = require('underscore')._; //tool for doing things like calling .size on an array
+
+
 function Room(name, id, owner) {
   this.name = name;
   this.id = id;
@@ -12,13 +15,10 @@ function Room(name, id, owner) {
 };
 
 Room.prototype.addFan = function(fan) {
-  if (this.status === "available") {
-    fan.owns = null;
-    fan.hostof = null;
-    fan.inroom = this.id;
-    this.fans.push(fan);
-    this.peopleNum++;
-  }
+  //dont add anyone if this user already exists
+  if(this.getUser(fan.id)) return;
+  this.fans.push(fan);
+  this.peopleNum++;
 };
 
 Room.prototype.killRoom = function() {
@@ -35,12 +35,11 @@ Room.prototype.killRoom = function() {
   console.log("kill room called.  there are now "+this.peopleNum+" people in the room.");
 };
 
-Room.prototype.removeFan = function(personID) {
+Room.prototype.removeFan = function(personId) {
   var fanIndex = -1;
   for(var i = 0; i < this.fans.length; i++){
-    if(this.fans[i].id === personID){
+    if(this.fans[i].id === personId){
       var fan = this.fans[i];
-      fan.inroom = null;
       this.fans.splice(i,1);
       this.peopleNum--;
       return;
@@ -48,52 +47,47 @@ Room.prototype.removeFan = function(personID) {
   }
 };
 
-
 Room.prototype.getFan = function(personID) {
   var fan = null;
   for(var i = 0; i < this.fans.length; i++) {
     if(this.fans[i].id === personID) {
       fan = this.fans[i];
-      return fan;
+      break;
     }
   }
+  return fan;
 };
 
+Room.prototype.isOwner = function(userId) {
+  if(this.owner.id == userId) return true;
+  return false;
+}
+
+//THIS NEEDS TO BE UPDATED
 Room.prototype.addHost = function(host) {
-  if (this.status === "available") {
-    host.owns = null;
-    host.hostof = this.id;
-    host.inroom = this.id;
-    this.hosts.push(host);
-    this.peopleNum++;
-  }
+  if(this.getUser(host.id)) return;
+  this.hosts.push(host);
+  this.peopleNum++;
 };
-
-
 
 Room.prototype.addOwner = function(owner) {
-  if (this.status === "available") {
-    if(this.owner) {
-      console.error("TRIED TO ADD OWNER ("+owner.username+") BUT OWNER ALREADY EXISTS ("+this.owner.username+")");
-      return false;
-    }
-    owner.owns = this.id;
-    owner.hostof = this.id;
-    owner.inroom = this.id;
-    this.owner = owner;
-    this.peopleNum++;
+  if(this.owner) {
+    console.error("TRIED TO ADD OWNER ("+owner.username+") BUT OWNER ALREADY EXISTS ("+this.owner.username+")");
+    return false;
   }
+  this.owner = owner;
+  this.peopleNum++;
 };
 
-Room.prototype.removeHost = function(personID) {
+Room.prototype.removeHost = function(personId) {
 
   for(var i = 0; i < this.hosts.length; i++){
-    if(this.hosts[i].id === personID){
+    if(this.hosts[i].id === personId){
       var hostToRemove = this.hosts[i];
-      hostToRemove.hostof = null;
-      hostToRemove.inroom = null;
+      // hostToRemove.hostOf = _.without(hostToRemove.hostOf, this.id);
+      // hostToRemove.inRooms = _.without(hostToRemove.inRooms, this.id);
       this.hosts.splice(i,1);
-      if(personID == this.owner.id) {
+      if(personId == this.owner.id) {
         this.removeOwner();
         return;
       }
@@ -104,36 +98,114 @@ Room.prototype.removeHost = function(personID) {
 };
 
 Room.prototype.removeOwner = function() {
-  this.owner.owns = null;
-  this.owner.hostof = null;
-  this.owner.inroom = null;
+  // this.owner.owns = null;
+  // this.owner.hostOf = _.without(this.owner.hostOf, this.id);
+  // this.owner.inRooms = _.without(this.owner.inRooms, this.id);
   this.owner = null;
   this.peopleNum--;
   console.log("removing owner from room. peopleNum will be "+this.peopleNum);
 };
 
+Room.prototype.getUser = function(userId) {
+  var toRet = this.getFan(userId);
+  if(toRet) return toRet;
 
-Room.prototype.removePerson = function(personID) {
-  if(this.getFan(personID)) {
-    this.removeFan(personID);
+  toRet = this.getHost(userId);
+  if(toRet) return toRet;
+
+  if(this.owner.id == userId) return this.owner;
+
+  return null;
+}
+
+Room.prototype.removeUser = function(userId) {
+  if(this.getFan(userId)) {
+    this.removeFan(userId);
   }
-  else if(this.getHost(personID)) {
-    this.removeHost(personID);
+  else if(this.getHost(userId)) {
+    this.removeHost(userId);
   }
-  else if(this.owner.id == personID){
+  else if(this.owner.id == userId){
     this.owner.owns = null;
-    this.owner
-
+    this.owner = null;
   }
   else {
-    console.error("COULDNT FIND THE PERSON TO REMOVE (room.js)");
+    console.error("COULDNT FIND THE USER TO REMOVE (room.js)");
     return false;
   }
   return true;
+}; 
+
+Room.prototype.getFanWithSocketId = function(socketId) { 
+  for (var i = 0; i < this.fans.length; i ++) {
+    var fan = this.fans[i];
+    for(var x = 0; x < fan.sockets.length; x++) {
+      if (fan.sockets[x] == socketId) {
+        return fan;
+      }
+    }
+  }
+  return null;
+}
+
+Room.prototype.getHostWithSocketId = function(socketId) { 
+  for (var i = 0; i < this.hosts.length; i ++) {
+    var host = this.hosts[i];
+    for(var x = 0; x < host.sockets.length; x++) {
+      if (host.sockets[x] == socketId) {
+        return host;
+      }
+    }
+  }
+  return null;
+}
+
+Room.prototype.getUserWithSocketId = function(socketId) {
+  
+  var toRet = this.getFanWithSocketId(socketId);
+  if(toRet) return toRet;
+  
+  toRet = this.getHostWithSocketId(socketId);
+  if(toRet) return toRet;
+  
+  for(var i = 0; i<this.owner.sockets.length; i++) {
+    if(this.owner.sockets[i] == socketId) {
+      return this.owner;
+    }
+  }
+  return null;
 };
 
-Room.prototype.promoteFanToHost = function(personID) {
-    var newHost = this.getFan(personID);
+// Room.prototype.timesUserIsInThisRoom = function(userId) {
+//   var count = 0;
+
+//   for(var i = 0; i < this.fans.length; i ++) {
+//     if(this.fans[i].id == userId) count++;
+//   }
+
+//   var inRooms = user.inRooms;
+//   console.log("user.inRooms.length =  "+ inRooms.length);
+//   console.log("user "+user.username+": user.inRooms[0] =  "+ inRooms[0]+" and this.id = "+this.id);
+
+//   var count = 0;
+//   for (var i = 0; i < inRooms.length; i++) {
+//     if(inRooms[i] == this.id) {
+//       count++;
+//     }
+//   }
+//   return count;
+// }
+
+// Room.prototype.removeSocket = function(socketId) {
+//   var user = this.getUserWithSocketId(socketId);
+//   console.log("user is in this room "+ this.timesUserIsInThisRoom(user)+" times");
+//   if(this.timesUserIsInThisRoom(user) == 1) { //user is only in this room once
+//     this.removePerson(user.id);
+//   }
+// };
+
+Room.prototype.promoteFanToHost = function(personId) {
+    var newHost = this.getFan(personId);
     this.removeFan(newHost.id);
     this.addHost(newHost);
     return newHost;
