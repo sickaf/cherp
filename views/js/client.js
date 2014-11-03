@@ -139,7 +139,28 @@ $(function() {
     addHostMessageElement($el, options);
   }
 
-  function showNotification(message) {
+  function showToastNotification (type, title, message) {
+    toastr.options.timeout = 2;
+    switch (type) {
+      case 'info':
+        toastr.info(message, title);
+        break;
+      case 'warning':
+        toastr.warning(message, title);
+        break;
+      case 'success':
+        toastr.success(message, title);
+        break;
+      case 'error':
+        toastr.error(message, title);
+        break;
+      default:
+        toastr.info(message, title);
+        break;
+    }
+  }
+
+  function showFullscreenNotification(message) {
     smoke.signal(message, function(e){
     }, {
       duration: 2000,
@@ -487,49 +508,93 @@ $(function() {
     }
     $hostLabel.text(st);
 
-    // Notify of any promotions or demotions
-    if (currentHosts && currentRoomID == room.id) {
+    // // Notify of any promotions or demotions
+    // if (currentHosts && currentRoomID == room.id) {
 
-      var usersRemoved = currentHosts.filter(function(current) {
-        return room.hosts.filter(function(current_b) {
-          return current_b.id == current.id
-        }).length == 0;
-      });
+    //   var usersRemoved = currentHosts.filter(function(current) {
+    //     return room.hosts.filter(function(current_b) {
+    //       return current_b.id == current.id
+    //     }).length == 0;
+    //   });
 
-      var usersAdded = room.hosts.filter(function(current) {
-        return currentHosts.filter(function(current_a) {
-          return current_a.id == current.id
-        }).length == 0;
-      });
+    //   var usersAdded = room.hosts.filter(function(current) {
+    //     return currentHosts.filter(function(current_a) {
+    //       return current_a.id == current.id
+    //     }).length == 0;
+    //   });
 
-      for (var i = usersAdded.length - 1; i >= 0; i--) {
-        var user = usersAdded[i];
-        if (user.username == username) {
-          showNotification('You have been added as a host of this conversation!');
-        }
-        else {
-          showNotification(user.username + ' has been added as a host of this conversation!');
-        }
-      };
+    //   for (var i = usersAdded.length - 1; i >= 0; i--) {
+    //     var user = usersAdded[i];
+    //     if (user.username == username) {
+    //       showNotification('You have been added as a host of this conversation!');
+    //     }
+    //     else {
+    //       showNotification(user.username + ' has been added as a host of this conversation!');
+    //     }
+    //   };
 
-      for (var i = usersRemoved.length - 1; i >= 0; i--) {
-        var user = usersRemoved[i];
-        if (user.username == username) {
-          showNotification('You have been demoted :(');
-        }
-        else {
-          showNotification(user.username + ' has been demoted :(');
-        }
-      }
-    }
-    else {
-      currentHosts = null;
-    }
+    //   for (var i = usersRemoved.length - 1; i >= 0; i--) {
+    //     var user = usersRemoved[i];
+    //     if (user.username == username) {
+    //       showNotification('You have been demoted :(');
+    //     }
+    //     else {
+    //       showNotification(user.username + ' has been demoted :(');
+    //     }
+    //   }
+    // }
+    // else {
+    //   currentHosts = null;
+    // }
 
-    currentHosts = room.hosts.slice();
-    currentRoomID = room.id;
+    // currentHosts = room.hosts.slice();
+    // currentRoomID = room.id;
 
   });
+
+  // NOTIFICATIONS
+
+  socket.on('created room', function (data) {
+    normalLog('You are now the owner of this conversation! Send some messages to get started');
+  });
+
+  socket.on('fan joined room', function(username) {
+    showToastNotification('info', '', username + ' joined your room!');
+  });
+
+  socket.on('user was promoted', function(username) {
+    showFullscreenNotification(username + ' was promoted to host!');
+  });
+
+  socket.on('user was demoted', function(username) {
+    showFullscreenNotification(username + ' was demoted :(');
+  });
+
+  socket.on('message was forwarded', function(username) {
+    showFullscreenNotification(username + ' forwarded your message!');
+  });
+
+  socket.on('toast notification', function(options) {
+    showToastNotification(options.type, options.title, options.message);
+  });
+
+  socket.on('log notification', function(options) {
+    switch (options.type) {
+      case 'normal':
+        normalLog(options.message);
+        break;
+      case 'danger':
+        dangerLog(options.message);
+        break;
+      case 'success':
+        successLog(options.message);
+        break;
+      default:
+        normalLog(options.message);
+        break;
+    }
+  });
+  
 
     ///////////////////////////////////////////////////////////////
   ///////                                                  //////
