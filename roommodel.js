@@ -26,4 +26,4 @@ roomSchema.pre('save', function(next){
 
 
 // create the model for users and expose it to our app
-module.exports = mongoose.model('RoomModel', roomSchema);
+module.exports = mongoose.model('Rooms', roomSchema);
