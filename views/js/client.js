@@ -62,16 +62,21 @@ $(function() {
     $.getJSON(url, {}, function(data) {
       $.each(data, function(index, element) {
         $('#loading').hide();
-        var newLink = '/archives/' + element.id;
-        var $roomDiv = $('<li><a href="#">' + element.id + '</a></li>');
-        $roomDiv.click(function () {
+        var $roomDiv = constructArchiveDiv(element);
+        $('.archived-chats-list').append($roomDiv);
+      });
+    });
+
+    function constructArchiveDiv(element) {
+      var newLink = '/archives/' + element.id;
+      var $newDiv = $('<li><a href="#">' + element.id + '</a></li>');
+      $newDiv.click(function () {
           switchToRoom(element.id);
           $('#profile-modal').modal('hide');
           return false;
         });
-        $('.archived-chats-list').append($roomDiv);
-      });
-    });
+      return $newDiv;
+    }
 
     // make sure the profile link doesn't actually resolve
     return false;
