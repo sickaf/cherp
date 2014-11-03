@@ -425,6 +425,7 @@ io.on('connection', function (socket) {
     io.to(id).emit("set archived state", "This room is Archived.  Join another room or start your own conversation");
   });
 
+
   function enterChatWithId(idParam) {
     var id = idParam;
     if (!id) {
