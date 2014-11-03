@@ -136,7 +136,6 @@ function getSocketWithId(socketId) {
   else return null;
 }
 
-// function pushMessageToDB(roomID, fullMessage){
 function pushMessageToDB(name, roomID, fullMessage){
   RoomModel.findOne({ 'id' : roomID }, function(err, room) {
     if (err)
@@ -168,36 +167,12 @@ function pushMessageToDB(name, roomID, fullMessage){
     }
   });
 }
-function getUserWithId () {
-  return null;
-}
-
-// function isThisUserInThisRoom (userParam, roomID) {
-//     var inRoomList = userParam.inRooms;
-//     for(var i = 0; i < inRoomList.length; i++) {
-//       if(inRoomList[i] == roomID){
-//         return true;
-//       }
-//     }
-//     return false;
-// } 
 
 function isThisUserInThisRoom (userParam, roomId) {
   var room = getRoomWithID(roomId);
   if(room.getUser(userParam.id)) return true;
   return false;
 } 
-
-
-// function isThisUserHostOfThisRoom (userParam, roomId) {
-//     var hostOfList = userParam.hostOf;
-//     for(var i = 0; i < hostOfList.length; i++) {
-//       if(hostOfList[i] == roomId){
-//         return true;
-//       }
-//     }
-//     return false;
-// } 
 
 function isThisUserHostOfThisRoom (userParam, roomId) {
   var room = getRoomWithID(roomId);
@@ -233,9 +208,6 @@ function isThisUserAtLeastHostOfThisRoom (userParam, roomId) {
   return getRoomWithID(roomId).isOwner(userParam.id);
 }
 
-
-
-
 function getRoomList () {
   var toReturn = "";
   var first = true;
@@ -253,8 +225,6 @@ function getRoomList () {
 io.on('connection', function (socket) {
 
   console.log(socket.request.session);
-
-
 
   var ourUser = null;
   var ourUserId;
@@ -277,27 +247,16 @@ io.on('connection', function (socket) {
 
           } else { //anon user wooo
             console.log("socket connecton from anon user, generating uuid");
-            ourUserId = uuid.v4();
-
             ourUser = new User();
-            ourUser.id = ourUserId;
             ourUser.username = "ANON_USERNAME_NOT_SET_420";
-            ourUser.owns = null;
-            ourUser.hostOf = [];
-            ourUser.inRooms = [];
             ourUser.sockets.push(socket.id);
             users.push(ourUser);
-
           }
       } else {console.error("NO PASSPORT io.on connection");}
   } else {console.error("NO SESSION io.on connection");}
 
-
-
   //messaging
-  socket.emit('update', "Welcome to the world. You have connected to the server. Users ("+users.length+") are: "+getUsersList()+". you are "+JSON.stringify(ourUser)+" AND "+ourUser._id);
-  //sets connected = true
-  
+  socket.emit('update', "Welcome to the world. You have connected to the server. Users ("+users.length+") are: "+getUsersList()+". you are "+JSON.stringify(ourUser)+" AND "+ourUser._id);  
   sockets.push(socket);
 
   var addedUser = true;  
