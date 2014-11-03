@@ -49,6 +49,11 @@ body {
   list-style-type: none;
 }
 
+.archived-chats-list {
+	padding: 0;
+	list-style-type: none;
+}
+
 .text-input {
 	padding-top: 20px;
 }

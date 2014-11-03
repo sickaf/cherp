@@ -415,14 +415,19 @@ io.on('connection', function (socket) {
     }
   });
 
-  socket.on('enter chat with id', function (id) { //used when you click the trending rooms link
-    enterChatWithId(id);
+  socket.on('enter chat with id', function (data) { //used when you click the trending rooms link
+    enterChatWithId(data["id"], data["name"]);
   });
 
-  function enterChatWithId(idParam) {
+  function enterChatWithId(idParam, name) {
     var id = idParam;
     if (!id) {
       id = ourUser.id;
+    }
+
+    var roomName = name;
+    if (!roomName) {
+      roomName = 'Untitled';
     }
 
     //check if this socket is already in the room
@@ -460,7 +465,7 @@ io.on('connection', function (socket) {
     else { //room doesnt exist. create it
       socket.emit("update", "the room with id "+ id + " doesnt exist yet.  adding you as OWNER");
 
-      var room = new Room(ourUser.username, id, ourUser);
+      var room = new Room(roomName, id, ourUser);
       rooms.push(room);
       //add room to socket, and auto join the creator of the room
       socket.emit("set iAmHost", ourUser.username, true); 

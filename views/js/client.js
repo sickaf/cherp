@@ -47,7 +47,18 @@ $(function() {
   }
 
   $('#create-room-button').click(function() {
-      socket.emit('enter chat with id', null);
+    smoke.prompt("Name your room", function(e){
+      if (e){
+        socket.emit('enter chat with id', { "id" : null, "name" : e});
+      } else{
+        // nothing
+      }
+      }, {
+      ok: "Create Conversation",
+      cancel: "Cancel",
+      classname: "custom-class",
+      value: "Enter room name"
+    });
   });
 
   $('#twitter-signin').click(function() {
@@ -68,14 +79,32 @@ $(function() {
     });
 
     function constructArchiveDiv(element) {
-      var newLink = '/archives/' + element.id;
-      var $newDiv = $('<li><a href="#">' + element.id + '</a></li>');
-      $newDiv.click(function () {
-          switchToRoom(element.id);
-          $('#profile-modal').modal('hide');
-          return false;
-        });
-      return $newDiv;
+
+      // create an element with an object literal, defining properties
+      var listItem = $("<li />", {
+        "class": "list-group-item archive-list", // you need to quote "class" since it's a reserved keyword
+      });
+
+      var title = $("<h4 />");
+
+      var linkItem = $("<a />", {
+        href: '/archives/' + element.id,
+        "class": "archive-link",
+        text: element.name
+      });
+
+      var c = new Date(element.created_at).yyyymmdd();
+      
+      var created = $("<h5 />", {
+        text: c
+      });
+
+      title.append(linkItem);
+
+      listItem.append(title);
+      listItem.append(created);
+
+      return listItem;
     }
 
     // make sure the profile link doesn't actually resolve
@@ -146,7 +175,7 @@ $(function() {
   function switchToRoom(roomID) {
     currentHosts = null;
     currentRoomID = null;
-    socket.emit('enter chat with id', roomID);
+    socket.emit('enter chat with id', { "id" : roomID, "name" : null});
   }
 
   // Sends a chat message
@@ -727,6 +756,16 @@ $(function() {
     }) 
   } 
 });
+
+// Utilities
+
+Date.prototype.yyyymmdd = function() {
+   var yyyy = this.getFullYear().toString();
+   var mm = (this.getMonth()+1).toString(); // getMonth() is zero-based
+   var dd  = this.getDate().toString();
+   return (mm[1]?mm:"0"+mm[0]) + '-' + (dd[1]?dd:"0"+dd[0]) + '-' + yyyy; // padding
+};
+
 
 /*
 
