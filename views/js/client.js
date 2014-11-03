@@ -52,6 +52,40 @@ $(function() {
 
   $('#twitter-signin').click(function() {
     window.location.replace("/auth/twitter");
+  });
+
+  $('#profile-link').click(function () {
+    $("#profile-dropdown").click()
+    $('.modal-title').text(username);
+    $('#profile-modal').modal('show');
+    var url = "/profile/archives/"+user._id;
+    $.getJSON(url, {}, function(data) {
+      $.each(data, function(index, element) {
+        $('#loading').hide();
+        var $roomDiv = constructArchiveDiv(element);
+        $('.archived-chats-list').append($roomDiv);
+      });
+    });
+
+    function constructArchiveDiv(element) {
+      var newLink = '/archives/' + element.id;
+      var $newDiv = $('<li><a href="#">' + element.id + '</a></li>');
+      $newDiv.click(function () {
+          switchToRoom(element.id);
+          $('#profile-modal').modal('hide');
+          return false;
+        });
+      return $newDiv;
+    }
+
+    // make sure the profile link doesn't actually resolve
+    return false;
+  });
+
+  $('#profile-modal').on('hidden.bs.modal', function (e) {
+      $('.archived-chats-list').empty();
+      var $loadingDiv = $('<li id="loading">Loading...</li>');
+      $('.archived-chats-list').append($loadingDiv);
   })
 
   // UI Helpers

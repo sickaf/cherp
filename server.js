@@ -145,7 +145,7 @@ function getSocketWithId(socketId) {
   else return null;
 }
 
-function pushMessageToDB(name, roomID, fullMessage){
+function pushMessageToDB(ownerID, name, roomID, fullMessage){
   RoomModel.findOne({ 'id' : roomID }, function(err, room) {
     if (err)
       console.log("database ERR: "+err);
@@ -164,6 +164,8 @@ function pushMessageToDB(name, roomID, fullMessage){
       var newRoom = new RoomModel();
       newRoom.id = roomID;
       newRoom.name = name;
+      newRoom.owner = ownerID;
+      newRoom.hosts = [];
       newRoom.hostMessages = [];
       newRoom.hostMessages.push(fullMessage);
       newRoom.save(function(err) {
@@ -282,7 +284,7 @@ io.on('connection', function (socket) {
 
     if(isThisUserAtLeastHostOfThisRoom(ourUser, socket.room)) {
       io.sockets.in(socket.room).emit('new host message', fullMessage);
-      pushMessageToDB(getRoomWithID(socket.room).name, socket.room, fullMessage);
+      pushMessageToDB(ourUser.id, getRoomWithID(socket.room).name, socket.room, fullMessage);
     }
     else  {
       socket.emit("update", "ur not the host get a day job");
@@ -300,7 +302,7 @@ io.on('connection', function (socket) {
 
     if(isThisUserAtLeastHostOfThisRoom(ourUser, socket.room)) {
       socket.broadcast.to(socket.room).emit("new host message", fullMessage);
-      pushMessageToDB(getRoomWithID(socket.room).name, socket.room, fullMessage);
+      pushMessageToDB(ourUser.id, getRoomWithID(socket.room).name, socket.room, fullMessage);
     }
     else {
       socket.broadcast.to(socket.room).emit("new fan message", fullMessage);
@@ -377,7 +379,7 @@ io.on('connection', function (socket) {
 
     if(isThisUserAtLeastHostOfThisRoom(ourUser, socket.room)) {
       socket.broadcast.to(socket.room).emit('host repost', data);
-      pushMessageToDB(getRoomWithID(socket.room).name, socket.room, data);
+      pushMessageToDB(ourUser.id, getRoomWithID(socket.room).name, socket.room, data);
     }
     else {
       socket.emit("update", "ur not the host lol pull out homie");

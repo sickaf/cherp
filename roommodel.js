@@ -5,9 +5,22 @@ var bcrypt   = require('bcrypt-nodejs');
 
 // define the schema for our user model
 var roomSchema = mongoose.Schema({
+	owner: String,
+	hosts: Array,
     name: String,
     id : String,
-    hostMessages : Array
+    hostMessages : Array,
+    created_at    : { type: Date },
+  	updated_at    : { type: Date }
+});
+
+roomSchema.pre('save', function(next){
+  now = new Date();
+  this.updated_at = now;
+  if ( !this.created_at ) {
+    this.created_at = now;
+  }
+  next();
 });
 
 
