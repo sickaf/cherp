@@ -249,6 +249,7 @@ $(function() {
 
   function showToastNotification (type, title, message) {
     toastr.options.timeout = 2;
+    toastr.options.positionClass = 'toast-bottom-left';
     switch (type) {
       case 'info':
         toastr.info(message, title);
