@@ -130,6 +130,12 @@ function getRoomWithID (id) {
   else return null;
 }   
 
+function getRoomWithID (idParam) {
+  var toRet = _.where(users, {id: idParam});
+  if(toRet.length > 0) return toRet[0];
+  else return null;
+}   
+
 function getSocketWithId(socketId) {
   var toRet = _.where(sockets, {id: socketId});
   if(toRet.length > 0) return toRet[0];
@@ -256,10 +262,8 @@ io.on('connection', function (socket) {
   } else {console.error("NO SESSION io.on connection");}
 
   //messaging
-  socket.emit('update', "Welcome to the world. You have connected to the server. Users ("+users.length+") are: "+getUsersList()+". you are "+JSON.stringify(ourUser)+" AND "+ourUser._id);  
+  socket.emit('update', "Welcome to the world. You have connected to the server. Users ("+users.length+") are: "+getUsersList()+". you are "+JSON.stringify(ourUser)+" and your id is "+ourUser._id);  
   sockets.push(socket);
-
-  var addedUser = true;  
 
   //Received an image: broadcast to all
   socket.on('new image', function (data) {
