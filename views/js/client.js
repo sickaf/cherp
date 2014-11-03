@@ -22,6 +22,7 @@ $(function() {
   var $createRoomButton = $('#create-room-button');
   var $hostLabel = $("#host-label");
   var $membersLabel = $("#members-label");
+  var $textGroup = $(".text-input");
 
   // Prompt for setting a username
   var username = user.username;
@@ -49,14 +50,14 @@ $(function() {
   $('#create-room-button').click(function() {
     smoke.prompt("Name your room", function(e){
       if (e){
-        socket.emit('enter chat with id', { "id" : null, "name" : e});
+        socket.emit('enter chat with id', { id : null, name : e});
       } else{
         // nothing
       }
       }, {
       ok: "Create Conversation",
       cancel: "Cancel",
-      classname: "custom-class",
+      classname: "room-name-field",
       value: "Enter room name"
     });
   });
@@ -88,9 +89,16 @@ $(function() {
       var title = $("<h4 />");
 
       var linkItem = $("<a />", {
-        href: '/archives/' + element.id,
+        href: '#',
         "class": "archive-link",
         text: element.name
+      });
+
+      linkItem.click(function() {
+        switchToRoom(element.id);
+        $('#profile-modal').modal('hide');
+        $('#profile-dropdown').click();
+        return false;
       });
 
       var c = new Date(element.created_at).yyyymmdd();
@@ -176,6 +184,12 @@ $(function() {
     currentHosts = null;
     currentRoomID = null;
     socket.emit('enter chat with id', { "id" : roomID, "name" : null});
+  }
+
+  function switchToArchivedRoom(roomID) {
+    currentHosts = null;
+    currentRoomID = null;
+    socket.emit('enter archived chat', roomID);
   }
 
   // Sends a chat message
@@ -482,7 +496,7 @@ $(function() {
 
   $window.keydown(function (event) {
     // Auto-focus the current input when a key is typed
-    if (!(event.ctrlKey || event.metaKey || event.altKey)) {
+    if (!(event.ctrlKey || event.metaKey || event.altKey) && $(".room-name-field").length == 0) {
       $inputMessage.focus();
     }
 
@@ -503,13 +517,13 @@ $(function() {
 
   // Socket stuff
 
-  // Whenever the server emits 'login', log the login message
-  socket.on('tell client owner left', function (msg) {
+  socket.on('set archived state', function (msg) {
     currentlyInRoom = false;
     iAmHost = false;
     dangerLog(msg);
     $membersLabel.text('');
     $hostLabel.text("This room is archived.");
+    // $textGroup.hide();
   });
 
   // Whenever the server emits 'new message', update the chat body

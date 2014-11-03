@@ -10,9 +10,6 @@ var userSchema = mongoose.Schema({
     username : String,
     wantsToJoin : String,
     sockets : Array,
-    owns : String,
-    hostof : Array,
-    inRooms : Array,
     local            : {
         username     : String,
         email        : String,
