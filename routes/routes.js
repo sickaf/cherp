@@ -114,5 +114,5 @@ function randomUsername() {
     var noun = nouns[Math.floor(Math.random() * nouns.length)];
     var descriptor = descriptors[Math.floor(Math.random() * descriptors.length)];
     var number = numbers[Math.floor(Math.random() * numbers.length)];
-    return noun+descriptor+numbers;
+    return noun+descriptor+number;
 }
