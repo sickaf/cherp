@@ -22,6 +22,7 @@ $(function() {
   var $createRoomButton = $('#create-room-button');
   var $hostLabel = $("#host-label");
   var $membersLabel = $("#members-label");
+  var $textGroup = $(".text-input");
 
   // Prompt for setting a username
   var username = user.username;
@@ -71,7 +72,7 @@ $(function() {
       var newLink = '/archives/' + element.id;
       var $newDiv = $('<li><a href="#">' + element.id + '</a></li>');
       $newDiv.click(function () {
-          switchToRoom(element.id);
+          switchToArchivedRoom(element.id);
           $('#profile-modal').modal('hide');
           return false;
         });
@@ -147,6 +148,12 @@ $(function() {
     currentHosts = null;
     currentRoomID = null;
     socket.emit('enter chat with id', roomID);
+  }
+
+  function switchToArchivedRoom(roomID) {
+    currentHosts = null;
+    currentRoomID = null;
+    socket.emit('enter archived chat', roomID);
   }
 
   // Sends a chat message
@@ -474,13 +481,13 @@ $(function() {
 
   // Socket stuff
 
-  // Whenever the server emits 'login', log the login message
-  socket.on('tell client owner left', function (msg) {
+  socket.on('set archived state', function (msg) {
     currentlyInRoom = false;
     iAmHost = false;
     dangerLog(msg);
     $membersLabel.text('');
     $hostLabel.text("This room is archived.");
+    $textGroup.hide();
   });
 
   // Whenever the server emits 'new message', update the chat body
