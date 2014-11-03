@@ -128,47 +128,6 @@ Room.prototype.removeUser = function(userId) {
   return true;
 }; 
 
-// Room.prototype.getFanWithSocketId = function(socketId) { 
-//   for (var i = 0; i < this.fans.length; i ++) {
-//     var fan = this.fans[i];
-//     for(var x = 0; x < fan.sockets.length; x++) {
-//       if (fan.sockets[x] == socketId) {
-//         return fan;
-//       }
-//     }
-//   }
-//   return null;
-// }
-
-// Room.prototype.getHostWithSocketId = function(socketId) { 
-//   for (var i = 0; i < this.hosts.length; i ++) {
-//     var host = this.hosts[i];
-//     for(var x = 0; x < host.sockets.length; x++) {
-//       if (host.sockets[x] == socketId) {
-//         return host;
-//       }
-//     }
-//   }
-//   return null;
-// }
-
-// Room.prototype.getUserWithSocketId = function(socketId) {
-  
-//   var toRet = this.getFanWithSocketId(socketId);
-//   if(toRet) return toRet;
-  
-//   toRet = this.getHostWithSocketId(socketId);
-//   if(toRet) return toRet;
-  
-//   for(var i = 0; i<this.owner.sockets.length; i++) {
-//     if(this.owner.sockets[i] == socketId) {
-//       return this.owner;
-//     }
-//   }
-//   return null;
-// };
-
-
 Room.prototype.promoteFanToHost = function(personId) {
     var newHost = this.getFan(personId);
     this.removeFan(newHost.id);
