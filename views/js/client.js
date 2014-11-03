@@ -14,6 +14,7 @@ $(function() {
   var $window = $(window);
   var $hostMessages = $('#hostMessages'); // host messages area
   var $fanMessages = $('#fanMessages'); // fan messages area
+  var $chatRoom = $('#chatRoom'); // fan messages area
   var $inputMessage = $('#chat_input'); // Input message input box
   var $sendButton = $('#send_button');
   var $chatRoomField = $('#chat-room-field');
@@ -337,21 +338,6 @@ $(function() {
     return COLORS[index];
   }
 
-  // //this wont work for dates or arrays
-  // /*
-  // *
-  // * DEPRECATED
-  // *
-  // */
-  // function clone(obj) {
-  //   if (null == obj || "object" != typeof obj) return obj;
-  //   var copy = obj.constructor();
-  //   for (var attr in obj) {
-  //       if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
-  //   }
-  //   return copy;
-  // }
-
   // Image uploader
   var opts = {
     dragClass: "#hostMessages",
@@ -407,6 +393,8 @@ $(function() {
     currentlyInRoom = false;
     iAmHost = false;
     dangerLog(msg);
+    $membersLabel.text('');
+    $hostLabel.text("This room is archived.");
   });
 
   // Whenever the server emits 'new message', update the chat body
@@ -444,6 +432,7 @@ $(function() {
    // Whenever the server emits 'new message', update the chat body
   socket.on('update roomsList', function (data) {
     updateRoomsList(data);
+    $chatRoom.show();  //this isn't the best long term place for this
   });
 
   //TODO this needs to work with the browser's back and forward buttons
