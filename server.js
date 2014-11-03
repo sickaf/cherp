@@ -408,8 +408,8 @@ io.on('connection', function (socket) {
     }
   });
 
-  socket.on('enter chat with id', function (id) { //used when you click the trending rooms link. null when you click create new room
-    enterChatWithId(id);
+  socket.on('enter chat with id', function (data) { //used when you click the trending rooms link
+    enterChatWithId(data.id, data.name);
   });
 
   function joinTrendingChat () {
@@ -425,11 +425,15 @@ io.on('connection', function (socket) {
     io.to(id).emit("set archived state", "This room is Archived.  Join another room or start your own conversation");
   });
 
-
-  function enterChatWithId(idParam) {
+  function enterChatWithId(idParam, name) {
     var id = idParam;
     if (!id) {
       id = uuid.v4();
+    }
+
+    var roomName = name;
+    if (!roomName) {
+      roomName = 'Untitled';
     }
 
     //check if this socket is already in the room
@@ -469,7 +473,7 @@ io.on('connection', function (socket) {
     }
     else { //room doesnt exist. create it
       socket.emit("log notification", { message:  "room "+ id + " doesnt exist yet. Adding you as OWNER. pretty cool huh?", type : "normal" });   
-      var room = new Room(id, ourUser);
+      var room = new Room(id, ourUser, roomName);
       rooms.push(room);
 
       //add room to socket, and auto join the creator of the room

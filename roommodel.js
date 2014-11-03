@@ -10,6 +10,7 @@ var roomSchema = mongoose.Schema({
     name: String,
     id : String,
     hostMessages : Array,
+    total_fans : Number,
     created_at    : { type: Date },
   	updated_at    : { type: Date }
 });

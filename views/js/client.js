@@ -48,7 +48,14 @@ $(function() {
   }
 
   $('#create-room-button').click(function() {
-      socket.emit('enter chat with id', null);
+    smoke.prompt("Name your room", function(e){
+        socket.emit('enter chat with id', { id : null, name : e});
+      }, {
+      ok: "Create Conversation",
+      cancel: "Cancel",
+      classname: "room-name-field",
+      value: ""
+    });
   });
 
   $('#twitter-signin').click(function() {
@@ -69,14 +76,39 @@ $(function() {
     });
 
     function constructArchiveDiv(element) {
-      var newLink = '/archives/' + element.id;
-      var $newDiv = $('<li><a href="#">' + element.id + '</a></li>');
-      $newDiv.click(function () {
-          switchToArchivedRoom(element.id);
-          $('#profile-modal').modal('hide');
-          return false;
-        });
-      return $newDiv;
+
+      // create an element with an object literal, defining properties
+      var listItem = $("<li />", {
+        "class": "list-group-item archive-list", // you need to quote "class" since it's a reserved keyword
+      });
+
+      var title = $("<h4 />");
+
+      var linkItem = $("<a />", {
+        href: '#',
+        "class": "archive-link",
+        text: element.name
+      });
+
+      linkItem.click(function() {
+        switchToRoom(element.id);
+        $('#profile-modal').modal('hide');
+        $('#profile-dropdown').click();
+        return false;
+      });
+
+      var c = new Date(element.created_at).yyyymmdd();
+      
+      var created = $("<h5 />", {
+        text: c
+      });
+
+      title.append(linkItem);
+
+      listItem.append(title);
+      listItem.append(created);
+
+      return listItem;
     }
 
     // make sure the profile link doesn't actually resolve
@@ -147,7 +179,7 @@ $(function() {
   function switchToRoom(roomID) {
     currentHosts = null;
     currentRoomID = null;
-    socket.emit('enter chat with id', roomID);
+    socket.emit('enter chat with id', { "id" : roomID, "name" : null});
   }
 
   function switchToArchivedRoom(roomID) {
@@ -460,7 +492,7 @@ $(function() {
 
   $window.keydown(function (event) {
     // Auto-focus the current input when a key is typed
-    if (!(event.ctrlKey || event.metaKey || event.altKey)) {
+    if (!(event.ctrlKey || event.metaKey || event.altKey) && $(".room-name-field").length == 0) {
       $inputMessage.focus();
     }
 
@@ -487,7 +519,7 @@ $(function() {
     dangerLog(msg);
     $membersLabel.text('');
     $hostLabel.text("This room is archived.");
-    $textGroup.hide();
+    // $textGroup.hide();
   });
 
   // Whenever the server emits 'new message', update the chat body
@@ -734,6 +766,16 @@ $(function() {
     }) 
   } 
 });
+
+// Utilities
+
+Date.prototype.yyyymmdd = function() {
+   var yyyy = this.getFullYear().toString();
+   var mm = (this.getMonth()+1).toString(); // getMonth() is zero-based
+   var dd  = this.getDate().toString();
+   return (mm[1]?mm:"0"+mm[0]) + '-' + (dd[1]?dd:"0"+dd[0]) + '-' + yyyy; // padding
+};
+
 
 /*
 

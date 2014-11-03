@@ -1,8 +1,8 @@
 // load the things we need
 var _ = require('underscore')._; //tool for doing things like calling .size on an array
 
-function Room(id, owner) {
-  this.name = owner.username;
+function Room(id, owner, name) {
+  this.name = name;
   this.id = id;
   this.hosts = [];
   this.fans = [];
