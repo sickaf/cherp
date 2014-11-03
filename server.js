@@ -349,7 +349,7 @@ io.on('connection', function (socket) {
   });
 
   socket.on('join chat by owner', function (ownerName) {
-    var roomToJoin = getRoomWithName(ownerName+"Room");
+    var roomToJoin = getRoomWithName(ownerName);
     if (roomToJoin) {
       enterChatWithId(roomToJoin.id);
     } else {
@@ -410,7 +410,7 @@ io.on('connection', function (socket) {
       socket.emit("update", "the room with id "+ id + " doesnt exist yet.  adding you as OWNER");
 
       //var id = uuid.v4();
-      var room = new Room(ourHero.username+"Room", id, ourHero);
+      var room = new Room(ourHero.username, id, ourHero);
       rooms.push(room);
       //add room to socket, and auto join the creator of the room
       socket.emit("set iAmHost", ourHero.username, true); 
@@ -425,7 +425,7 @@ io.on('connection', function (socket) {
       if (room) {
         console.log("database found room with id: "+room.id);
         socket.emit("add database messages", room.hostMessages);
-        
+
       } else {
         console.log("database couldnt find "+id+" to load messages from");
       }
