@@ -263,7 +263,7 @@ io.on('connection', function (socket) {
           if ("user" in socket.request.session.passport) {
             console.log('socket connection from logged in twitter user');
             
-            ourUserId = getUserWithId(socket.request.session.passport.user);
+            ourUserId = socket.request.session.passport.user;
             ourUser = getUserWithId(ourUserId);
             if (ourUser) { //user already exists
               ourUser.sockets.push(socket.id);
@@ -295,7 +295,7 @@ io.on('connection', function (socket) {
 
 
   //messaging
-  socket.emit('update', "Welcome to the world. You have connected to the server. Users ("+users.length+") are: "+getUsersList()+". you are "+JSON.stringify(ourUser));
+  socket.emit('update', "Welcome to the world. You have connected to the server. Users ("+users.length+") are: "+getUsersList()+". you are "+JSON.stringify(ourUser)+" AND "+ourUser._id);
   //sets connected = true
   
   sockets.push(socket);
@@ -405,11 +405,11 @@ io.on('connection', function (socket) {
   // when the client emits 'host repost', this listens and executes
   socket.on('host repost', function (data) {
 
-    //DEPRECATED////////////////////////////////////////////////
-    if(!getRoomWithID(socket.room).isAvailable()){ /////////////
-      socket.emit("update", "THIS ROOM IS FUCKING DEAD"); //////
-      return; //////////////////////////////////////////////////
-    } //////////////////////////////////////////////////////////
+    //DEPRECATED//////////////////////////////////////////////////
+    //if(!getRoomWithID(socket.room).isAvailable()){ /////////////
+    //  socket.emit("update", "THIS ROOM IS FUCKING DEAD"); //////
+    //  return; //////////////////////////////////////////////////
+    //} //////////////////////////////////////////////////////////
 
     if(isThisUserAtLeastHostOfThisRoom(ourUser, socket.room)) {
       console.log("hostrepost ourUser owns this room! yay");
