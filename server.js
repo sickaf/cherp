@@ -263,14 +263,13 @@ io.on('connection', function (socket) {
           if ("user" in socket.request.session.passport) {
             console.log('socket connection from logged in twitter user');
             
-            ourUserId = socket.request.session.passport.user;
+            ourUserId = socket.request.session.passport.user.id;
             ourUser = getUserWithId(ourUserId);
             if (ourUser) { //user already exists
               ourUser.sockets.push(socket.id);
             } else {  //wooo lets make a new user object
-              ourUser = new User();
-              ourUser.id = ourUserId;
-              ourUser.username = "LOGGEDIN_USERNAME_NOT_SET_420";
+
+              ourUser = socket.request.session.passport.user;
               ourUser.sockets.push(socket.id);
               users.push(ourUser);
             }
