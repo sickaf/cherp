@@ -389,13 +389,6 @@ io.on('connection', function (socket) {
     ourUser.username = username;
   });
 
-  function joinTrendingChat () {
-    if(rooms.length > 0) {
-      enterChatWithId(rooms[0].id);
-    } else  {
-      console.log("TRIED TO JOIN TRENDING CHAT BUT AINT NO ROOMS");
-    }
-  }
 
   socket.on('join trending chat', function (data) {
     joinTrendingChat();
@@ -410,14 +403,22 @@ io.on('connection', function (socket) {
     }
   });
 
-  socket.on('enter chat with id', function (id) { //used when you click the trending rooms link
+  socket.on('enter chat with id', function (id) { //used when you click the trending rooms link. null when you click create new room
     enterChatWithId(id);
   });
+
+  function joinTrendingChat () {
+    if(rooms.length > 0) {
+      enterChatWithId(rooms[0].id);
+    } else  {
+      console.log("TRIED TO JOIN TRENDING CHAT BUT AINT NO ROOMS");
+    }
+  }
 
   function enterChatWithId(idParam) {
     var id = idParam;
     if (!id) {
-      id = ourUser.id;
+      id = uuid.v4();
     }
 
     //check if this socket is already in the room
@@ -457,6 +458,7 @@ io.on('connection', function (socket) {
       socket.emit("update", "the room with id "+ id + " doesnt exist yet.  adding you as OWNER. pretty cool huh?");
       var room = new Room(id, ourUser);
       rooms.push(room);
+
       //add room to socket, and auto join the creator of the room
       socket.emit("set iAmHost", ourUser.username, true); 
     }
