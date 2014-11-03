@@ -36,6 +36,9 @@ $(function() {
   var socket = io();
 
   socket.emit('set username', username);
+  
+  // configure right navbar
+  configureRightNavBar();
 
   if (user.wantsToJoin) {
     socket.emit('join chat by owner', user.wantsToJoin);
@@ -46,6 +49,24 @@ $(function() {
   $('#create-room-button').click(function() {
       socket.emit('enter chat with id', null);
   });
+
+  $('#twitter-signin').click(function() {
+    window.location.replace("/auth/twitter");
+  })
+
+  // UI Helpers
+
+  // Enable or disable nav buttons if user is logged in or not
+  function configureRightNavBar () {
+    if (!user.twitter) {
+      $("#right-nav-signed-out").show();
+      $("#username-label").text('You are currently anonymous (' + username + ')');
+    }
+    else {
+      $("#right-nav-signed-in").show();
+      $("#username-label").text('signed in as ' + username);
+    }
+  }
 
   //someone needs to get rid of this dumb function
   function addParticipantsMessage (data) {
