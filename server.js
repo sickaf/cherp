@@ -354,7 +354,8 @@ io.on('connection', function (socket) {
         return;
       }
       roomForChange.promoteFanToHost(userToChange.id);
-      io.to(socket.room).emit("user was promoted", username);   
+      socket.emit("log notification", { message: "just made "+username+" a host.", type : "success" }); 
+      socket.broadcast.to(socket.room).emit("user was promoted", username); 
     }
     else { //DEMOTION :(
       if(roomForChange.isOwner(userToChange.id)) {
@@ -368,8 +369,8 @@ io.on('connection', function (socket) {
       }
 
       roomForChange.demoteHostToFan(userToChange.id);
-      socket.emit("log notification", { message: "just demoted "+username+".", type : "success" });   
-
+      socket.emit("log notification", { message: "just demoted "+username+".", type : "success" });
+      socket.broadcast.to(socket.room).emit("user was demoted", username); 
     }
     io.to(socket.room).emit("update room metadata", roomForChange);
     socket.broadcast.to(socket.room).emit("set iAmHost", username, promoteUp);
