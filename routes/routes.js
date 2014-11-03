@@ -32,7 +32,7 @@ module.exports = function(app, passport) {
 		req.flash('loginMessage', 'Logged out');
 		req.session.destroy();
 		req.logout();
-  		res.redirect('/login');
+  		res.redirect('/');
 	});
 
 

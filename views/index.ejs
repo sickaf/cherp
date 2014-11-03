@@ -13,10 +13,13 @@
 
     <!-- Bootstrap core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
     <!-- Custom styles for this template -->
     <link href="css/style.css" rel="stylesheet">
     <!-- Custom styles for smoke -->
     <link href="js/smoke/smoke.css" rel="stylesheet">
+    <!-- Custom styles for toastr -->
+    <link href="js/toastr/toastr.min.css" rel="stylesheet">
 
   </head>
 
@@ -31,20 +34,27 @@
               <a class="navbar-brand" href="#">Cherp</a>
             </div>
 
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-              <div class="navbar-form navbar-left" role="search">
-                <button type="button" class="btn btn-success new-chat-button" id="create-room-button">Start Conversation</button>
+            <div class="collapse navbar-collapse">
+
+              <div class="nav navbar-nav navbar-left"> <!-- left side -->
+                <button type="button" class="btn btn-success navbar-btn new-chat-button" id="create-room-button">Start Conversation</button>
               </div>
-              <ul class="nav navbar-nav navbar-right">
-                <li class="dropdown">
-                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Signed in as <%= user.username %> <span class="caret"></span></a>
+
+              <ul class="nav navbar-nav navbar-right start-hidden" id="right-nav-signed-out"> <!-- right side that shows if user is signed in -->
+                <li><a href="/auth/twitter" id="username-label"></a></li>
+                <li><button type="button" class="btn btn-info navbar-btn" id="twitter-signin"><span class="fa fa-twitter"></span>   Sign in with Twitter</button></li>
+              </ul>
+
+              <ul class="nav navbar-nav navbar-right start-hidden" id="right-nav-signed-in"> <!-- right side that shows if user is signed out -->
+                 <li class="dropdown" id="profile-dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" id="username-label">Signed in as <%= user.username %> <span class="caret"></span></a>
                   <ul class="dropdown-menu" role="menu">
-                    <li><a href="/login">Login</a></li>
-                    <li><a href="/logout">Logout</a></li>
                     <li><a href="/profile">Profile</a></li>
+                    <li><a href="/logout">Logout</a></li>
                   </ul>
                 </li>
               </ul>
+
             </div>
           </nav>
 
@@ -107,6 +117,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src='js/filereader.js'></script>
     <script src="js/smoke/smoke.js"></script>
+    <script src="js/toastr/toastr.min.js"></script>
     <script>
     var user = <%- JSON.stringify(user) %>;
     console.log(user.wantsToJoin);

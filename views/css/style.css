@@ -24,6 +24,14 @@ body {
 	overflow-y: scroll;
 }
 
+.start-hidden {
+	display:none;
+}
+
+#twitter-signin {
+	margin-right: 20px;
+}
+
 #chatRoom {
 	display:none;
 }
