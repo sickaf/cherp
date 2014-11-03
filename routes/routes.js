@@ -20,11 +20,9 @@ module.exports = function(app, passport) {
         }
 	});
 
-
 	app.get('/login', function(req, res) {
 		res.render('login', { message: req.flash('loginMessage') });
 	});
-
 
 	// =====================================
 	// LOGOUT ==============================
@@ -37,7 +35,8 @@ module.exports = function(app, passport) {
 	});
 
 	app.get('/profile/archives/:userid', function(req, res) {
-		RoomModel.find({ owner: req.params.userid }, function (err, docs) {
+		var q = RoomModel.find({ owner: req.params.userid }).sort({'created_at': -1}).limit(10);
+		q.exec(function (err, docs) {
 			res.send(docs);
 		});
 	});
@@ -45,6 +44,12 @@ module.exports = function(app, passport) {
 	app.get('/archives/:id', function(req, res) {
 		RoomModel.findOne({'id' : req.params.id}, function(err, docs) {
 			res.send(docs);
+		});
+	});
+
+	app.del('/archives/:id', function(req, res) {
+		RoomModel.remove({'id' : req.params.id}, function(err, docs) {
+			res.send(err);
 		});
 	});
 

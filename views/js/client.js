@@ -49,12 +49,14 @@ $(function() {
 
   $('#create-room-button').click(function() {
     smoke.prompt("Name your room", function(e){
+      if (e) { 
         socket.emit('enter chat with id', { id : null, name : e});
+      } 
       }, {
       ok: "Create Conversation",
       cancel: "Cancel",
       classname: "room-name-field",
-      value: ""
+      value: randomRoomName()
     });
   });
 
@@ -103,10 +105,22 @@ $(function() {
         text: c
       });
 
-      title.append(linkItem);
+      var button = $('<button type="button" class="btn btn-danger">Delete</button>');
+      button.on('click', function() {
+        var url = '/archives/' + element.id;
+        $.ajax({
+            url: url,
+            type: 'DELETE',
+            success: function(result) {
+                listItem.remove();
+            }
+        });
+      });
 
+      title.append(linkItem);
       listItem.append(title);
       listItem.append(created);
+      listItem.append(button);
 
       return listItem;
     }
@@ -461,7 +475,17 @@ $(function() {
     var descriptor = descriptors[Math.floor(Math.random() * descriptors.length)];
     var number = numbers[Math.floor(Math.random() * numbers.length)];
     return noun+descriptor+number;
-}
+  }
+
+  function randomRoomName() {
+    var nouns = ['fart','weed','420','snowboard','longboarding','blaze','pussy'];
+    var descriptors = ['room'];
+    var numbers = ['420','69'];
+    var noun = nouns[Math.floor(Math.random() * nouns.length)];
+    var descriptor = descriptors[Math.floor(Math.random() * descriptors.length)];
+    var number = numbers[Math.floor(Math.random() * numbers.length)];
+    return noun+descriptor+number;
+  }
 
   // Image uploader
   var opts = {
