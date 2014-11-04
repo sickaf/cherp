@@ -124,6 +124,12 @@ function getRoomWithName (name) {
   else return null;
 }
 
+function getUserWithUserame (username) {
+  var toRet =  _.where(users, {username: username});
+  if(toRet.length > 0) return toRet[0];
+  return null;
+}
+
 function getRoomWithID (id) {
   var toRet = _.where(rooms, {id: id});
   if(toRet.length > 0) return toRet[0];
@@ -330,7 +336,7 @@ io.on('connection', function (socket) {
   function changeStatus(username, promoteUp) {
     if(!socketIsInChat()) return;
 
-    var userToChange = _.where(users, {username: username})[0];
+    var userToChange = getUserWithUsername(username);
     var roomForChange = getRoomWithID(socket.room);
 
     if(!roomForChange.isOwner(ourUser.id)) {

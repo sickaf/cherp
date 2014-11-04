@@ -19,7 +19,6 @@ ul {
 
 
 
-
 #hostMessages, #fanMessages {
 	background-color: white;
 	height:550px;
@@ -31,7 +30,10 @@ ul {
 	overflow-y: scroll;
 }
 
-
+.form-control {
+	border-radius: 0px;
+	border: 3px solid #000;
+}
 
 
 .list-group-item {
@@ -66,9 +68,16 @@ ul {
 .navbar-default .navbar-nav>li>a {
 	color: #fff;
 }
+.navbar-default .navbar-nav>li>a:hover {
+	color: #ccc;
+}
+
 .navbar-default .navbar-brand {
 	color: #fff;
+}
 
+.navbar-default .navbar-brand:hover {
+	color: #ccc;
 }
 
 .btn {
@@ -76,10 +85,17 @@ ul {
 	border:0px;
 }
 
-.btn-success {
-	background-color: #ddd;
-	color: #000;
+.btn-success {	
+	background-color: #26a65b;
 }
+.btn-success:hover {
+	background-color: #1b7942;
+}
+
+.input-group .form-control {
+	width: 98%;
+}
+
 .start-hidden {
 	display:none;
 }
