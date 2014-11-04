@@ -5,7 +5,7 @@ var bcrypt   = require('bcrypt-nodejs');
 
 // define the schema for our user model
 var roomSchema = mongoose.Schema({
-	ownerName: String,
+	owner: String,
 	hosts: Array,
     name: String,
     id : String,

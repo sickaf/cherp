@@ -150,7 +150,7 @@ function getSocketWithId(socketId) {
   else return null;
 }
 
-function pushMessageToDB(ownerID, roomParam, fullMessage){
+function pushMessageToDB(ownerId, roomParam, fullMessage){
   RoomModel.findOne({ 'id' : roomID }, function(err, room) {
     if (err)
       console.log("database ERR: "+err);
@@ -169,7 +169,7 @@ function pushMessageToDB(ownerID, roomParam, fullMessage){
       var newRoom = new RoomModel();
       newRoom.id = roomParam.id;
       newRoom.name = roomParam.name;
-      newRoom.ownerName = ownerID;
+      newRoom.ownerId = ownerId;
       newRoom.hosts = [];
       newRoom.hostMessages = [];
       newRoom.hostMessages.push(fullMessage);
