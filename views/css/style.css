@@ -85,6 +85,11 @@ ul {
 	border:0px;
 }
 
+.navbar-default .navbar-nav>.open>a, .navbar-default .navbar-nav>.open>a:hover, .navbar-default .navbar-nav>.open>a:focus{
+	color: #ccc;
+	background-color: #000;
+}
+
 .btn-success {	
 	background-color: #26a65b;
 }

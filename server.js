@@ -154,7 +154,7 @@ function pushMessageToDB(ownerId, room, fullMessage){
   RoomModel.findOne({ 'id' : room.id }, function(err, roomModel) {
     if (err)
       console.log("database ERR: "+err);
-    if (room) {
+    if (roomModel) {
       console.log("database found room with id: "+roomModel.id);
       roomModel.hostMessages.push(fullMessage);
       roomModel.save(function(err) {
