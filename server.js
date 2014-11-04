@@ -150,7 +150,7 @@ function getSocketWithId(socketId) {
   else return null;
 }
 
-function pushMessageToDB(ownerID, name, roomID, fullMessage){
+function pushMessageToDB(ownerID, roomParam, fullMessage){
   RoomModel.findOne({ 'id' : roomID }, function(err, room) {
     if (err)
       console.log("database ERR: "+err);
@@ -167,8 +167,8 @@ function pushMessageToDB(ownerID, name, roomID, fullMessage){
     } else {
       console.log("database did not find room");
       var newRoom = new RoomModel();
-      newRoom.id = roomID;
-      newRoom.name = name;
+      newRoom.id = roomParam.id;
+      newRoom.name = roomParam.name;
       newRoom.ownerName = ownerID;
       newRoom.hosts = [];
       newRoom.hostMessages = [];
@@ -289,7 +289,7 @@ io.on('connection', function (socket) {
 
     if(isThisUserAtLeastHostOfThisRoom(ourUser, socket.room)) {
       io.sockets.in(socket.room).emit('new host message', fullMessage);
-      pushMessageToDB(ourUser.id, getRoomWithID(socket.room).name, socket.room, fullMessage);
+      pushMessageToDB(ourUser.id, getRoomWithID(socket.room), fullMessage);
     }
     else  {
       socket.emit("log notification", { message: "ur not the host get a day job", type : "danger" });   
@@ -307,7 +307,7 @@ io.on('connection', function (socket) {
 
     if(isThisUserAtLeastHostOfThisRoom(ourUser, socket.room)) {
       socket.broadcast.to(socket.room).emit("new host message", fullMessage);
-      pushMessageToDB(ourUser.id, getRoomWithID(socket.room).name, socket.room, fullMessage);
+      pushMessageToDB(ourUser.id, getRoomWithID(socket.room), fullMessage);
     }
     else {
       socket.broadcast.to(socket.room).emit("new fan message", fullMessage);
@@ -387,7 +387,7 @@ io.on('connection', function (socket) {
 
     if(isThisUserAtLeastHostOfThisRoom(ourUser, socket.room)) {
       socket.broadcast.to(socket.room).emit('host repost', data);
-      pushMessageToDB(ourUser.id, getRoomWithID(socket.room).name, socket.room, data);
+      pushMessageToDB(ourUser.id, getRoomWithID(socket.room), data);
     }
     else {
       socket.emit("log notification", { message: "ur not the host lol pull out homie", type : "danger" });   
