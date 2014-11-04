@@ -103,7 +103,6 @@ nsp.on('connection', function(socket){
 });
 // nsp.emit('hi', 'everyone!');
 
-
 function getUsersList () {
   var toReturn = "";
   var first = true;
@@ -170,7 +169,7 @@ function pushMessageToDB(ownerID, name, roomID, fullMessage){
       var newRoom = new RoomModel();
       newRoom.id = roomID;
       newRoom.name = name;
-      newRoom.owner = ownerID;
+      newRoom.ownerName = ownerID;
       newRoom.hosts = [];
       newRoom.hostMessages = [];
       newRoom.hostMessages.push(fullMessage);
@@ -322,7 +321,6 @@ io.on('connection', function (socket) {
     return false;
   }
 
-
   // when the client emits 'make host', this listens and executes
   socket.on('promote fan', function (username) {
     changeStatus(username, true);
@@ -336,7 +334,7 @@ io.on('connection', function (socket) {
   function changeStatus(username, promoteUp) {
     if(!socketIsInChat()) return;
 
-    var userToChange = getUserWithUsername(username);
+    var userToChange = getUserWithUserame(username);
     var roomForChange = getRoomWithID(socket.room);
 
     if(!roomForChange.isOwner(ourUser.id)) {
