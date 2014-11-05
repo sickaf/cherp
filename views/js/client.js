@@ -63,6 +63,8 @@ $(function() {
   $('#profile-link').click(function () {
     $("#profile-dropdown").click()
     $('.modal-title').text(username);
+    $('.profile-bio').text(user.bio);
+    $('#profile-avatar').attr('src', user.avatar_url);
     $('#profile-modal').modal('show');
     var url = "/api/v1/profile/archives/"+user._id;
     $.getJSON(url, {}, function(data) {
