@@ -101,14 +101,6 @@ var users = [];
 var rooms = [];
 var sockets = [];
 
-//namespace stuff
-//NOT CURRENTLY USED
-var nsp = io.of('/balls');
-nsp.on('connection', function(socket){
-  console.log('someone connected');
-});
-// nsp.emit('hi', 'everyone!');
-
 function randomUsername() {
   var nouns = ['fart','weed','poop','snowboard','longboarding','blaze','pussy','meat','slippery','dumb','heady','messy','drunk','blood'];
   var descriptors = ['fan','dude','man','doctor','expert','thug','hero','king','queen','idiot','queef','muscles','splatter','satan','worshipper'];

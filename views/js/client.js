@@ -382,7 +382,10 @@ $(function() {
       socket.emit('promote fan', data.id);
     });
 
-    $profileMenuItem = $('<li role="presentation"><a role="menuitem" href="#">Profile</a></li'); 
+    $profileMenuItem = $('<li role="presentation"><a role="menuitem" href="#">Profile</a></li');
+    $profileMenuItem.click(function () {
+      //TODO FARTMAN WEEDGUY
+    });    
 
 
     $menuDiv = $('<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"/>')
@@ -681,48 +684,6 @@ $(function() {
       st += ', ' + room.hosts[i].username;
     }
     $hostLabel.text(st);
-
-    // // Notify of any promotions or demotions
-    // if (currentHosts && currentRoomID == room.id) {
-
-    //   var usersRemoved = currentHosts.filter(function(current) {
-    //     return room.hosts.filter(function(current_b) {
-    //       return current_b.id == current.id
-    //     }).length == 0;
-    //   });
-
-    //   var usersAdded = room.hosts.filter(function(current) {
-    //     return currentHosts.filter(function(current_a) {
-    //       return current_a.id == current.id
-    //     }).length == 0;
-    //   });
-
-    //   for (var i = usersAdded.length - 1; i >= 0; i--) {
-    //     var user = usersAdded[i];
-    //     if (user.username == username) {
-    //       showNotification('You have been added as a host of this conversation!');
-    //     }
-    //     else {
-    //       showNotification(user.username + ' has been added as a host of this conversation!');
-    //     }
-    //   };
-
-    //   for (var i = usersRemoved.length - 1; i >= 0; i--) {
-    //     var user = usersRemoved[i];
-    //     if (user.username == username) {
-    //       showNotification('You have been demoted :(');
-    //     }
-    //     else {
-    //       showNotification(user.username + ' has been demoted :(');
-    //     }
-    //   }
-    // }
-    // else {
-    //   currentHosts = null;
-    // }
-
-    // currentHosts = room.hosts.slice();
-    // currentRoomID = room.id;
 
   });
 
