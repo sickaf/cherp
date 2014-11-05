@@ -27,6 +27,7 @@ $(function() {
   // Prompt for setting a username
   var username = user.username;
   var chatname;
+  var id = null;
   var iAmHost = false;
   var currentlyInRoom = false;
   var typing = false;
@@ -217,12 +218,14 @@ $(function() {
         if(iAmHost) {
           addHostMessage({
             username: username,
-            message: message
+            message: message,
+            id: id
           });
         } else {
           addFanMessage({
             username: username,
-            message: message
+            message: message,
+            id: id
           });
         }
       } 
@@ -314,7 +317,7 @@ $(function() {
 
     //set up a listener so that if the own clicks this div they will become demoted to a fan
     $usernameDiv.click(function () {
-      socket.emit('demote host', data.username);
+      socket.emit('demote host', data.id);
     });
 
     var $messageBodyDiv;
@@ -341,7 +344,7 @@ $(function() {
     var typingClass = data.typing ? 'typing' : '';
     var repostClass = data.repost ? 'repost' : '';
 
-    var $messageDiv = $('<li class="list-group-item message">')
+    var $messageDiv = $('<li id="'+data.id+'" class="list-group-item message">')
       .data('username', data.username)
       .addClass(typingClass)
       .addClass(repostClass)
@@ -359,7 +362,7 @@ $(function() {
     
     //set up a listener so that if the host clicks this div they will become the host
     $usernameDiv.click(function () {
-      socket.emit('promote fan', data.username);
+      socket.emit('promote fan', data.id);
     });
 
     var messageText = linkify(data.message, false);
@@ -375,7 +378,7 @@ $(function() {
       }
     });
 
-    var $messageDiv = $('<li class="list-group-item message"/>')
+    var $messageDiv = $('<li id="'+data.id+'" class="list-group-item message"/>')
       .data('username', data.username)
       .append($usernameDiv, $messageBodyDiv);
 
@@ -548,6 +551,10 @@ $(function() {
   // Whenever the server emits 'new message', update the chat body
   socket.on('update', function (data) {
     normalLog(data);
+  });
+
+  socket.on('set client id', function (idData) {
+    id = idData;
   });
 
   socket.on('set iAmHost', function (usrname, bool) {

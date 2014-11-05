@@ -105,8 +105,6 @@ module.exports = function(app, passport) {
       		user.wantsToJoin = req.params.ownerName;
       		res.render('index', { user : user });
         }
-		// req.flash('wantsToJoin', req.params.ownerName);
-		// res.redirect('/');
 	});
 
 }
