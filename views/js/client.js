@@ -374,17 +374,16 @@ $(function() {
     $repostItem.click(function () {
       data.repost = true;
       socket.emit('host repost', data);
-      if(iAmHost){
-        addHostMessage(data);
-      }
+      if(iAmHost) addHostMessage(data);
     });   
-
-    $profileMenuItem = $('<li role="presentation"><a role="menuitem" href="#">Profile</a></li'); 
 
     $makeHostMenuItem = $('<li role="presentation"><a role="menuitem">Make Host</a></li');
     $makeHostMenuItem.click(function () {
       socket.emit('promote fan', data.id);
     });
+
+    $profileMenuItem = $('<li role="presentation"><a role="menuitem" href="#">Profile</a></li'); 
+
 
     $menuDiv = $('<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"/>')
       .append($repostItem, $profileMenuItem, $makeHostMenuItem);

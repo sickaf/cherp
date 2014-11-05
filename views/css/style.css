@@ -35,7 +35,6 @@ ul {
 	border: 3px solid #000;
 }
 
-
 .list-group-item {
 	border:0px;
 	margin-bottom: 0px;
@@ -124,6 +123,12 @@ ul {
   padding-left: 15px;
   border-left: 4px solid #ccc;
   list-style-type: none;
+}
+
+.dropdown-menu {
+	border-radius: 0px;
+	border: 1px solid #000;
+
 }
 
 .archived-chats-list {
