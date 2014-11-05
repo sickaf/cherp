@@ -127,7 +127,7 @@ $(function() {
 
   $('#profile-modal').on('hidden.bs.modal', function (e) {
       $('.archived-chats-list').empty();
-      var $loadingDiv = $('<li id="loading">Loading...?</li>');
+      var $loadingDiv = $('<li id="loading">Loading...</li>');
       $('.archived-chats-list').append($loadingDiv);
   })
 
