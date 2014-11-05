@@ -214,13 +214,15 @@ $(function() {
           addHostMessage({
             username: username,
             message: message,
-            id: id
+            id: id,
+            avatar_url: user.avatar_url
           });
         } else {
           addFanMessage({
             username: username,
             message: message,
-            id: id
+            id: id,
+            avatar_url: user.avatar_url
           });
         }
       } 
@@ -305,6 +307,9 @@ $(function() {
       options.fade = false;
       $typingMessages.remove();
     }
+
+    $avatarDiv = $('<img id="host-avatar"/>').attr('src', data.avatar_url)
+    .css('background-color', getUsernameColor(data.username));
     
     var $usernameDiv = $('<span class="username"/>')
       .text(data.username + ' ')
@@ -343,13 +348,17 @@ $(function() {
       .data('username', data.username)
       .addClass(typingClass)
       .addClass(repostClass)
-      .append($usernameDiv, $messageBodyDiv);
+      .append($avatarDiv, $usernameDiv, $messageBodyDiv);
 
     addHostMessageElement($messageDiv, options);
   }
 
  // Adds the visual fan message to the message list
   function addFanMessage (data, options) {
+
+    $avatarDiv = $('<img id="fan-avatar"/>').attr('src', data.avatar_url)
+    .css('background-color', getUsernameColor(data.username));
+
     $usernameDiv = $('<span class="username dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown"/>')
     .text(data.username + ' ')
     .css('color', getUsernameColor(data.username));
@@ -365,7 +374,7 @@ $(function() {
       .append($makeHostMenuItem);
 
     $megaDiv = $('<div class="dropdown"/>')
-      .append($usernameDiv, $menuDiv);
+      .append($avatarDiv, $usernameDiv, $menuDiv);
 
     var messageText = linkify(data.message, false);
     $messageBodyDiv = $('<span class="messageBody">')
@@ -620,6 +629,7 @@ $(function() {
 
   // Whenever the server emits 'new message', update the chat body
   socket.on('new host message', function (data) {
+    console.log(data);
     addHostMessage(data);
   });
 

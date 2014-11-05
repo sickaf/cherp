@@ -150,6 +150,26 @@ ul {
 	color: #D3D3D3;
 }
 
+.username {
+	padding-left: 10px;
+}
+
+#fan-avatar {
+	width: 20px;
+	height: 20px;
+	border-radius: 10px;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+}
+
+#host-avatar {
+	width: 30px;
+	height: 30px;
+	border-radius: 15px;
+	-webkit-border-radius: 15px;
+	-moz-border-radius: 15px;
+}
+
 /* makes it so that list items break words to new line if they're too long */
 li {
 	word-wrap: break-word;

@@ -326,8 +326,11 @@ io.on('connection', function (socket) {
     var fullMessage = {
       username: ourUser.username,
       message: sanitizeHtml(data, {allowedTags: ['marquee']}),
-      id: ourUser.id
+      id: ourUser.id,
+      avatar_url: ourUser.avatar_url
     };
+
+    console.log(fullMessage);
 
     if(isThisUserAtLeastHostOfThisRoom(ourUser, socket.room)) {
       socket.broadcast.to(socket.room).emit("new host message", fullMessage);
