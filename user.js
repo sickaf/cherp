@@ -9,6 +9,7 @@ var userSchema = mongoose.Schema({
     wantsToJoin : String,
     sockets : Array,
     avatar_url : String,
+    bio : String,
     local            : {
         username     : String,
         email        : String,
