@@ -425,7 +425,8 @@ io.on('connection', function (socket) {
   }
 
   socket.on('enter archived chat', function (id) { //used when you click the trending rooms link. null when you click create new room
-    enterChatWithId(id);
+    // enterChatWithId(id);
+    enterArchivedChat(id);
     io.to(id).emit("set archived state", "This room is Archived.  Join another room or start your own conversation");
   });
 
@@ -499,11 +500,54 @@ io.on('connection', function (socket) {
       }
     });
     
-    socket.emit("set currentlyInRoom", true); //tell the client whats really good
+    socket.emit("set in active room", true); //tell the client whats really good
     socket.broadcast.emit("log notification", { message:  ourUser.username+" is now in room "+getRoomWithID(id).name, type : "normal" });   
     io.sockets.emit("update roomsList", rooms);
     socket.emit("push state", getRoomWithID(id).owner.username); //updates the address bar
     io.to(socket.room).emit("update room metadata", getRoomWithID(id));
+  }
+
+    function enterArchivedChat(idParam, name) {
+    var id = idParam;
+    if (!id) {
+      id = uuid.v4();
+    }
+
+    var roomName = name;
+    if (!roomName) {
+      roomName = 'Untitled';
+    }
+
+    //LETS DO THIS
+    // socket.emit("clear messages", {});
+   
+    var oldRoom = getRoomWithID(socket.room);
+    if (oldRoom) { 
+      socket.emit("log notification", { message: "Your socket is already in a room.  Going to remove the socket from room " + socket.room, type : "normal" });   
+      removeSocketFromRoom(socket, ourUser, oldRoom);
+    }
+
+
+    socket.leave(socket.room);
+    socket.room = id;
+    socket.join(socket.room);
+
+    RoomModel.findOne({'id' : id}, function(err, room) {
+      if (err)
+        console.log("database ERR getting hostMessages: "+err);
+      if (room) {
+        console.log("database found room with id: "+room.id);
+        socket.emit("add database messages", room.hostMessages);
+
+      } else {
+        console.log("database couldnt find "+id+" to load messages from");
+      }
+    });
+    
+    socket.emit("set in active room", false); //tell the client whats really good
+    socket.broadcast.emit("log notification", { message:  ourUser.username+" is now in ARCHIVED room ", type : "normal" });   
+    io.sockets.emit("update roomsList", rooms);
+    socket.emit("push state", "archivedChat"); //updates the address bar
   }
 
   socket.on('kill room', function (data) {

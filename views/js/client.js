@@ -93,7 +93,7 @@ $(function() {
       });
 
       linkItem.click(function() {
-        switchToRoom(element.id);
+        switchToArchivedRoom(element.id);
         $('#profile-modal').modal('hide');
         $('#profile-dropdown').click();
         return false;
@@ -551,7 +551,8 @@ $(function() {
     dangerLog(msg);
     $membersLabel.text('');
     $hostLabel.text("This room is archived.");
-    // $textGroup.hide();
+    $textGroup.hide();
+    $fanMessages.hide();
   });
 
   // Whenever the server emits 'new message', update the chat body
@@ -565,8 +566,17 @@ $(function() {
     }
   });
 
-  socket.on('set currentlyInRoom', function (bool) {
+  socket.on('set in active room', function (bool) {
     currentlyInRoom = bool;
+    if(bool) {
+      $chatRoom.show();  //this isn't the best long term place for this
+      $fanMessages.show();
+      $textGroup.show();
+    } else {
+      $fanMessages.hide();
+      $textGroup.hide();
+    }
+
   });
 
   // Whenever the server emits 'clear messages', update the chat body
@@ -589,7 +599,6 @@ $(function() {
    // Whenever the server emits 'new message', update the chat body
   socket.on('update roomsList', function (data) {
     updateRoomsList(data);
-    $chatRoom.show();  //this isn't the best long term place for this
   });
 
   //TODO this needs to work with the browser's back and forward buttons
