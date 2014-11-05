@@ -20,6 +20,7 @@
     "mongoose": "*",
     "morgan": "*",
     "node-uuid": "*",
+    "sanitize-html": "*",
     "passport": "*",
     "passport-local": "*",
     "passport-twitter": "*",

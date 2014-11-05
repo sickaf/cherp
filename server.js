@@ -16,6 +16,8 @@ var logger = require('morgan'); //hoping this will make debugging easier
 var uuid = require('node-uuid'); //for generating IDs for things like rooms
 var RoomModel = require('./roommodel');
 var User = require('./user');
+var sanitizeHtml = require('sanitize-html');
+
 
 
 
@@ -102,6 +104,16 @@ nsp.on('connection', function(socket){
   console.log('someone connected');
 });
 // nsp.emit('hi', 'everyone!');
+
+function randomUsername() {
+  var nouns = ['fart','weed','poop','snowboard','longboarding','blaze','pussy','meat','slippery','dumb','heady','messy','drunk','blood'];
+  var descriptors = ['fan','dude','man','doctor','expert','thug','hero','king','queen','idiot','queef','muscles','splatter'];
+  var numbers = ['420','69'];
+  var noun = nouns[Math.floor(Math.random() * nouns.length)];
+  var descriptor = descriptors[Math.floor(Math.random() * descriptors.length)];
+  var number = numbers[Math.floor(Math.random() * numbers.length)];
+  return noun+descriptor+number;
+}
 
 function getUsersList () {
   var toReturn = "";
@@ -273,7 +285,7 @@ io.on('connection', function (socket) {
           } else { //anon user wooo
             console.log("socket connecton from anon user, generating uuid");
             ourUser = new User();
-            ourUser.username = "ANON_USERNAME_NOT_SET_420";
+            ourUser.username = randomUsername();
             ourUser.sockets.push(socket.id);
             users.push(ourUser);
           }
@@ -281,7 +293,7 @@ io.on('connection', function (socket) {
   } else {console.error("NO SESSION io.on connection");}
 
   //messaging
-  socket.emit("set client id", ourUser.id);   
+  socket.emit("set client username and id", ourUser.username, ourUser.id);   
   sockets.push(socket);
 
   //Received an image: broadcast to all
@@ -310,7 +322,7 @@ io.on('connection', function (socket) {
 
     var fullMessage = {
       username: ourUser.username,
-      message: data,
+      message: sanitizeHtml(data, {allowedTags: ['marquee']}),
       id: ourUser.id
     };
 
@@ -328,6 +340,7 @@ io.on('connection', function (socket) {
     if(!socketIsInChat()) return;
 
     if(isThisUserAtLeastHostOfThisRoom(ourUser, socket.room)) {
+      data.message = sanitizeHtml(data.message, {allowedTags: ['marquee']});
       socket.broadcast.to(socket.room).emit('host repost', data);
       pushMessageToDB(ourUser.id, getRoomWithID(socket.room), data);
     }
@@ -403,10 +416,10 @@ io.on('connection', function (socket) {
 
   // when the client emits 'add username', this listens and executes
   socket.on('set username', function (username) {
-    ourUser.username = username;
+    ourUser.username = sanitizeHtml(username);
   });
 
-  socket.on('join trending chat', function (data) {
+  socket.on('join trending chat', function () {
     joinTrendingChat();
   });
 

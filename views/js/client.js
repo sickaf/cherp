@@ -25,7 +25,7 @@ $(function() {
   var $textGroup = $(".text-input");
 
   // Prompt for setting a username
-  var username = user.username;
+  var username = null;
   var chatname;
   var id = null;
   var iAmHost = false;
@@ -37,7 +37,7 @@ $(function() {
 
   var socket = io();
 
-  socket.emit('set username', username);
+  // socket.emit('set username', username);
   
   // configure right navbar
   configureRightNavBar();
@@ -45,7 +45,7 @@ $(function() {
   if (user.wantsToJoin) {
     socket.emit('join chat by owner', user.wantsToJoin);
   } else {
-    socket.emit('join trending chat', null);
+    socket.emit('join trending chat');
   }
 
   $('#create-room-button').click(function() {
@@ -132,7 +132,7 @@ $(function() {
 
   $('#profile-modal').on('hidden.bs.modal', function (e) {
       $('.archived-chats-list').empty();
-      var $loadingDiv = $('<li id="loading">Loading...</li>');
+      var $loadingDiv = $('<li id="loading">Loading...?</li>');
       $('.archived-chats-list').append($loadingDiv);
   })
 
@@ -553,8 +553,10 @@ $(function() {
     normalLog(data);
   });
 
-  socket.on('set client id', function (idData) {
+  socket.on('set client username and id', function (usernameParam, idData) {
+    username = usernameParam;
     id = idData;
+    configureRightNavBar();
   });
 
   socket.on('set iAmHost', function (usrname, bool) {
