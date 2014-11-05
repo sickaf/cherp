@@ -146,6 +146,10 @@ ul {
 	padding-top: 20px;
 }
 
+.typing {
+	color: #D3D3D3;
+}
+
 /* makes it so that list items break words to new line if they're too long */
 li {
 	word-wrap: break-word;
