@@ -127,7 +127,7 @@ $(function() {
 
   $('#profile-modal').on('hidden.bs.modal', function (e) {
       $('.archived-chats-list').empty();
-      var $loadingDiv = $('<li id="loading">Loading...?</li>');
+      var $loadingDiv = $('<li id="loading">Loading...</li>');
       $('.archived-chats-list').append($loadingDiv);
   })
 
@@ -318,7 +318,7 @@ $(function() {
     var $messageBodyDiv;
     
     //if it's an image, do that
-    if(data.image) {
+    if(data.base64Image) {
       $messageBodyDiv = $('<span class="messageBody">')
       .append('<img src="' + data.base64Image + '"/>');
     } else {
@@ -350,15 +350,22 @@ $(function() {
 
  // Adds the visual fan message to the message list
   function addFanMessage (data, options) {
+    $usernameDiv = $('<span class="username dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown"/>')
+    .text(data.username + ' ')
+    .css('color', getUsernameColor(data.username));
 
-    var $usernameDiv = $('<span class="username"/>')
-      .text(data.username + ' ')
-      .css('color', getUsernameColor(data.username));
-    
-    //set up a listener so that if the host clicks this div they will become the host
-    $usernameDiv.click(function () {
+    $profileMenuItem = $('<li role="presentation"><a role="menuitem" href="#">Profile</a></li');    
+    $makeHostMenuItem = $('<li role="presentation"><a role="menuitem">Make Host</a></li');
+    $makeHostMenuItem.click(function () {
       socket.emit('promote fan', data.id);
     });
+
+    $menuDiv = $('<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"/>')
+      .append($profileMenuItem)
+      .append($makeHostMenuItem);
+
+    $megaDiv = $('<div class="dropdown"/>')
+      .append($usernameDiv, $menuDiv);
 
     var messageText = linkify(data.message, false);
     $messageBodyDiv = $('<span class="messageBody">')
@@ -375,10 +382,42 @@ $(function() {
 
     var $messageDiv = $('<li id="'+data.id+'" class="list-group-item message"/>')
       .data('username', data.username)
-      .append($usernameDiv, $messageBodyDiv);
+      .append($megaDiv, $messageBodyDiv);
 
     addFanMessageElement($messageDiv, options);
   }
+
+ // // Adds the visual fan message to the message list
+ //  function addFanMessage (data, options) {
+
+ //    var $usernameDiv = $('<span class="username"/>')
+ //      .text(data.username + ' ')
+ //      .css('color', getUsernameColor(data.username));
+    
+ //    //set up a listener so that if the host clicks this div they will become the host
+ //    $usernameDiv.click(function () {
+ //      socket.emit('promote fan', data.id);
+ //    });
+
+ //    var messageText = linkify(data.message, false);
+ //    $messageBodyDiv = $('<span class="messageBody">')
+ //      .append(messageText);
+
+ //    //set up a listener so that if the host clicks this div itll get forwarded
+ //    $messageBodyDiv.click(function () {
+ //      data.repost = true;
+ //      socket.emit('host repost', data);
+ //      if(iAmHost){
+ //        addHostMessage(data);
+ //      }
+ //    });
+
+ //    var $messageDiv = $('<li id="'+data.id+'" class="list-group-item message"/>')
+ //      .data('username', data.username)
+ //      .append($usernameDiv, $messageBodyDiv);
+
+ //    addFanMessageElement($messageDiv, options);
+ //  }
 
   function addHostMessageElement (el, options) {
     addMessageElement(el, $hostMessages, options);

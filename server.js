@@ -107,7 +107,7 @@ nsp.on('connection', function(socket){
 
 function randomUsername() {
   var nouns = ['fart','weed','poop','snowboard','longboarding','blaze','pussy','meat','slippery','dumb','heady','messy','drunk','blood'];
-  var descriptors = ['fan','dude','man','doctor','expert','thug','hero','king','queen','idiot','queef','muscles','splatter'];
+  var descriptors = ['fan','dude','man','doctor','expert','thug','hero','king','queen','idiot','queef','muscles','splatter','satan','worshipper'];
   var numbers = ['420','69'];
   var noun = nouns[Math.floor(Math.random() * nouns.length)];
   var descriptor = descriptors[Math.floor(Math.random() * descriptors.length)];
@@ -303,8 +303,7 @@ io.on('connection', function (socket) {
     var fullMessage = {
       username: ourUser.username,
       base64Image: data,
-      id: ourUser.id,
-      image: true
+      id: ourUser.id
     };
 
     if(isThisUserAtLeastHostOfThisRoom(ourUser, socket.room)) {
@@ -351,7 +350,7 @@ io.on('connection', function (socket) {
 
   function socketIsInChat(){
     if(getRoomWithID(socket.room)) return true;
-    socket.emit("log notification", { message: "ur socket is not in a chatroom buddy.  go live or join one from the left if any exist.", type : "danger" });
+    socket.emit("log notification", { message: "your socket is not in a chatroom buddy.  go live or join one from the left if any exist.", type : "danger" });
     return false;
   }
 
@@ -447,7 +446,7 @@ io.on('connection', function (socket) {
 
   function enterChatWithId(idParam, name) {
     var id = idParam ? idParam : uuid.v4();
-    var roomName = name ? name : "Untitled";
+    var roomName = name ? sanitizeHtml(name) : "Untitled";
 
     //check if this socket is already in the room
     var roomToEnter = getRoomWithID(id);
