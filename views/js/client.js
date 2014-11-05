@@ -699,7 +699,7 @@ $(function() {
 
   socket.on('no rooms', function() {
     createFirstRoom();
-    showFullscreenNotification("Looks like you're the only one here!");
+    showToastNotification('info', '',"looks like you're the first one here! We've gone ahead and made you a host");
   });
 
   socket.on('user was promoted', function(username) {
