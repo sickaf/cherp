@@ -123,11 +123,6 @@ function getRoomWithName (name) {
   else return null;
 }
 
-function getUserWithUserame (username) {
-  var toRet =  _.where(users, {username: username});
-  if(toRet.length > 0) return toRet[0];
-  return null;
-}
 
 function getRoomWithID (id) {
   var toRet = _.where(rooms, {id: id});
@@ -287,7 +282,6 @@ io.on('connection', function (socket) {
 
   //messaging
   socket.emit("set client id", ourUser.id);   
-  
   sockets.push(socket);
 
   //Received an image: broadcast to all
