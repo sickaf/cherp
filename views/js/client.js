@@ -23,6 +23,7 @@ $(function() {
   var $hostLabel = $("#host-label");
   var $membersLabel = $("#members-label");
   var $textGroup = $(".text-input");
+  
 
   // Prompt for setting a username
   var username = null;
@@ -63,6 +64,8 @@ $(function() {
   $('#profile-link').click(function () {
     $("#profile-dropdown").click()
     $('.modal-title').text(username);
+    $('.profile-bio').text(user.bio);
+    $('#profile-avatar').attr('src', user.avatar_url);
     $('#profile-modal').modal('show');
     var url = "/api/v1/profile/archives/"+user._id;
     $.getJSON(url, {}, function(data) {
@@ -89,7 +92,7 @@ $(function() {
       });
 
       linkItem.click(function() {
-        switchToArchivedRoom(element.id);
+        switchToRoom(element.id);
         $('#profile-modal').modal('hide');
         $('#profile-dropdown').click();
         return false;
@@ -178,7 +181,7 @@ $(function() {
   }
 
   function addRoomToRoomsList(room){
-    var $roomDiv = $('<li><a href="#">'+'<strong>'+room.owner.username+'</strong> - '+room.name+'('+room.peopleNum+')</a></li>');
+    var $roomDiv = $('<li><a href="#">'+room.name+' ('+room.peopleNum+')</a></li>');
     $roomDiv.click(function () {
       switchToRoom(room.id);
       return false;
@@ -510,6 +513,10 @@ $(function() {
     return noun+descriptor+number;
   }
 
+  function createFirstRoom() {   
+     socket.emit('enter chat with id', { id : null, name : 'First Room'});
+  }
+
   // Image uploader
   var opts = {
     dragClass: "#hostMessages",
@@ -560,6 +567,15 @@ $(function() {
 
   // Socket stuff
 
+  socket.on('set archived state', function (msg) {
+    currentlyInRoom = false;
+    iAmHost = false;
+    dangerLog(msg);
+    $membersLabel.text('');
+    $hostLabel.text("This room is archived.");
+    // $textGroup.hide();
+  });
+
   // Whenever the server emits 'new message', update the chat body
   socket.on('update', function (data) {
     normalLog(data);
@@ -577,18 +593,8 @@ $(function() {
     }
   });
 
-  socket.on('set in active room', function (bool) {
+  socket.on('set currentlyInRoom', function (bool) {
     currentlyInRoom = bool;
-    if(bool) {
-      $chatRoom.show();  //this isn't the best long term place for this
-      $fanMessages.show();
-      $textGroup.show();
-    } else {
-      $hostLabel.text("This room is archived.");
-      $membersLabel.text('');
-      $fanMessages.hide();
-      $textGroup.hide();
-    }
   });
 
   // Whenever the server emits 'clear messages', update the chat body
@@ -612,6 +618,7 @@ $(function() {
    // Whenever the server emits 'new message', update the chat body
   socket.on('update roomsList', function (data) {
     updateRoomsList(data);
+    $chatRoom.show();  //this isn't the best long term place for this
   });
 
   //TODO this needs to work with the browser's back and forward buttons
@@ -666,6 +673,48 @@ $(function() {
     }
     $hostLabel.text(st);
 
+    // // Notify of any promotions or demotions
+    // if (currentHosts && currentRoomID == room.id) {
+
+    //   var usersRemoved = currentHosts.filter(function(current) {
+    //     return room.hosts.filter(function(current_b) {
+    //       return current_b.id == current.id
+    //     }).length == 0;
+    //   });
+
+    //   var usersAdded = room.hosts.filter(function(current) {
+    //     return currentHosts.filter(function(current_a) {
+    //       return current_a.id == current.id
+    //     }).length == 0;
+    //   });
+
+    //   for (var i = usersAdded.length - 1; i >= 0; i--) {
+    //     var user = usersAdded[i];
+    //     if (user.username == username) {
+    //       showNotification('You have been added as a host of this conversation!');
+    //     }
+    //     else {
+    //       showNotification(user.username + ' has been added as a host of this conversation!');
+    //     }
+    //   };
+
+    //   for (var i = usersRemoved.length - 1; i >= 0; i--) {
+    //     var user = usersRemoved[i];
+    //     if (user.username == username) {
+    //       showNotification('You have been demoted :(');
+    //     }
+    //     else {
+    //       showNotification(user.username + ' has been demoted :(');
+    //     }
+    //   }
+    // }
+    // else {
+    //   currentHosts = null;
+    // }
+
+    // currentHosts = room.hosts.slice();
+    // currentRoomID = room.id;
+
   });
 
   // NOTIFICATIONS
@@ -676,6 +725,11 @@ $(function() {
 
   socket.on('fan joined room', function(username) {
     showToastNotification('info', '', username + ' joined your room!');
+  });
+
+  socket.on('no rooms', function() {
+    createFirstRoom();
+    showFullscreenNotification("Looks like you're the only one here!");
   });
 
   socket.on('user was promoted', function(username) {
@@ -710,6 +764,8 @@ $(function() {
         break;
     }
   });
+
+  
   
 
     ///////////////////////////////////////////////////////////////
@@ -778,6 +834,8 @@ $(function() {
     }) 
   } 
 });
+
+
 
 // Utilities
 

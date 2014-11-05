@@ -445,7 +445,9 @@ io.on('connection', function (socket) {
   function joinTrendingChat () {
     if(rooms.length > 0) {
       enterChatWithId(rooms[0].id);
+
     } else  {
+      socket.emit("no rooms");
       console.log("TRIED TO JOIN TRENDING CHAT BUT AINT NO ROOMS");
     }
   }
