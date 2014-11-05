@@ -8,6 +8,7 @@ var userSchema = mongoose.Schema({
     username : String,
     wantsToJoin : String,
     sockets : Array,
+    avatar_url : String,
     local            : {
         username     : String,
         email        : String,

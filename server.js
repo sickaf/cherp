@@ -16,8 +16,11 @@ var logger = require('morgan'); //hoping this will make debugging easier
 var uuid = require('node-uuid'); //for generating IDs for things like rooms
 var RoomModel = require('./roommodel');
 var User = require('./user');
+var qt   = require('quickthumb');
 var sanitizeHtml = require('sanitize-html');
 
+// Use quickthumb
+app.use(qt.static(__dirname + '/'));
 
 
 
@@ -74,6 +77,7 @@ io.use(function(socket, next){
 // Routing
 //
 require('./routes/routes.js')(app, passport); // pass in app and passport
+require('./routes/api/v1/api.js')(app);
 app.use(express.static(path.join(__dirname, 'views'))); // tells express that static content is in the views directory
 
 server.listen(port, function () {
