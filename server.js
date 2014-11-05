@@ -329,8 +329,7 @@ io.on('connection', function (socket) {
 
   function socketIsInChat(){
     if(getRoomWithID(socket.room)) return true;
-    socket.emit("log notification", { message: "ur socket is not in a chatroom buddy.  go live or join one from the left if any exist.", type : "danger" });   
-
+    socket.emit("log notification", { message: "ur socket is not in a chatroom buddy.  go live or join one from the left if any exist.", type : "danger" });
     return false;
   }
 
@@ -462,14 +461,14 @@ io.on('connection', function (socket) {
 
       if(existingRoom.getUser(ourUser.id)) { //user is already in the room
         if(isThisUserAtLeastHostOfThisRoom(ourUser, existingRoom.id)){
-          socket.emit("set iAmHost", ourUser.username, true); //tell the client that it is host
+          socket.emit("set iAmHost", ourUser.username, true); //tell the client
         }
       } else {
         existingRoom.addFan(ourUser);
         socket.emit("log notification", { message:  "the room "+existingRoom.name + " already exists. Adding you as a FAN.", type : "normal" });   
         socket.broadcast.to(id).emit("fan joined room", ourUser.username);
 
-        socket.emit("set iAmHost", ourUser.username, false); //tell the client that it is not host
+        socket.emit("set iAmHost", ourUser.username, false); //tell the client
       }
     }
     else { //room doesnt exist. create it

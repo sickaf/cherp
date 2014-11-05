@@ -545,16 +545,6 @@ $(function() {
 
   // Socket stuff
 
-  // socket.on('set archived state', function (msg) {
-  //   currentlyInRoom = false;
-  //   iAmHost = false;
-  //   dangerLog(msg);
-  //   $membersLabel.text('');
-  //   $hostLabel.text("This room is archived.");
-  //   $textGroup.hide();
-  //   $fanMessages.hide();
-  // });
-
   // Whenever the server emits 'new message', update the chat body
   socket.on('update', function (data) {
     normalLog(data);
@@ -568,7 +558,6 @@ $(function() {
 
   socket.on('set in active room', function (bool) {
     currentlyInRoom = bool;
-
     if(bool) {
       $chatRoom.show();  //this isn't the best long term place for this
       $fanMessages.show();
@@ -579,7 +568,6 @@ $(function() {
       $fanMessages.hide();
       $textGroup.hide();
     }
-
   });
 
   // Whenever the server emits 'clear messages', update the chat body
@@ -655,48 +643,6 @@ $(function() {
       st += ', ' + room.hosts[i].username;
     }
     $hostLabel.text(st);
-
-    // // Notify of any promotions or demotions
-    // if (currentHosts && currentRoomID == room.id) {
-
-    //   var usersRemoved = currentHosts.filter(function(current) {
-    //     return room.hosts.filter(function(current_b) {
-    //       return current_b.id == current.id
-    //     }).length == 0;
-    //   });
-
-    //   var usersAdded = room.hosts.filter(function(current) {
-    //     return currentHosts.filter(function(current_a) {
-    //       return current_a.id == current.id
-    //     }).length == 0;
-    //   });
-
-    //   for (var i = usersAdded.length - 1; i >= 0; i--) {
-    //     var user = usersAdded[i];
-    //     if (user.username == username) {
-    //       showNotification('You have been added as a host of this conversation!');
-    //     }
-    //     else {
-    //       showNotification(user.username + ' has been added as a host of this conversation!');
-    //     }
-    //   };
-
-    //   for (var i = usersRemoved.length - 1; i >= 0; i--) {
-    //     var user = usersRemoved[i];
-    //     if (user.username == username) {
-    //       showNotification('You have been demoted :(');
-    //     }
-    //     else {
-    //       showNotification(user.username + ' has been demoted :(');
-    //     }
-    //   }
-    // }
-    // else {
-    //   currentHosts = null;
-    // }
-
-    // currentHosts = room.hosts.slice();
-    // currentRoomID = room.id;
 
   });
 
