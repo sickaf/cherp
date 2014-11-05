@@ -386,7 +386,7 @@ $(function() {
 
 
     $menuDiv = $('<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"/>')
-      .append($repostItem, $profileMenuItem, $makeHostMenuItem);
+      .append($repostItem, $makeHostMenuItem, $profileMenuItem);
 
 
     var $messageDiv = $('<li id="'+data.id+'" class="list-group-item message dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown"/>')
