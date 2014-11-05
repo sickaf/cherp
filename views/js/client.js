@@ -36,12 +36,7 @@ $(function() {
   var currentRoomID;
 
   var socket = io();
-
-  // socket.emit('set username', username);
   
-  // configure right navbar
-  configureRightNavBar();
-
   if (user.wantsToJoin) {
     socket.emit('join chat by owner', user.wantsToJoin);
   } else {
@@ -553,9 +548,9 @@ $(function() {
     normalLog(data);
   });
 
-  socket.on('set client username and id', function (usernameParam, idData) {
+  socket.on('set client username and id', function (usernameParam, idParam) {
     username = usernameParam;
-    id = idData;
+    id = idParam;
     configureRightNavBar();
   });
 
