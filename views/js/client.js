@@ -69,7 +69,7 @@ $(function() {
     $("#profile-dropdown").click()
     $('.modal-title').text(username);
     $('#profile-modal').modal('show');
-    var url = "/profile/archives/"+user._id;
+    var url = "/api/v1/profile/archives/"+user._id;
     $.getJSON(url, {}, function(data) {
       $.each(data, function(index, element) {
         $('#loading').hide();
@@ -108,7 +108,7 @@ $(function() {
 
       var button = $('<button type="button" class="btn btn-danger">Delete</button>');
       button.on('click', function() {
-        var url = '/archives/' + element.id;
+        var url = '/api/v1/archives/' + element.id;
         $.ajax({
             url: url,
             type: 'DELETE',
