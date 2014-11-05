@@ -359,74 +359,43 @@ $(function() {
     $avatarDiv = $('<img id="fan-avatar"/>').attr('src', data.avatar_url)
     .css('background-color', getUsernameColor(data.username));
 
-    $usernameDiv = $('<span class="username dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown"/>')
+    $usernameDiv = $('<span class="username"/>')
     .text(data.username + ' ')
     .css('color', getUsernameColor(data.username));
 
-    $profileMenuItem = $('<li role="presentation"><a role="menuitem" href="#">Profile</a></li');    
+    var messageText = linkify(data.message, false);
+    $messageBodyDiv = $('<span class="messageBody">')
+      .append(messageText);
+
+    $repostItem = $('<li role="presentation"><a role="menuitem" href="#">Forward Message</a></li'); 
+    $repostItem.click(function () {
+      data.repost = true;
+      socket.emit('host repost', data);
+      if(iAmHost){
+        addHostMessage(data);
+      }
+    });   
+
+    $profileMenuItem = $('<li role="presentation"><a role="menuitem" href="#">Profile</a></li'); 
+
     $makeHostMenuItem = $('<li role="presentation"><a role="menuitem">Make Host</a></li');
     $makeHostMenuItem.click(function () {
       socket.emit('promote fan', data.id);
     });
 
     $menuDiv = $('<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"/>')
-      .append($profileMenuItem)
-      .append($makeHostMenuItem);
+      .append($repostItem, $profileMenuItem, $makeHostMenuItem);
 
-    $megaDiv = $('<div class="dropdown"/>')
-      .append($avatarDiv, $usernameDiv, $menuDiv);
 
-    var messageText = linkify(data.message, false);
-    $messageBodyDiv = $('<span class="messageBody">')
-      .append(messageText);
-
-    //set up a listener so that if the host clicks this div itll get forwarded
-    $messageBodyDiv.click(function () {
-      data.repost = true;
-      socket.emit('host repost', data);
-      if(iAmHost){
-        addHostMessage(data);
-      }
-    });
-
-    var $messageDiv = $('<li id="'+data.id+'" class="list-group-item message"/>')
+    var $messageDiv = $('<li id="'+data.id+'" class="list-group-item message dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown"/>')
       .data('username', data.username)
-      .append($megaDiv, $messageBodyDiv);
+      .append($avatarDiv, $usernameDiv, $messageBodyDiv);
 
-    addFanMessageElement($messageDiv, options);
+    var $parentDiv = $('<div class="dropdown"/>')
+      .append($messageDiv, $menuDiv);
+
+    addFanMessageElement($parentDiv, options);
   }
-
- // // Adds the visual fan message to the message list
- //  function addFanMessage (data, options) {
-
- //    var $usernameDiv = $('<span class="username"/>')
- //      .text(data.username + ' ')
- //      .css('color', getUsernameColor(data.username));
-    
- //    //set up a listener so that if the host clicks this div they will become the host
- //    $usernameDiv.click(function () {
- //      socket.emit('promote fan', data.id);
- //    });
-
- //    var messageText = linkify(data.message, false);
- //    $messageBodyDiv = $('<span class="messageBody">')
- //      .append(messageText);
-
- //    //set up a listener so that if the host clicks this div itll get forwarded
- //    $messageBodyDiv.click(function () {
- //      data.repost = true;
- //      socket.emit('host repost', data);
- //      if(iAmHost){
- //        addHostMessage(data);
- //      }
- //    });
-
- //    var $messageDiv = $('<li id="'+data.id+'" class="list-group-item message"/>')
- //      .data('username', data.username)
- //      .append($usernameDiv, $messageBodyDiv);
-
- //    addFanMessageElement($messageDiv, options);
- //  }
 
   function addHostMessageElement (el, options) {
     addMessageElement(el, $hostMessages, options);
