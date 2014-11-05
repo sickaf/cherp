@@ -11,7 +11,7 @@ module.exports = function(app) {
 	// User API Methods
 
 	app.get('/api/v1/profile/archives/:userid', function(req, res) {
-		var q = RoomModel.find({ owner: req.params.userid }).sort({'created_at': -1}).limit(10);
+		var q = RoomModel.find({ ownerId: req.params.userid }).sort({'created_at': -1}).limit(10);
 		q.exec(function (err, docs) {
 			res.send(docs);
 		});

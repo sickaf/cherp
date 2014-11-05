@@ -13,7 +13,6 @@ module.exports = function(app, passport) {
 		} else {
 			console.log('no user found, creating anon user and saving to session');
 			var user = new User();
-      		user.username = randomUsername();
       		user.wantsToJoin = req.flash('wantsToJoin');
       		res.render('index', { user : user });
         }
@@ -58,7 +57,6 @@ module.exports = function(app, passport) {
 		} else {
 			console.log('no user found, creating anon user and saving to session');
 			var user = new User();
-      		user.username = randomUsername();
       		user.wantsToJoin = req.params.ownerName;
       		res.render('index', { user : user });
         }
@@ -76,14 +74,4 @@ function isLoggedIn(req, res, next) {
 
 	// if they aren't redirect them to the login
 	res.redirect('/login');
-}
-
-function randomUsername() {
-	var nouns = ['fart','weed','420','snowboard','longboarding','blaze','pussy'];
-	var descriptors = ['fan','dude','man','doctor','expert','thug'];
-	var numbers = ['420','69'];
-    var noun = nouns[Math.floor(Math.random() * nouns.length)];
-    var descriptor = descriptors[Math.floor(Math.random() * descriptors.length)];
-    var number = numbers[Math.floor(Math.random() * numbers.length)];
-    return noun+descriptor+number;
 }
