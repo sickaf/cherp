@@ -607,11 +607,6 @@ $(function() {
     }
   });
 
-
-  socket.on('set currentlyInRoom', function (bool) {
-    currentlyInRoom = bool;
-  });
-
   // Whenever the server emits 'clear messages', update the chat body
   socket.on('clear messages', function (data) {
     clearMessages();
