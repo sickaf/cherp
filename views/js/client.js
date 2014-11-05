@@ -593,6 +593,21 @@ $(function() {
     }
   });
 
+  socket.on('set in active room', function (bool) {
+    currentlyInRoom = bool;
+    if(bool) {
+      $chatRoom.show();  //this isn't the best long term place for this
+      $fanMessages.show();
+      $textGroup.show();
+    } else {
+      $hostLabel.text("This room is archived.");
+      $membersLabel.text('');
+      $fanMessages.hide();
+      $textGroup.hide();
+    }
+  });
+
+
   socket.on('set currentlyInRoom', function (bool) {
     currentlyInRoom = bool;
   });
