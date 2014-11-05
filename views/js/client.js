@@ -545,15 +545,15 @@ $(function() {
 
   // Socket stuff
 
-  socket.on('set archived state', function (msg) {
-    currentlyInRoom = false;
-    iAmHost = false;
-    dangerLog(msg);
-    $membersLabel.text('');
-    $hostLabel.text("This room is archived.");
-    $textGroup.hide();
-    $fanMessages.hide();
-  });
+  // socket.on('set archived state', function (msg) {
+  //   currentlyInRoom = false;
+  //   iAmHost = false;
+  //   dangerLog(msg);
+  //   $membersLabel.text('');
+  //   $hostLabel.text("This room is archived.");
+  //   $textGroup.hide();
+  //   $fanMessages.hide();
+  // });
 
   // Whenever the server emits 'new message', update the chat body
   socket.on('update', function (data) {
@@ -568,11 +568,14 @@ $(function() {
 
   socket.on('set in active room', function (bool) {
     currentlyInRoom = bool;
+
     if(bool) {
       $chatRoom.show();  //this isn't the best long term place for this
       $fanMessages.show();
       $textGroup.show();
     } else {
+      $hostLabel.text("This room is archived.");
+      $membersLabel.text('');
       $fanMessages.hide();
       $textGroup.hide();
     }
