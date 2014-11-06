@@ -177,7 +177,9 @@ $(function() {
     $trendingRoomsDiv.html("");
     if(data.length == 0) {
       $trendingRoomsDiv.append($('<li>no rooms yet</li>'));
-      $("#noRoomsImage").show();
+      if(!$chatRoom.is(":visible")) {
+        $("#noRoomsImage").show();
+      }
     }
 
     for (var i = 0; i <data.length; i++) {
