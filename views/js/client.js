@@ -429,8 +429,8 @@ $(function() {
     if (options.prepend) div.prepend($el);
     else div.append($el);
     
-    //DONT HARDCODE 600
-    if((div[0].scrollTop+div.height()) > div[0].scrollHeight) div[0].scrollTop = div[0].scrollHeight;
+    //DONT HARDCODE 600 maybe try to work in div.height()
+    if((div[0].scrollTop+600) > div[0].scrollHeight) div[0].scrollTop = div[0].scrollHeight;
   }
 
   // Adds the visual chat typing message
@@ -564,6 +564,7 @@ $(function() {
     username = usernameParam;
     id = idParam;
     configureRightNavBar();
+    $createRoomButton.show();
   });
 
   socket.on('set iAmHost', function (usrname, bool) {

@@ -322,8 +322,6 @@ io.on('connection', function (socket) {
       avatar_url: ourUser.avatar_url
     };
 
-    console.log(fullMessage);
-
     if(isThisUserAtLeastHostOfThisRoom(ourUser, socket.room)) {
       socket.broadcast.to(socket.room).emit("new host message", fullMessage);
       pushMessageToDB(ourUser.id, getRoomWithID(socket.room), fullMessage);
