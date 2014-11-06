@@ -419,26 +419,18 @@ $(function() {
     var $el = $(el);
 
     // Setup default options
-    if (!options) {
-      options = {};
-    }
-    if (typeof options.fade === 'undefined') {
-      options.fade = true;
-    }
-    if (typeof options.prepend === 'undefined') {
-      options.prepend = false;
-    }
+    if (!options) options = {};
+    if (typeof options.fade === 'undefined') options.fade = true;
+    if (typeof options.prepend === 'undefined') options.prepend = false;
 
     // Apply options
-    if (options.fade) {
-      $el.hide().fadeIn(FADE_TIME);
-    }
-    if (options.prepend) {
-      div.prepend($el);
-    } else {
-      div.append($el);
-    }
-    div[0].scrollTop = div[0].scrollHeight;
+    if (options.fade) $el.hide().fadeIn(FADE_TIME);
+    
+    if (options.prepend) div.prepend($el);
+    else div.append($el);
+    
+    //DONT HARDCODE 600
+    if((div[0].scrollTop+600) > div[0].scrollHeight) div[0].scrollTop = div[0].scrollHeight;
   }
 
   // Adds the visual chat typing message
@@ -497,16 +489,6 @@ $(function() {
     // Calculate color
     var index = Math.abs(hash % COLORS.length);
     return COLORS[index];
-  }
-
-  function randomUsername() {
-    var nouns = ['fart','weed','420','snowboard','longboarding','blaze','pussy'];
-    var descriptors = ['fan','dude','man','doctor','expert','thug'];
-    var numbers = ['420','69'];
-    var noun = nouns[Math.floor(Math.random() * nouns.length)];
-    var descriptor = descriptors[Math.floor(Math.random() * descriptors.length)];
-    var number = numbers[Math.floor(Math.random() * numbers.length)];
-    return noun+descriptor+number;
   }
 
   function randomRoomName() {
