@@ -479,7 +479,7 @@ io.on('connection', function (socket) {
       }
     }
     else { //room doesnt exist. create it
-      socket.emit("log notification", { message:  "room "+ id + " doesnt exist yet. Adding you as OWNER. pretty cool huh?", type : "normal" });   
+      socket.emit("log notification", { message:  "Creating a new room for ya and adding you as OWNER. pretty cool huh?", type : "normal" });   
       var room = new Room(id, ourUser, roomName);
       rooms.push(room);
 
