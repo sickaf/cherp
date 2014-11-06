@@ -175,6 +175,10 @@ $(function() {
 
   function updateRoomsList (data, options) {
     $trendingRoomsDiv.html("");
+    if(data.length == 0) {
+      $trendingRoomsDiv.append($('<li>no rooms yet</li>'));
+    }
+
     for (var i = 0; i <data.length; i++) {
       addRoomToRoomsList(data[i]);
     }
@@ -515,9 +519,9 @@ $(function() {
     return noun+descriptor+number;
   }
 
-  function createFirstRoom() {   
-     socket.emit('enter chat with id', { id : null, name : 'First Room'});
-  }
+  // function createFirstRoom() {   
+  //    socket.emit('enter chat with id', { id : null, name : 'First Room'});
+  // }
 
   // Image uploader
   var opts = {
@@ -687,10 +691,10 @@ $(function() {
     showToastNotification('info', '', username + ' joined your room!');
   });
 
-  socket.on('no rooms', function() {
-    createFirstRoom();
-    showToastNotification('info', '',"looks like you're the first one here! We've gone ahead and made you a host");
-  });
+  // socket.on('no rooms', function() {
+  //   createFirstRoom();
+  //   showToastNotification('info', '',"looks like you're the first one here! We've gone ahead and made you a host");
+  // });
 
   socket.on('user was promoted', function(username) {
     showFullscreenNotification(username + ' was promoted to host!');

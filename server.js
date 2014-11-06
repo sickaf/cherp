@@ -439,7 +439,8 @@ io.on('connection', function (socket) {
       enterChatWithId(rooms[0].id);
 
     } else  {
-      socket.emit("no rooms");
+      // socket.emit("no rooms");
+      socket.emit("update roomsList", rooms);
       console.log("TRIED TO JOIN TRENDING CHAT BUT AINT NO ROOMS");
     }
   }
