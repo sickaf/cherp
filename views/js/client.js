@@ -190,6 +190,13 @@ $(function() {
 
   function updateRoomsList (data, options) {
     $trendingRoomsDiv.html("");
+    if(data.length == 0) {
+      $trendingRoomsDiv.append($('<li>no rooms yet</li>'));
+      if(!$chatRoom.is(":visible")) {
+        $("#noRoomsImage").show();
+      }
+    }
+
     for (var i = 0; i <data.length; i++) {
       addRoomToRoomsList(data[i]);
     }
@@ -386,7 +393,7 @@ $(function() {
     $messageBodyDiv = $('<span class="messageBody">')
       .append(messageText);
 
-    $repostItem = $('<li role="presentation"><a role="menuitem" href="#">Forward Message</a></li'); 
+    $repostItem = $('<li role="presentation"><a role="menuitem" href="#">Forward Message</a></li');
     $repostItem.click(function () {
       data.repost = true;
       socket.emit('host repost', data);
@@ -430,26 +437,20 @@ $(function() {
     var $el = $(el);
 
     // Setup default options
-    if (!options) {
-      options = {};
-    }
-    if (typeof options.fade === 'undefined') {
-      options.fade = true;
-    }
-    if (typeof options.prepend === 'undefined') {
-      options.prepend = false;
-    }
+    if (!options) options = {};
+    if (typeof options.fade === 'undefined') options.fade = true;
+    if (typeof options.prepend === 'undefined') options.prepend = false;
 
     // Apply options
-    if (options.fade) {
-      $el.hide().fadeIn(FADE_TIME);
-    }
-    if (options.prepend) {
-      div.prepend($el);
-    } else {
-      div.append($el);
-    }
-    div[0].scrollTop = div[0].scrollHeight;
+    if (options.fade) $el.hide().fadeIn(FADE_TIME);
+    
+    if (options.prepend) div.prepend($el);
+    else div.append($el);
+    
+    //DONT HARDCODE 600 maybe try to work in div.height()
+    if((div[0].scrollTop+600) > div[0].scrollHeight) {
+      div[0].scrollTop = div[0].scrollHeight;  
+    } 
   }
 
   // Adds the visual chat typing message
@@ -510,16 +511,6 @@ $(function() {
     return COLORS[index];
   }
 
-  function randomUsername() {
-    var nouns = ['fart','weed','420','snowboard','longboarding','blaze','pussy'];
-    var descriptors = ['fan','dude','man','doctor','expert','thug'];
-    var numbers = ['420','69'];
-    var noun = nouns[Math.floor(Math.random() * nouns.length)];
-    var descriptor = descriptors[Math.floor(Math.random() * descriptors.length)];
-    var number = numbers[Math.floor(Math.random() * numbers.length)];
-    return noun+descriptor+number;
-  }
-
   function randomRoomName() {
     var nouns = ['fart','weed','420','snowboard','longboarding','blaze','pussy'];
     var descriptors = ['room'];
@@ -530,9 +521,9 @@ $(function() {
     return noun+descriptor+number;
   }
 
-  function createFirstRoom() {   
-     socket.emit('enter chat with id', { id : null, name : 'First Room'});
-  }
+  // function createFirstRoom() {   
+  //    socket.emit('enter chat with id', { id : null, name : 'First Room'});
+  // }
 
   // Image uploader
   var opts = {
@@ -593,6 +584,7 @@ $(function() {
     username = usernameParam;
     id = idParam;
     configureRightNavBar();
+    $createRoomButton.show();
   });
 
   socket.on('set iAmHost', function (usrname, bool) {
@@ -607,6 +599,7 @@ $(function() {
       $chatRoom.show();  //this isn't the best long term place for this
       $fanMessages.show();
       $textGroup.show();
+      $("#noRoomsImage").hide();
     } else {
       $hostLabel.text("This room is archived.");
       $membersLabel.text('');
@@ -683,12 +676,17 @@ $(function() {
     var totalPeopleInRoom = room.peopleNum;
     $membersLabel.text('Members: ' + totalPeopleInRoom);
 
+ 
+
     // Update hosts label
-    var st = "Hosts: " + room.owner.username;
+    $hostLabel.html("");
+    var st = "<strong>"+room.name+"</strong> hosted by: " + room.owner.username;
     for(var i = 0; i < room.hosts.length; i++) {
       st += ', ' + room.hosts[i].username;
     }
-    $hostLabel.text(st);
+    $hostLabel.append($('<div>'+st+'</div>'));
+
+
 
   });
 
@@ -702,10 +700,10 @@ $(function() {
     showToastNotification('info', '', username + ' joined your room!');
   });
 
-  socket.on('no rooms', function() {
-    createFirstRoom();
-    showToastNotification('info', '',"looks like you're the first one here! We've gone ahead and made you a host");
-  });
+  // socket.on('no rooms', function() {
+  //   createFirstRoom();
+  //   showToastNotification('info', '',"looks like you're the first one here! We've gone ahead and made you a host");
+  // });
 
   socket.on('user was promoted', function(username) {
     showFullscreenNotification(username + ' was promoted to host!');

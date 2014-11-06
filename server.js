@@ -322,8 +322,6 @@ io.on('connection', function (socket) {
       avatar_url: ourUser.avatar_url
     };
 
-    console.log(fullMessage);
-
     if(isThisUserAtLeastHostOfThisRoom(ourUser, socket.room)) {
       socket.broadcast.to(socket.room).emit("new host message", fullMessage);
       pushMessageToDB(ourUser.id, getRoomWithID(socket.room), fullMessage);
@@ -439,7 +437,8 @@ io.on('connection', function (socket) {
       enterChatWithId(rooms[0].id);
 
     } else  {
-      socket.emit("no rooms");
+      // socket.emit("no rooms");
+      socket.emit("update roomsList", rooms);
       console.log("TRIED TO JOIN TRENDING CHAT BUT AINT NO ROOMS");
     }
   }
@@ -473,14 +472,14 @@ io.on('connection', function (socket) {
         }
       } else {
         existingRoom.addFan(ourUser);
-        socket.emit("log notification", { message:  "the room "+existingRoom.name + " already exists. Adding you as a FAN.", type : "normal" });   
+        socket.emit("log notification", { message:  "Adding you to this already existing room...", type : "normal" });   
         socket.broadcast.to(id).emit("fan joined room", ourUser.username);
 
         socket.emit("set iAmHost", ourUser.username, false); //tell the client
       }
     }
     else { //room doesnt exist. create it
-      socket.emit("log notification", { message:  "room "+ id + " doesnt exist yet. Adding you as OWNER. pretty cool huh?", type : "normal" });   
+      socket.emit("log notification", { message:  "Creating a new room for ya and adding you as OWNER. pretty cool huh?", type : "normal" });   
       var room = new Room(id, ourUser, roomName);
       rooms.push(room);
 
