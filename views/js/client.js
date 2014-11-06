@@ -66,11 +66,18 @@ $(function() {
     $('.modal-title').text(username);
     $('.profile-bio').text(user.bio);
     $('#profile-avatar').attr('src', user.avatar_url);
+    $('#profile-twitter-link').attr('href', 'https://twitter.com/' + user.twitter.username).attr("target", "_blank");
     $('#profile-modal').modal('show');
     var url = "/api/v1/profile/archives/"+user._id;
     $.getJSON(url, {}, function(data) {
+
+      if (data.length == 0) {
+        $('#loading').text('No archived chats');
+        return;
+      }
+
+      $('#loading').hide();
       $.each(data, function(index, element) {
-        $('#loading').hide();
         var $roomDiv = constructArchiveDiv(element);
         $('.archived-chats-list').append($roomDiv);
       });
@@ -80,8 +87,12 @@ $(function() {
 
       // create an element with an object literal, defining properties
       var listItem = $("<li />", {
-        "class": "list-group-item archive-list", // you need to quote "class" since it's a reserved keyword
+        "class": "list-group-item archive-list",
       });
+
+      var row = $('<div class="row" id="archive-chat-row" />');
+      var col = $('<div class="col-md-10 panel" />');
+      var col2 = $('<div class="col-md-2 panel" id="delete-column" />');
 
       var title = $("<h4 />");
 
@@ -98,28 +109,32 @@ $(function() {
         return false;
       });
 
+      title.append(linkItem);
+
       var c = new Date(element.created_at).yyyymmdd();
       
       var created = $("<h5 />", {
         text: c
       });
+      
+      col.append(title);
+      col.append(created);
 
-      var button = $('<button type="button" class="btn btn-danger">Delete</button>');
+      var button = $('<button type="button" class="btn btn-danger" id="archive-delete-button">Delete</button>');
       button.on('click', function() {
         var url = '/api/v1/archives/' + element.id;
+        listItem.remove();
         $.ajax({
             url: url,
-            type: 'DELETE',
-            success: function(result) {
-                listItem.remove();
-            }
+            type: 'DELETE'
         });
       });
 
-      title.append(linkItem);
-      listItem.append(title);
-      listItem.append(created);
-      listItem.append(button);
+      col2.append(button);
+
+      row.append(col);
+      row.append(col2);
+      listItem.append(row);
 
       return listItem;
     }
@@ -792,7 +807,12 @@ $(function() {
        } 
       return '<a href="' +fullURL+ '" target="_blank">' + url + '</a>';
     }) 
-  } 
+  }
+
+  $('a').live('click', function() {
+    window.open($(this).attr('href'));
+    return false;
+  }); 
 });
 
 

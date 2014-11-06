@@ -62,6 +62,12 @@
             <h4>Trending</h4>
             <div class="row" id="trending-rooms"> <!-- Trending rooms row -->
               <li>Loading...?</li>
+              <li class="dropdown-toggle" data-toggle="dropdown">testest test</li>
+                  <ul class="dropdown-menu" role="menu">
+                    <li><a href="/lol">Profile</a></li>
+                    <li><a href="/idk">Make host</a></li>
+                  </ul>
+
             </div>
 
           </div>
@@ -114,19 +120,31 @@
             <div class="modal-content">
               <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                <div class="row-fluid info">
+                <div class="row-fluid profile-row" id="profile-header"> 
+                  <div class="row"> 
+                  <div class="col-md-1">
                     <img id="profile-avatar" />
-                    <h4 class="modal-title">Modal title</h4>
-                </div>
-                <div class="row-fluid description">
+                  </div>
+                  <div class="col-md-11" id="profile-username">
+                      <h3 class="modal-title"><strong>Modal title</strong></h3>
+                      <a id="profile-twitter-link">Twitter</a>
+                  </div>
+                  </div>
+                  <div class="row"> <!-- text input row column -->
+                  <div class="col-md-12">
                   <p class="profile-bio">Modal description</p>
+                  </div>
+                  </div>
                 </div>
               </div>
+
               <div class="modal-body">
-                <h4>Archived Chats:</h4>
-                <ul class="archived-chats-list">
-                  <li id="loading">Loading...</li>
-                </ul>
+                <div class="row-fluid profile-row">
+                  <p><strong>Archived Chats:</strong></p>
+                  <ul class="archived-chats-list">
+                    <li id="loading">Loading...</li>
+                  </ul>
+                </div>
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
