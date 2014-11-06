@@ -472,7 +472,7 @@ io.on('connection', function (socket) {
         }
       } else {
         existingRoom.addFan(ourUser);
-        socket.emit("log notification", { message:  "the room "+existingRoom.name + " already exists. Adding you as a FAN.", type : "normal" });   
+        socket.emit("log notification", { message:  "Adding you to this already existing room...", type : "normal" });   
         socket.broadcast.to(id).emit("fan joined room", ourUser.username);
 
         socket.emit("set iAmHost", ourUser.username, false); //tell the client
