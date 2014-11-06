@@ -118,27 +118,28 @@
         <div class="modal fade" id="profile-modal">
           <div class="modal-dialog">
             <div class="modal-content">
-              <div class="modal-header">
+
+              <div class="modal-header"> <!-- header -->
                 <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                 <div class="row-fluid profile-row" id="profile-header"> 
                   <div class="row"> 
-                  <div class="col-md-1">
-                    <img id="profile-avatar" />
-                  </div>
-                  <div class="col-md-11" id="profile-username">
+                    <div class="col-md-1">
+                      <img id="profile-avatar" />
+                    </div>
+                    <div class="col-md-11" id="profile-username">
                       <h3 class="modal-title"><strong>Modal title</strong></h3>
                       <a id="profile-twitter-link">Twitter</a>
+                    </div>
                   </div>
-                  </div>
-                  <div class="row"> <!-- text input row column -->
-                  <div class="col-md-12">
-                  <p class="profile-bio">Modal description</p>
-                  </div>
+                  <div class="row"> 
+                    <div class="col-md-12">
+                      <p class="profile-bio">Modal description</p>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div class="modal-body">
+              <div class="modal-body"> <!-- body -->
                 <div class="row-fluid profile-row">
                   <p><strong>Archived Chats:</strong></p>
                   <ul class="archived-chats-list">
@@ -146,9 +147,11 @@
                   </ul>
                 </div>
               </div>
-              <div class="modal-footer">
+
+              <div class="modal-footer"> <!-- footer -->
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
               </div>
+
             </div><!-- /.modal-content -->
           </div><!-- /.modal-dialog -->
         </div><!-- /.modal -->
