@@ -177,6 +177,7 @@ $(function() {
     $trendingRoomsDiv.html("");
     if(data.length == 0) {
       $trendingRoomsDiv.append($('<li>no rooms yet</li>'));
+      $("#noRoomsImage").show();
     }
 
     for (var i = 0; i <data.length; i++) {
@@ -581,6 +582,7 @@ $(function() {
       $chatRoom.show();  //this isn't the best long term place for this
       $fanMessages.show();
       $textGroup.show();
+      $("#noRoomsImage").hide();
     } else {
       $hostLabel.text("This room is archived.");
       $membersLabel.text('');
