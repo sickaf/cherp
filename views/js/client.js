@@ -430,7 +430,7 @@ $(function() {
     else div.append($el);
     
     //DONT HARDCODE 600
-    if((div[0].scrollTop+600) > div[0].scrollHeight) div[0].scrollTop = div[0].scrollHeight;
+    if((div[0].scrollTop+div.height()) > div[0].scrollHeight) div[0].scrollTop = div[0].scrollHeight;
   }
 
   // Adds the visual chat typing message
