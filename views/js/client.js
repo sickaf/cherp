@@ -661,18 +661,16 @@ $(function() {
     var totalPeopleInRoom = room.peopleNum;
     $membersLabel.text('Members: ' + totalPeopleInRoom);
 
-    // $avatarDiv = $('<img id="fan-avatar"/>')
-    //                 .attr('src', room.owner.avatar_url)
-    //                 .css('background-color', getUsernameColor(room.owner.username));
+ 
 
     // Update hosts label
-    var st = room.name+" hosted by: " + room.owner.username;
+    $hostLabel.html("");
+    var st = "<strong>"+room.name+"</strong> hosted by: " + room.owner.username;
     for(var i = 0; i < room.hosts.length; i++) {
       st += ', ' + room.hosts[i].username;
     }
-    $hostLabel.text(st);
+    $hostLabel.append($('<div>'+st+'</div>'));
 
-    // $hostLabel.append($(st), $avatarDiv);
 
 
   });
