@@ -375,7 +375,7 @@ $(function() {
     $messageBodyDiv = $('<span class="messageBody">')
       .append(messageText);
 
-    $repostItem = $('<li role="presentation"><a role="menuitem" href="#">Forward Message</a></li'); 
+    $repostItem = $('<li role="presentation"><a role="menuitem" href="#">Forward Message</a></li');
     $repostItem.click(function () {
       data.repost = true;
       socket.emit('host repost', data);
@@ -430,7 +430,9 @@ $(function() {
     else div.append($el);
     
     //DONT HARDCODE 600 maybe try to work in div.height()
-    if((div[0].scrollTop+600) > div[0].scrollHeight) div[0].scrollTop = div[0].scrollHeight;
+    if((div[0].scrollTop+600) > div[0].scrollHeight) {
+      div[0].scrollTop = div[0].scrollHeight;  
+    } 
   }
 
   // Adds the visual chat typing message
@@ -655,12 +657,19 @@ $(function() {
     var totalPeopleInRoom = room.peopleNum;
     $membersLabel.text('Members: ' + totalPeopleInRoom);
 
+    // $avatarDiv = $('<img id="fan-avatar"/>')
+    //                 .attr('src', room.owner.avatar_url)
+    //                 .css('background-color', getUsernameColor(room.owner.username));
+
     // Update hosts label
-    var st = "Hosts: " + room.owner.username;
+    var st = room.name+" hosted by: " + room.owner.username;
     for(var i = 0; i < room.hosts.length; i++) {
       st += ', ' + room.hosts[i].username;
     }
     $hostLabel.text(st);
+
+    // $hostLabel.append($(st), $avatarDiv);
+
 
   });
 
