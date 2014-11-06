@@ -92,7 +92,7 @@ $(function() {
       });
 
       linkItem.click(function() {
-        switchToRoom(element.id);
+        switchToArchivedRoom(element.id)
         $('#profile-modal').modal('hide');
         $('#profile-dropdown').click();
         return false;
@@ -181,7 +181,8 @@ $(function() {
   }
 
   function addRoomToRoomsList(room){
-    var $roomDiv = $('<li><a href="#">'+room.name+' ('+room.peopleNum+')</a></li>');
+    var $roomDiv = $('<li><a href="#">'+'<strong>'+room.owner.username+'</strong>-'+room.name+'('+room.peopleNum+')</a></li>');
+
     $roomDiv.click(function () {
       switchToRoom(room.id);
       return false;
@@ -387,7 +388,6 @@ $(function() {
       //TODO FARTMAN WEEDGUY
     });    
 
-
     $menuDiv = $('<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"/>')
       .append($repostItem, $makeHostMenuItem, $profileMenuItem);
 
@@ -569,15 +569,6 @@ $(function() {
 
   // Socket stuff
 
-  socket.on('set archived state', function (msg) {
-    currentlyInRoom = false;
-    iAmHost = false;
-    dangerLog(msg);
-    $membersLabel.text('');
-    $hostLabel.text("This room is archived.");
-    // $textGroup.hide();
-  });
-
   // Whenever the server emits 'new message', update the chat body
   socket.on('update', function (data) {
     normalLog(data);
@@ -630,7 +621,6 @@ $(function() {
    // Whenever the server emits 'new message', update the chat body
   socket.on('update roomsList', function (data) {
     updateRoomsList(data);
-    $chatRoom.show();  //this isn't the best long term place for this
   });
 
   //TODO this needs to work with the browser's back and forward buttons
