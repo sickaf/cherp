@@ -248,7 +248,8 @@ $(function() {
             username: username,
             message: message,
             id: id,
-            avatar_url: user.avatar_url
+            avatar_url: user.avatar_url,
+            anon: !user.twitter
           });
         }
       } 
@@ -382,6 +383,8 @@ $(function() {
  // Adds the visual fan message to the message list
   function addFanMessage (data, options) {
 
+    console.log(data);
+
     $avatarDiv = $('<img id="fan-avatar"/>').attr('src', data.avatar_url)
     .css('background-color', getUsernameColor(data.username));
 
@@ -405,13 +408,25 @@ $(function() {
       socket.emit('promote fan', data.id);
     });
 
-    $profileMenuItem = $('<li role="presentation"><a role="menuitem" href="#">Profile</a></li');
-    $profileMenuItem.click(function () {
-      //TODO FARTMAN WEEDGUY
-    });    
+    if (!data.anon) {
+      $profileMenuItem = $('<li role="presentation"><a role="menuitem" href="#">Profile</a></li');
+      $profileMenuItem.click(function () {
+        console.log(data.anon);
+        var url = "/api/v1/profile/"+data.id;
+        $.getJSON(url, {}, function(data) {
+
+          console.log(data);
+
+          $.each(data, function(index, element) {
+            var $roomDiv = constructArchiveDiv(element);
+            $('.archived-chats-list').append($roomDiv);
+          });
+        });
+      }); 
+    }
 
     $menuDiv = $('<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"/>')
-      .append($repostItem, $makeHostMenuItem, $profileMenuItem);
+      .append($repostItem, $makeHostMenuItem, data.anon ? null : $profileMenuItem);
 
 
     var $messageDiv = $('<li id="'+data.id+'" class="list-group-item message dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown"/>')

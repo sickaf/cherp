@@ -10,14 +10,13 @@ module.exports = function(app) {
 
 	// User API Methods
 
-	app.get('/api/v1/profile/archives/:userid', function(req, res) {
-		var q = RoomModel.find({ ownerId: req.params.userid }).sort({'created_at': -1}).limit(10);
-		q.exec(function (err, docs) {
-			res.send(docs);
-		});
-	});
+	// Profiles
 
-	// Profile Pic
+	app.get('/api/v1/profile/:userid', function (req, res){
+	  User.findOne({'_id' : req.params.userid}, function(err, docs) {
+			res.send(docs);
+		}); 
+	});
 
 	// Show the upload form	
 	app.get('/profile/:userid/uploadnewimage', function (req, res){
@@ -77,12 +76,22 @@ module.exports = function(app) {
 
 	// Archives API Methods
 
+	// Get archives for a specific user
+	app.get('/api/v1/profile/archives/:userid', function(req, res) {
+		var q = RoomModel.find({ ownerId: req.params.userid }).sort({'created_at': -1}).limit(10);
+		q.exec(function (err, docs) {
+			res.send(docs);
+		});
+	});
+
+	// Get a specific archive
 	app.get('/api/v1/archives/:id', function(req, res) {
 		RoomModel.findOne({'id' : req.params.id}, function(err, docs) {
 			res.send(docs);
 		});
 	});
 
+	// Delete a specific archive
 	app.del('/api/v1/archives/:id', function(req, res) {
 		RoomModel.remove({'id' : req.params.id}, function(err, docs) {
 			res.send(err);
