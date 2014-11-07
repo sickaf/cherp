@@ -283,6 +283,7 @@ io.on('connection', function (socket) {
             ourUser = new User();
             ourUser.username = randomUsername();
             ourUser.sockets.push(socket.id);
+            ourUser.anon = true;
             users.push(ourUser);
           }
       } else {console.error("NO PASSPORT io.on connection");}
@@ -299,7 +300,9 @@ io.on('connection', function (socket) {
     var fullMessage = {
       username: ourUser.username,
       base64Image: data,
-      id: ourUser.id
+      id: ourUser.id,
+      avatar_url: ourUser.avatar_url,
+      anon: ourUser.anon
     };
 
     if(isThisUserAtLeastHostOfThisRoom(ourUser, socket.room)) {
@@ -319,7 +322,8 @@ io.on('connection', function (socket) {
       username: ourUser.username,
       message: sanitizeHtml(data, {allowedTags: ['marquee']}),
       id: ourUser.id,
-      avatar_url: ourUser.avatar_url
+      avatar_url: ourUser.avatar_url,
+      anon: ourUser.anon
     };
 
     if(isThisUserAtLeastHostOfThisRoom(ourUser, socket.room)) {
