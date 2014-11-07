@@ -343,11 +343,6 @@ $(function() {
       .text(data.username + ' ')
       .css('color', getUsernameColor(data.username));
 
-    //set up a listener so that if the own clicks this div they will become demoted to a fan
-    $usernameDiv.click(function () {
-      socket.emit('demote host', data.id);
-    });
-
     var $messageBodyDiv;
     
     //if it's an image, do that
@@ -360,43 +355,25 @@ $(function() {
       .append(messageText);
     }
 
-    //set up a listener so that if the host clicks this div itll get forwarded
-    $messageBodyDiv.click(function () {
-      data.repost = true;
-      socket.emit('host repost', data);
-      if(iAmHost){
-        addHostMessage(data);
-      }
-    });
+    $menuDiv = getMenuDiv(data, false);
 
     var typingClass = data.typing ? 'typing' : '';
     var repostClass = data.repost ? 'repost' : '';
 
-    var $messageDiv = $('<li id="'+data.id+'" class="list-group-item message">')
+
+    var $messageDiv = $('<li id="'+data.id+'" class="list-group-item message dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown"/>')
       .data('username', data.username)
       .addClass(typingClass)
       .addClass(repostClass)
       .append($avatarDiv, $usernameDiv, $messageBodyDiv);
 
-    addHostMessageElement($messageDiv, options);
+    var $parentDiv = $('<div class="dropdown"/>')
+      .append($messageDiv, $menuDiv);
+
+    addHostMessageElement($parentDiv, options);
   }
 
- // Adds the visual fan message to the message list
-  function addFanMessage (data, options) {
-
-    if (data.avatar_url) $avatarDiv = $('<img/>').attr('src', data.avatar_url);
-    else $avatarDiv = $('<div/>').css('background-color', getUsernameColor(data.username));
-    $avatarDiv.attr('id', 'fan-avatar');
-
-
-    $usernameDiv = $('<span class="username"/>')
-    .text(data.username + ' ')
-    .css('color', getUsernameColor(data.username));
-
-    var messageText = linkify(data.message, false);
-    $messageBodyDiv = $('<span class="messageBody">')
-      .append(messageText);
-
+  function getMenuDiv(data, forFan) {
     $repostItem = $('<li role="presentation"><a role="menuitem">Forward Message</a></li');
     $repostItem.click(function () {
       data.repost = true;
@@ -404,9 +381,11 @@ $(function() {
       if(iAmHost) addHostMessage(data);
     });   
 
-    $makeHostMenuItem = $('<li role="presentation"><a role="menuitem">Make Host</a></li');
-    $makeHostMenuItem.click(function () {
-      socket.emit('promote fan', data.id);
+    $promoteMenuItem = forFan ? $('<li role="presentation"><a role="menuitem">Make Host</a></li') : $('<li role="presentation"><a role="menuitem">Demote host</a></li');
+                            
+    $promoteMenuItem.click(function () {
+      if(forFan) socket.emit('promote fan', data.id);
+      else socket.emit('demote host', data.id);
     });
 
     if (!data.anon) {
@@ -427,7 +406,59 @@ $(function() {
     }
 
     $menuDiv = $('<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"/>')
-      .append($repostItem, $makeHostMenuItem, data.anon ? null : $profileMenuItem);
+      .append($repostItem, $promoteMenuItem, data.anon ? null : $profileMenuItem);
+
+    return $menuDiv;
+  }
+
+ // Adds the visual fan message to the message list
+  function addFanMessage (data, options) {
+
+    if (data.avatar_url) $avatarDiv = $('<img/>').attr('src', data.avatar_url);
+    else $avatarDiv = $('<div/>').css('background-color', getUsernameColor(data.username));
+    $avatarDiv.attr('id', 'fan-avatar');
+
+    $usernameDiv = $('<span class="username"/>')
+    .text(data.username + ' ')
+    .css('color', getUsernameColor(data.username));
+
+    var messageText = linkify(data.message, false);
+    $messageBodyDiv = $('<span class="messageBody">')
+      .append(messageText);
+
+    // $repostItem = $('<li role="presentation"><a role="menuitem">Forward Message</a></li');
+    // $repostItem.click(function () {
+    //   data.repost = true;
+    //   socket.emit('host repost', data);
+    //   if(iAmHost) addHostMessage(data);
+    // });   
+
+    // $makeHostMenuItem = $('<li role="presentation"><a role="menuitem">Make Host</a></li');
+    // $makeHostMenuItem.click(function () {
+    //   socket.emit('promote fan', data.id);
+    // });
+
+    // if (!data.anon) {
+    //   $profileMenuItem = $('<li role="presentation"><a role="menuitem" href="#">Profile</a></li');
+    //   $profileMenuItem.click(function () {
+    //     console.log(data.anon);
+    //     var url = "/api/v1/profile/"+data.id;
+    //     $.getJSON(url, {}, function(data) {
+
+    //       console.log(data);
+
+    //       $.each(data, function(index, element) {
+    //         var $roomDiv = constructArchiveDiv(element);
+    //         $('.archived-chats-list').append($roomDiv);
+    //       });
+    //     });
+    //   }); 
+    // }
+
+    // $menuDiv = $('<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"/>')
+    //   .append($repostItem, $makeHostMenuItem, data.anon ? null : $profileMenuItem);
+
+    $menuDiv = getMenuDiv(data, true);
 
 
     var $messageDiv = $('<li id="'+data.id+'" class="list-group-item message dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown"/>')
