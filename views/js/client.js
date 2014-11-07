@@ -97,7 +97,7 @@ $(function() {
       var title = $("<h4 />");
 
       var linkItem = $("<a />", {
-        href: '#',
+        href: '',
         "class": "archive-link",
         text: element.name
       });
@@ -203,7 +203,7 @@ $(function() {
   }
 
   function addRoomToRoomsList(room){
-    var $roomDiv = $('<li><a href="#">'+'<strong>'+room.owner.username+'</strong>-'+room.name+'('+room.peopleNum+')</a></li>');
+    var $roomDiv = $('<li><a>'+'<strong>'+room.owner.username+'</strong>-'+room.name+'('+room.peopleNum+')</a></li>');
 
     $roomDiv.click(function () {
       switchToRoom(room.id);
@@ -393,7 +393,7 @@ $(function() {
     $messageBodyDiv = $('<span class="messageBody">')
       .append(messageText);
 
-    $repostItem = $('<li role="presentation"><a role="menuitem" href="#">Forward Message</a></li');
+    $repostItem = $('<li role="presentation"><a role="menuitem">Forward Message</a></li');
     $repostItem.click(function () {
       data.repost = true;
       socket.emit('host repost', data);
@@ -680,15 +680,27 @@ $(function() {
 
     // Update hosts label
     $hostLabel.html("");
-    var st = "<strong>"+room.name+"</strong> hosted by: " + room.owner.username;
+    var st = "<strong>"+room.name+"</strong> by: " + room.owner.username;
     for(var i = 0; i < room.hosts.length; i++) {
       st += ', ' + room.hosts[i].username;
     }
     $hostLabel.append($('<div>'+st+'</div>'));
-
-
-
   });
+
+  function get_products_of_all_ints_except_at_index(array) {
+    var prevProd = 1;
+    var resultsArray = [];
+
+    for(var i = 0; i < array.length; i ++) {
+      var resultForI = prevProd;
+      for (var x = i+1; x < array.length; x++) {
+        resultForI *= array[x];
+      }
+      resultsArray.push(resultForI);
+      prevProd *=array[i];
+    }
+    return resultsArray;
+  }
 
   // NOTIFICATIONS
 
