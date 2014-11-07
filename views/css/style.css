@@ -75,7 +75,7 @@ ul {
 	color: #fff;
 }
 
-.navbar-default .navbar-brand:hover {
+.navbar-default .navbar-brand:hover, .navbar-default .navbar-nav>li>a:hover {
 	color: #ccc;
 }
 

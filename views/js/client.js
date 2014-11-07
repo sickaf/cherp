@@ -203,7 +203,7 @@ $(function() {
   }
 
   function addRoomToRoomsList(room){
-    var $roomDiv = $('<li><a>'+'<strong>'+room.owner.username+'</strong>-'+room.name+'('+room.peopleNum+')</a></li>');
+    var $roomDiv = $('<li><a>'+room.owner.username+' ('+room.peopleNum+')</a></li>');
 
     $roomDiv.click(function () {
       switchToRoom(room.id);
