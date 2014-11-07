@@ -115,6 +115,14 @@ ul {
 	display:none;
 }*/
 
+.panel {
+	box-shadow: 0 0px 0px rgba(0,0,0,0);
+}
+
+p {
+	padding-left: 0px;
+}
+
 .message {
 	border-left: 0px;
 	border-right: 0px;
