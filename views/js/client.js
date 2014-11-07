@@ -97,7 +97,7 @@ $(function() {
       var title = $("<h4 />");
 
       var linkItem = $("<a />", {
-        href: '#',
+        href: '',
         "class": "archive-link",
         text: element.name
       });

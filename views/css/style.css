@@ -166,17 +166,19 @@ ul {
 #fan-avatar {
 	width: 20px;
 	height: 20px;
-	border-radius: 10px;
-	-webkit-border-radius: 10px;
-	-moz-border-radius: 10px;
+	border-radius: 5px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
 }
 
 #host-avatar {
 	width: 30px;
 	height: 30px;
-	border-radius: 15px;
-	-webkit-border-radius: 15px;
-	-moz-border-radius: 15px;
+/*	border-radius: 15px;
+	-webkit-border-radius: 15px; */
+	border-radius: 5px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
 }
 
 .profile-row {
