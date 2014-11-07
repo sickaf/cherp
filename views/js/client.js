@@ -334,8 +334,9 @@ $(function() {
       $typingMessages.remove();
     }
 
-    $avatarDiv = $('<img id="host-avatar"/>').attr('src', data.avatar_url)
-    .css('background-color', getUsernameColor(data.username));
+    if (data.avatar_url) $avatarDiv = $('<img/>').attr('src', data.avatar_url);
+    else $avatarDiv = $('<img/>').css('background-color', getUsernameColor(data.username));
+    $avatarDiv.attr('id', 'host-avatar');
     
     var $usernameDiv = $('<span class="username"/>')
       .text(data.username + ' ')
@@ -382,8 +383,10 @@ $(function() {
  // Adds the visual fan message to the message list
   function addFanMessage (data, options) {
 
-    $avatarDiv = $('<img id="fan-avatar"/>').attr('src', data.avatar_url)
-    .css('background-color', getUsernameColor(data.username));
+    if (data.avatar_url) $avatarDiv = $('<img/>').attr('src', data.avatar_url);
+    else $avatarDiv = $('<div/>').css('background-color', getUsernameColor(data.username));
+    $avatarDiv.attr('id', 'fan-avatar');
+
 
     $usernameDiv = $('<span class="username"/>')
     .text(data.username + ' ')

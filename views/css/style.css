@@ -171,22 +171,21 @@ p {
 	padding-left: 10px;
 }
 
-#fan-avatar {
-	width: 20px;
-	height: 20px;
+#host-avatar, #fan-avatar {
 	border-radius: 5px;
 	-webkit-border-radius: 5px;
 	-moz-border-radius: 5px;
+	float: left;
+}
+
+#fan-avatar {
+	width: 20px;
+	height: 20px;
 }
 
 #host-avatar {
 	width: 30px;
 	height: 30px;
-/*	border-radius: 15px;
-	-webkit-border-radius: 15px; */
-	border-radius: 5px;
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
 }
 
 .profile-row {
