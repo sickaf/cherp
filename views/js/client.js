@@ -335,7 +335,7 @@ $(function() {
     }
 
     if (data.avatar_url) $avatarDiv = $('<img/>').attr('src', data.avatar_url);
-    else $avatarDiv = $('<img/>').css('background-color', getUsernameColor(data.username));
+    else $avatarDiv = $('<div/>').css('background-color', getUsernameColor(data.username));
     $avatarDiv.attr('id', 'host-avatar');
     
     var $usernameDiv = $('<span class="username"/>')
