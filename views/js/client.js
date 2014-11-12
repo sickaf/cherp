@@ -423,12 +423,12 @@ $(function() {
     }
 
     if (data.avatar_url) $avatarDiv = $('<img/>').attr('src', data.avatar_url);
-    else $avatarDiv = $('<div/>').css('background-color', getUsernameColor(data.username));
+    else $avatarDiv = $('<div/>').css('background-color', getIdColor(data.id));
     $avatarDiv.attr('id', 'host-avatar');
     
     var $usernameDiv = $('<span class="username"/>')
       .text(data.username + ' ')
-      .css('color', getUsernameColor(data.username));
+      .css('color', getIdColor(data.id));
 
     var $messageBodyDiv;
     
@@ -496,12 +496,12 @@ $(function() {
   function addFanMessage (data, options) {
 
     if (data.avatar_url) $avatarDiv = $('<img/>').attr('src', data.avatar_url);
-    else $avatarDiv = $('<div/>').css('background-color', getUsernameColor(data.username));
+    else $avatarDiv = $('<div/>').css('background-color', getIdColor(data.id));
     $avatarDiv.attr('id', 'fan-avatar');
 
     $usernameDiv = $('<span class="username"/>')
     .text(data.username + ' ')
-    .css('color', getUsernameColor(data.username));
+    .css('color', getIdColor(data.id));
 
     var messageText = linkify(data.message, false);
     $messageBodyDiv = $('<span class="messageBody">')
@@ -600,6 +600,18 @@ $(function() {
     var hash = 7;
     for (var i = 0; i < username.length; i++) {
        hash = username.charCodeAt(i) + (hash << 5) - hash;
+    }
+    // Calculate color
+    var index = Math.abs(hash % COLORS.length);
+    return COLORS[index];
+  }
+
+    // Gets the color of a username through our hash function
+  function getIdColor (id) {
+    // Compute hash code
+    var hash = 7;
+    for (var i = 0; i < id.length; i++) {
+       hash = id.charCodeAt(i) + (hash << 5) - hash;
     }
     // Calculate color
     var index = Math.abs(hash % COLORS.length);

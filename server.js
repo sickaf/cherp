@@ -152,6 +152,14 @@ function getUserWithId (idParam) {
   }
   return null;
 }   
+function usernameExists (usernameParam) {
+  for(var i = 0; i < users.length; i++) {
+    if (users[i].username == usernameParam) {
+      return true;
+    }
+  }
+  return false;
+}   
 
 function getSocketWithId(socketId) {
   var toRet = _.where(sockets, {id: socketId});
@@ -422,6 +430,15 @@ io.on('connection', function (socket) {
 
   // when the client emits 'add username', this listens and executes
   socket.on('set username', function (username) {
+    var usernameSanitized = sanitizeHtml(username);
+    if(usernameExists(usernameSanitized)) {
+      socket.emit("toast notification", {type: "warning", title : "oops", message: "that username is taken"});   
+      return;
+    }
+    if(usernameSanitized[0] == "@") {
+      socket.emit("toast notification", {type: "warning", title : "oops", message: "can't start with '@'"});   
+      return;
+    }
     ourUser.username = sanitizeHtml(username);
     socket.emit('set client username', ourUser.username);
     io.to(socket.room).emit("update room metadata", getRoomWithID(socket.room));
