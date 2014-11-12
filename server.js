@@ -131,6 +131,12 @@ function getRoomWithName (name) {
   else return null;
 }
 
+function getRoomWithOwnerName (name) {
+  var toRet = _.where(rooms, {ownerName: name});
+  if(toRet.length > 0) return toRet[0];
+  else return null;
+}
+
 
 function getRoomWithID (id) {
   var toRet = _.where(rooms, {id: id});
@@ -424,7 +430,7 @@ io.on('connection', function (socket) {
   });
 
   socket.on('join chat by owner', function (ownerName) { //used when user has a direct URL
-    var roomToJoin = getRoomWithName(ownerName);
+    var roomToJoin = getRoomWithOwnerName(ownerName);
     if (roomToJoin) {
       enterChatWithId(roomToJoin.id);
     } else {
