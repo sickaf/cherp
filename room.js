@@ -11,6 +11,7 @@ function Room(id, owner, name) {
   this.status = "available";
   this.private = false;
   this.addOwner(owner);
+  this.ownerName = owner.username;
 };
 
 Room.prototype.addFan = function(fan) {
