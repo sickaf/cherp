@@ -45,6 +45,7 @@ $(function() {
     socket.emit('join trending chat');
   }
 
+  //allow user to set roomname when they create a room
   $createRoomButton.click(function() {
     smoke.prompt("Name your room", function(e){
       if (e) { 
@@ -58,6 +59,7 @@ $(function() {
     });
   });
 
+  //allow user to rename room
   $usernameLabel.click(function() {
     smoke.prompt("Change username", function(e){
       if (e) { 
