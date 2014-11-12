@@ -75,6 +75,7 @@ Room.prototype.addOwner = function(owner) {
     return false;
   }
   this.owner = owner;
+  this.ownerName = owner.username;
   this.peopleNum++;
 };
 
