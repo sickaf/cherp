@@ -327,7 +327,8 @@ $(function() {
             username: username,
             message: message,
             id: id,
-            avatar_url: user.avatar_url
+            avatar_url: user.avatar_url,
+            anon: !user.twitter
           });
         } else {
           addFanMessage({
