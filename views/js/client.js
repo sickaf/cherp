@@ -239,11 +239,11 @@ $(function() {
 
     normalLog("there are " + data.numUsers + " people in this room.");
 
-    if (data.numUsers === 1) {
-      iAmHost = true;
-      message += "you're the host";
-      normalLog(message)
-    } 
+    // if (data.numUsers === 1) {
+    //   iAmHost = true;
+    //   message += "you're the host";
+    //   normalLog(message)
+    // } 
   }
 
   function addChatroomUpdate (data) {
@@ -251,11 +251,11 @@ $(function() {
 
     normalLog("there are " + data.numUsers + " people in this room.");
 
-    if (data.numUsers === 1) {
-      iAmHost = true;
-      message += "you're the host";
-      normalLog(message)
-    } 
+    // if (data.numUsers === 1) {
+    //   iAmHost = true;
+    //   message += "you're the host";
+    //   normalLog(message)
+    // } 
   }
 
   function updateRoomsList (data, options) {
@@ -668,6 +668,8 @@ $(function() {
   socket.on('set iAmHost', function (usrname, bool) {
     if(username == usrname) {
       iAmHost = bool;
+      if(bool) $("#input-group-offset").hide();
+      else $("#input-group-offset").show();
     }
   });
 
@@ -753,8 +755,6 @@ $(function() {
     // Update total members label
     var totalPeopleInRoom = room.peopleNum;
     $membersLabel.text('Members: ' + totalPeopleInRoom);
-
- 
 
     // Update hosts label
     $hostLabel.html("");

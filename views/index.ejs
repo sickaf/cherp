@@ -11,14 +11,10 @@
 
     <title>Cherp</title>
 
-    <!-- Bootstrap core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
-    <!-- Custom styles for this template -->
     <link href="css/style.css" rel="stylesheet">
-    <!-- Custom styles for smoke -->
     <link href="js/smoke/smoke.css" rel="stylesheet">
-    <!-- Custom styles for toastr -->
     <link href="js/toastr/toastr.min.css" rel="stylesheet">
 
   </head>
@@ -88,12 +84,13 @@
             </div>
 
             <div class="row text-input"> <!-- text input row column -->
-              <div class="col-md-12">
+              <div class="col-md-6" id="input-group-offset"></div>
+              <div class="col-md-6">
                 <div class="input-group">
                   <input type="text" class="form-control" id="chat_input">
                   <span class="input-group-btn">
                   <!-- Split button -->
-                  <button type="button" class="btn btn-success send-button" id="send_button">Send</button>
+                  <button type="button" class="btn btn-success send-button" id="send-button">Send</button>
                   <button type="button" class="btn btn-success success-toggle" data-toggle="dropdown">
                   <span class="caret"></span>
                   <span class="sr-only">Toggle Dropdown</span>
