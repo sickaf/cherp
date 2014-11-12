@@ -1,6 +1,6 @@
 {
   "name": "socket.io-chat",
-  "version": "0.0.0-85",
+  "version": "0.0.0-86",
   "description": "sick.af",
   "main": "server.js",
   "author": "devon townsend",

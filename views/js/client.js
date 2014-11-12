@@ -20,6 +20,7 @@ $(function() {
   var $chatRoomField = $('#chat-room-field');
   var $trendingRoomsDiv = $('#trending-rooms');
   var $createRoomButton = $('#create-room-button');
+  var $usernameLabel = $('#username-label');
   var $hostLabel = $("#host-label");
   var $membersLabel = $("#members-label");
   var $textGroup = $(".text-input");
@@ -44,7 +45,7 @@ $(function() {
     socket.emit('join trending chat');
   }
 
-  $('#create-room-button').click(function() {
+  $createRoomButton.click(function() {
     smoke.prompt("Name your room", function(e){
       if (e) { 
         socket.emit('enter chat with id', { id : null, name : e});
@@ -52,8 +53,21 @@ $(function() {
       }, {
       ok: "Create Conversation",
       cancel: "Cancel",
-      classname: "room-name-field",
+      classname: "popup-text-field",
       value: randomRoomName()
+    });
+  });
+
+  $usernameLabel.click(function() {
+    smoke.prompt("Change username", function(e){
+      if (e) { 
+        socket.emit('set username', e);
+      } 
+      }, {
+      ok: "Set new username",
+      cancel: "Cancel",
+      classname: "popup-text-field",
+      value: username
     });
   });
 
@@ -225,11 +239,11 @@ $(function() {
   function configureRightNavBar () {
     if (!user.twitter) {
       $("#right-nav-signed-out").show();
-      $("#username-label").text('You are currently anonymous (' + username + ')');
+      $usernameLabel.text('You are currently anonymous (' + username + ')');
     }
     else {
       $("#right-nav-signed-in").show();
-      $("#username-label").text('signed in as ' + username);
+      $usernameLabel.text('signed in as ' + username);
     }
   }
 
@@ -632,7 +646,7 @@ $(function() {
 
   $window.keydown(function (event) {
     // Auto-focus the current input when a key is typed
-    if (!(event.ctrlKey || event.metaKey || event.altKey) && $(".room-name-field").length == 0) {
+    if (!(event.ctrlKey || event.metaKey || event.altKey) && $(".popup-text-field").length == 0) {
       $inputMessage.focus();
     }
 
@@ -664,6 +678,14 @@ $(function() {
     configureRightNavBar();
     $createRoomButton.show();
   });
+
+  //TOO MUCH DUPLICATED CODE
+  socket.on('set client username', function (usernameParam) {
+    username = usernameParam;
+    configureRightNavBar();
+    $createRoomButton.show();
+  });
+
 
   socket.on('set iAmHost', function (usrname, bool) {
     if(username == usrname) {

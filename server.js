@@ -292,8 +292,8 @@ io.on('connection', function (socket) {
             ourUser.anon = true;
             users.push(ourUser);
           }
-      } else {console.error("NO PASSPORT io.on connection");}
-  } else {console.error("NO SESSION io.on connection");}
+      } else {console.error("NO PASSPORT io.on connection"); return;}
+  } else {console.error("NO SESSION io.on connection"); return;}
 
   //messaging
   socket.emit("set client username and id", ourUser.username, ourUser.id);   
@@ -423,6 +423,9 @@ io.on('connection', function (socket) {
   // when the client emits 'add username', this listens and executes
   socket.on('set username', function (username) {
     ourUser.username = sanitizeHtml(username);
+    socket.emit('set client username', ourUser.username);
+    io.to(socket.room).emit("update room metadata", getRoomWithID(socket.room));
+    io.sockets.emit("update roomsList", rooms);
   });
 
   socket.on('join trending chat', function () {
