@@ -61,29 +61,105 @@ $(function() {
     window.location.replace("/auth/twitter");
   });
 
+
+  ///////////////////////////////////////////////////////////////
+  ///////                                                  //////
+  ///////  PROFILE FUNCTIONS                               //////
+  ///////                                                  //////
+  ///////////////////////////////////////////////////////////////
+
   $('#profile-link').click(function () {
-    $("#profile-dropdown").click()
-    $('.modal-title').text(username);
-    $('.profile-bio').text(user.bio);
-    $('#profile-avatar').attr('src', user.avatar_url);
-    $('#profile-twitter-link').attr('href', 'https://twitter.com/' + user.twitter.username).attr("target", "_blank");
+      $("#profile-dropdown").click()
+      showProfileForMe();
+      return false;  
+  });
+
+  function showProfileForMe() {
+
+      // Set username title regardless of user
+      $('.modal-title').text(username);
+
+      // Set appropriate info
+      setProfileInfoForUser(user);
+
+      // Show the profile
+      $('#profile-modal').modal('show');
+
+      // Get archived chats
+      getArchivedChatsAndDisplayInProfileForUser(user._id);
+  }
+
+  // global variables used to reference requests so we can cancel them if profile is closed before they finish
+  var profileRequest;
+  var archivesRequest;
+
+  function showProfileForUser(data) {
+
+    // Set username title regardless of user
+    $('.modal-title').text(data.username);
+    // Bio text should be loading...
+    $('.profile-bio').text('Loading...');
+
+    // Show profile
     $('#profile-modal').modal('show');
-    var url = "/api/v1/profile/archives/"+user._id;
-    $.getJSON(url, {}, function(data) {
 
-      if (data.length == 0) {
-        $('#loading').text('No archived chats');
-        return;
-      }
+    // Retrieve profile data and update profile
+    var url = "/api/v1/profile/"+data.id;
+    profileRequest = $.getJSON(url, {}, function(result) {
 
-      $('#loading').hide();
-      $.each(data, function(index, element) {
-        var $roomDiv = constructArchiveDiv(element);
-        $('.archived-chats-list').append($roomDiv);
-      });
+      setProfileInfoForUser(result);
+
     });
 
-    function constructArchiveDiv(element) {
+    getArchivedChatsAndDisplayInProfileForUser(data.id);
+  }
+
+  function setProfileInfoForUser(thisUser) {
+    // Check if we're the logged in user we want to see the profile for
+      $('.modal-title').text(thisUser.username);
+      $('.profile-bio').text(thisUser.bio);
+      $('#profile-avatar').attr('src', thisUser.avatar_url);
+      $('#profile-twitter-link').attr('href', 'https://twitter.com/' + thisUser.twitter.username).attr("target", "_blank");
+  }
+
+  $('#profile-modal').on('hidden.bs.modal', function (e) {
+
+      // abort all REST requests currently in process
+      if (profileRequest) {
+        profileRequest.abort();
+      };
+      
+      archivesRequest.abort();
+
+      $('.archived-chats-list').empty();
+      var $loadingDiv = $('<li id="loading">Loading...</li>');
+      $('.archived-chats-list').append($loadingDiv);
+
+      $('.modal-title').text('');
+      $('.profile-bio').text('');
+      $('#profile-avatar').attr('src', '');
+      $('#profile-twitter-link').attr('href', '#').attr("target", "_blank");
+  })
+
+  function getArchivedChatsAndDisplayInProfileForUser(userID) {
+      // Get archived chat info
+      var url = "/api/v1/profile/archives/"+userID;
+      archivesRequest = $.getJSON(url, {}, function(data) {
+
+        if (data.length == 0) {
+          $('#loading').text('No archived chats');
+          return;
+        }
+
+        $('#loading').hide();
+        $.each(data, function(index, element) {
+          var $roomDiv = constructArchiveDiv(element);
+          $('.archived-chats-list').append($roomDiv);
+        });
+    });
+  }
+
+  function constructArchiveDiv(element) {
 
       // create an element with an object literal, defining properties
       var listItem = $("<li />", {
@@ -137,19 +213,13 @@ $(function() {
       listItem.append(row);
 
       return listItem;
-    }
+  }
 
-    // make sure the profile link doesn't actually resolve
-    return false;
-  });
-
-  $('#profile-modal').on('hidden.bs.modal', function (e) {
-      $('.archived-chats-list').empty();
-      var $loadingDiv = $('<li id="loading">Loading...</li>');
-      $('.archived-chats-list').append($loadingDiv);
-  })
-
-  // UI Helpers
+  ///////////////////////////////////////////////////////////////
+  ///////                                                  //////
+  ///////  UI HELPERS                                      //////
+  ///////                                                  //////
+  ///////////////////////////////////////////////////////////////
 
   // Enable or disable nav buttons if user is logged in or not
   function configureRightNavBar () {
@@ -391,17 +461,11 @@ $(function() {
     if (!data.anon) {
       $profileMenuItem = $('<li role="presentation"><a role="menuitem" href="#">Profile</a></li');
       $profileMenuItem.click(function () {
-        console.log(data.anon);
-        var url = "/api/v1/profile/"+data.id;
-        $.getJSON(url, {}, function(data) {
-
-          console.log(data);
-
-          $.each(data, function(index, element) {
-            var $roomDiv = constructArchiveDiv(element);
-            $('.archived-chats-list').append($roomDiv);
-          });
-        });
+        if (data.id == user._id) {
+          showProfileForMe();
+        } else {
+          showProfileForUser(data);
+        }
       }); 
     }
 
@@ -426,40 +490,7 @@ $(function() {
     $messageBodyDiv = $('<span class="messageBody">')
       .append(messageText);
 
-    // $repostItem = $('<li role="presentation"><a role="menuitem">Forward Message</a></li');
-    // $repostItem.click(function () {
-    //   data.repost = true;
-    //   socket.emit('host repost', data);
-    //   if(iAmHost) addHostMessage(data);
-    // });   
-
-    // $makeHostMenuItem = $('<li role="presentation"><a role="menuitem">Make Host</a></li');
-    // $makeHostMenuItem.click(function () {
-    //   socket.emit('promote fan', data.id);
-    // });
-
-    // if (!data.anon) {
-    //   $profileMenuItem = $('<li role="presentation"><a role="menuitem" href="#">Profile</a></li');
-    //   $profileMenuItem.click(function () {
-    //     console.log(data.anon);
-    //     var url = "/api/v1/profile/"+data.id;
-    //     $.getJSON(url, {}, function(data) {
-
-    //       console.log(data);
-
-    //       $.each(data, function(index, element) {
-    //         var $roomDiv = constructArchiveDiv(element);
-    //         $('.archived-chats-list').append($roomDiv);
-    //       });
-    //     });
-    //   }); 
-    // }
-
-    // $menuDiv = $('<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"/>')
-    //   .append($repostItem, $makeHostMenuItem, data.anon ? null : $profileMenuItem);
-
     $menuDiv = getMenuDiv(data, true);
-
 
     var $messageDiv = $('<li id="'+data.id+'" class="list-group-item message dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown"/>')
       .data('username', data.username)
@@ -800,7 +831,7 @@ $(function() {
   
   
 
-    ///////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////
   ///////                                                  //////
   ///////  LINK HELPERS                                    //////
   ///////                                                  //////
@@ -866,10 +897,10 @@ $(function() {
     }) 
   }
 
-  $('a').live('click', function() {
-    window.open($(this).attr('href'));
-    return false;
-  }); 
+  // $('a').live('click', function() {
+  //   window.open($(this).attr('href'));
+  //   return false;
+  // }); 
 });
 
 
