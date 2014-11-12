@@ -261,7 +261,7 @@ $(function() {
   function updateRoomsList (data, options) {
     $trendingRoomsDiv.html("");
     if(data.length == 0) {
-      $trendingRoomsDiv.append($('<li>no rooms yet</li>'));
+      $trendingRoomsDiv.append($('<li class="trending-room">no rooms yet</li>'));
       if(!$chatRoom.is(":visible")) {
         $("#noRoomsImage").show();
       }
@@ -273,7 +273,7 @@ $(function() {
   }
 
   function addRoomToRoomsList(room){
-    var $roomDiv = $('<li><a>'+room.owner.username+' ('+room.peopleNum+')</a></li>');
+    var $roomDiv = $('<li class="trending-room"><a>'+room.owner.username+' ('+room.peopleNum+')</a></li>');
 
     $roomDiv.click(function () {
       switchToRoom(room.id);

@@ -103,7 +103,7 @@ var sockets = [];
 
 function randomUsername() {
   var nouns = ['fart','weed','poop','snowboard','longboarding','blaze','pussy','meat','slippery','dumb','heady','messy','drunk','blood'];
-  var descriptors = ['fan','dude','man','doctor','expert','thug','hero','king','queen','idiot','queef','muscles','splatter','satan','worshipper'];
+  var descriptors = ['fan','dude','man','doctor','expert','thug','hero','king','queen','idiot','queef','muscles','splatter','satan','worshipper', 'virgin'];
   var numbers = ['420','69'];
   var noun = nouns[Math.floor(Math.random() * nouns.length)];
   var descriptor = descriptors[Math.floor(Math.random() * descriptors.length)];

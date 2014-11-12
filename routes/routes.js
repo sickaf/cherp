@@ -7,7 +7,7 @@ module.exports = function(app, passport) {
 	// =====================================
 	app.get('/', function(req, res) {
 		if (req.user) {
-			console.log('logged in user found in session');
+			console.log('logged in user found i n session');
 			req.user.wantsToJoin = req.flash('wantsToJoin');
 			res.render('index', { user : req.user });
 		} else {
