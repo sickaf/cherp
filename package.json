@@ -26,7 +26,6 @@
     "passport": "*",
     "passport-local": "*",
     "passport-twitter": "*",
-    "quickthumb": "0.0.10",
     "socket.io": "^1.1.0",
     "underscore": "*"
   },

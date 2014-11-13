@@ -16,13 +16,7 @@ var logger = require('morgan'); //hoping this will make debugging easier
 var uuid = require('node-uuid'); //for generating IDs for things like rooms
 var RoomModel = require('./roommodel');
 var User = require('./user');
-var qt   = require('quickthumb');
 var sanitizeHtml = require('sanitize-html');
-
-// Use quickthumb
-app.use(qt.static(__dirname + '/'));
-
-
 
 //
 // database stuff
