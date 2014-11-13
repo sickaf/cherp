@@ -23,25 +23,9 @@ ul {
 	overflow-y: scroll;
 }
 
-.host-image {
-	max-width: 100%;
-}
-
-.host-column {
-	padding-right: 20px;
-}
-
-.chat-info{
-	padding-left: 0px;
-	padding-right: 0px;
-}
-
-.fan-column {
-	padding-left: 20px;
-}
-
 .text-input-row {
 	padding-top: 10px;
+	padding-bottom: 10px;
 }
 
 #members-label {
@@ -257,6 +241,11 @@ p {
   transform: translateY(-50%);
 }*/
 
+.chat-info {
+	padding-left: 0px;
+	padding-right: 0px;
+}
+
 /* makes it so that list items break words to new line if they're too long */
 li {
 	word-wrap: break-word;
@@ -264,4 +253,21 @@ li {
 
 .log-message {
 	font-size: 12px;
+}
+
+@media(min-width:768px) {
+
+	.host-column {
+		padding-right: 20px;
+	}
+
+	.fan-column {
+		padding-left: 20px;
+	}
+}
+
+@media(min-width:992px) {
+	.text-input-row {
+		padding-bottom: 0px;
+	}
 }
