@@ -264,7 +264,7 @@ $(function() {
   function configureRightNavBar () {
     if (!user.twitter) {
       $("#right-nav-signed-out").show();
-      $usernameLabel.text('You are currently anonymous (' + username + ')');
+      $usernameLabel.text('You are not logged in (' + username + ')');
     }
     else {
       $("#right-nav-signed-in").show();
