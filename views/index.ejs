@@ -59,11 +59,12 @@
             <div class="row" id="trending-rooms"> <!-- Trending rooms row -->
               <li class="trending-room">Loading...</li>
             </div>
-
-
           </div>
+
           <div class="start-hidden" id="noRoomsImage"><img src="img/getstarted.png" style="width:304px;height:228px"/></div>
+
           <div class="col-md-10 chat-container start-hidden" id="chatRoom"> <!-- Chat column -->
+
             <div class="row chat-windows"> <!-- chat header row -->
               <div class="col-md-6 chat-info">
                 <h5 id="host-label"/>
@@ -74,33 +75,39 @@
             </div>
 
             <div class="row chat-windows"> <!-- chat windows row -->
-              <div class="col-md-6">
-                <ul class="list-group" id="hostMessages"></ul>
-              </div>
-              <div class="col-md-6">
-                <ul class="list-group" id="fanMessages"></ul>
-              </div>
-            </div>
 
-            <div class="row text-input"> <!-- text input row column -->
-              <div class="col-md-6" id="input-group-offset"></div>
-              <div class="col-md-6">
-                <div class="input-group">
-                  <input type="text" class="form-control" id="chat_input">
-                  <span class="input-group-btn">
-                  <!-- Split button -->
-                  <button type="button" class="btn btn-success send-button" id="send-button">Send</button>
-                  <button type="button" class="btn btn-success success-toggle" data-toggle="dropdown">
-                  <span class="caret"></span>
-                  <span class="sr-only">Toggle Dropdown</span>
-                  </button>
-                  <ul class="dropdown-menu" role="menu">
-                  <li><input type="file" id="imagefile" accept="image/*"></li>
-                  </ul>
-                  </span>
+              <div class="col-md-6 host-column">
+
+                <div class="row host-message">
+                  <ul class="list-group" id="hostMessages"></ul>
+                </div>
+
+                <div class="row text-input-row">
+                  <div class="input-group">
+                    <input type="text" class="form-control" id="chat_input">
+                    <span class="input-group-btn">
+                    <!-- Split button -->
+                    <button type="button" class="btn btn-success send-button" id="send-button">Send</button>
+                    <button type="button" class="btn btn-success success-toggle" data-toggle="dropdown">
+                    <span class="caret"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                    <li><input type="file" id="imagefile" accept="image/*"></li>
+                    </ul>
+                    </span>
+                  </div>
+                </div>
+
               </div>
+
+              <div class="col-md-6 fan-column">
+                <div class="row fan-message">
+                  <ul class="list-group" id="fanMessages"></ul>
+                </div>
+              </div>
+
             </div>
-          </div>
 
         </div>
 

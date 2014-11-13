@@ -23,8 +23,7 @@ $(function() {
   var $usernameLabel = $('#username-label');
   var $hostLabel = $("#host-label");
   var $membersLabel = $("#members-label");
-  var $textGroup = $(".text-input");
-  
+  var $textGroup = $(".text-input-row");
 
   // Prompt for setting a username
   var username = null;
@@ -37,6 +36,15 @@ $(function() {
   var currentHosts;
   var currentRoomID;
 
+  // Variables for adjusting size of chat divs
+  var heightOfTextInputRow = 44;
+  var originalHeightOfChatDiv = $('#hostMessages').height();
+  var adjustedHeightOfChatDiv = $('#hostMessages').height() - heightOfTextInputRow;
+  var textInputRow = $(".text-input-row");
+  var hostColumn = $(".host-column");
+  var fanColumn = $(".fan-column");
+
+  // Socket
   var socket = io();
   
   if (user.wantsToJoin) {
@@ -236,6 +244,21 @@ $(function() {
   ///////  UI HELPERS                                      //////
   ///////                                                  //////
   ///////////////////////////////////////////////////////////////
+
+  function adjustTextInputDivForHost(host) {
+
+    textInputRow.remove();
+
+    if (host) {
+      hostColumn.append(textInputRow);
+      $("#hostMessages").height(adjustedHeightOfChatDiv);
+      $("#fanMessages").height(originalHeightOfChatDiv);
+    } else {
+      fanColumn.append(textInputRow);
+      $("#hostMessages").height(originalHeightOfChatDiv);
+      $("#fanMessages").height(adjustedHeightOfChatDiv);
+    }
+  } 
 
   // Enable or disable nav buttons if user is logged in or not
   function configureRightNavBar () {
@@ -705,8 +728,7 @@ $(function() {
   socket.on('set iAmHost', function (usrname, bool) {
     if(username == usrname) {
       iAmHost = bool;
-      if(bool) $("#input-group-offset").hide();
-      else $("#input-group-offset").show();
+      adjustTextInputDivForHost(iAmHost);
     }
   });
 
