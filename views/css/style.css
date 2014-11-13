@@ -23,16 +23,9 @@ ul {
 	overflow-y: scroll;
 }
 
-.host-column {
-	padding-right: 20px;
-}
-
-.fan-column {
-	padding-left: 20px;
-}
-
 .text-input-row {
 	padding-top: 10px;
+	padding-bottom: 10px;
 }
 
 #members-label {
@@ -255,4 +248,21 @@ li {
 
 .log-message {
 	font-size: 12px;
+}
+
+@media(min-width:768px) {
+
+	.host-column {
+		padding-right: 20px;
+	}
+
+	.fan-column {
+		padding-left: 20px;
+	}
+}
+
+@media(min-width:992px) {
+	.text-input-row {
+		padding-bottom: 0px;
+	}
 }
