@@ -27,6 +27,11 @@ ul {
 	padding-right: 20px;
 }
 
+.chat-info{
+	padding-left: 0px;
+	padding-right: 0px;
+}
+
 .fan-column {
 	padding-left: 20px;
 }
