@@ -23,6 +23,10 @@ ul {
 	overflow-y: scroll;
 }
 
+.host-image {
+	max-width: 100%;
+}
+
 .text-input-row {
 	padding-top: 10px;
 	padding-bottom: 10px;
