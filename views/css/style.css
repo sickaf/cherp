@@ -117,7 +117,7 @@ ul {
 }
 
 .input-group .form-control {
-	width: 98%;
+	width: 100%;
 }
 
 .start-hidden {
@@ -173,6 +173,10 @@ p {
 
 .send-button {
 	width: 80px;
+}
+
+.input-group-btn {
+	padding-left: 7px; /* THIS DOESNT FEEL RIGHT.  IDEALLY IT WOULD BE 5px */
 }
 
 /* 
