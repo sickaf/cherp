@@ -25,6 +25,7 @@ ul {
 
 .host-image {
 	max-width: 100%;
+	padding-top: 10px;
 }
 
 .text-input-row {
