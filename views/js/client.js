@@ -458,7 +458,7 @@ $(function() {
     //if it's an image, do that
     if(data.base64Image) {
       $messageBodyDiv = $('<span class="messageBody">')
-      .append('<img src="' + data.base64Image + '"/>');
+      .append('<img class="host-image" src="' + data.base64Image + '"/>');
     } else {
       var messageText = linkify(data.message, true);
       $messageBodyDiv = $('<span class="messageBody">')
