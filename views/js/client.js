@@ -253,10 +253,12 @@ $(function() {
       hostColumn.append(textInputRow);
       $("#hostMessages").height(adjustedHeightOfChatDiv);
       $("#fanMessages").height(originalHeightOfChatDiv);
+      $('#send-image-button').show();
     } else {
       fanColumn.append(textInputRow);
       $("#hostMessages").height(originalHeightOfChatDiv);
       $("#fanMessages").height(adjustedHeightOfChatDiv);
+      $('#send-image-button').hide();
     }
   } 
 
@@ -449,7 +451,8 @@ $(function() {
     else $avatarDiv = $('<div/>').css('background-color', getIdColor(data.id));
     $avatarDiv.attr('id', 'host-avatar');
     
-    var $usernameDiv = $('<span class="username"/>')
+    var $usernameDiv = $('<span/>')
+      .addClass('username')
       .text(data.username + ' ')
       .css('color', getIdColor(data.id));
 
@@ -457,7 +460,8 @@ $(function() {
     
     //if it's an image, do that
     if(data.base64Image) {
-      $messageBodyDiv = $('<span class="messageBody">')
+      $messageBodyDiv = $('<span>')
+      .addClass('messageBody')
       .append('<img class="host-image" src="' + data.base64Image + '"/>');
     } else {
       var messageText = linkify(data.message, true);

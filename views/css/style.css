@@ -175,6 +175,29 @@ p {
 	width: 80px;
 }
 
+/* 
+*
+* START OF SEND IMAGE BUTTON STUFF
+*
+*/
+.file_button_container, .file_button_container input {
+    height: 34px;
+    width: 43px;
+}
+
+.file_button_container {
+	background-color: blue;
+    background: transparent url(http://devontownsend.com/images/cameraicon.png) left top no-repeat;
+    margin-left: 5px;
+    vertical-align: middle;
+	display: inline-block;
+}
+
+.file_button_container input {
+    opacity: 0;
+}
+/* END OF SEND IMAGE BUTTON STUFF */
+
 .trending-users {
 	padding-top: 20px;
 }
@@ -276,3 +299,6 @@ li {
 		padding-bottom: 0px;
 	}
 }
+
+
+
