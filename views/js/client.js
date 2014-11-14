@@ -474,14 +474,13 @@ $(function() {
     var typingClass = data.typing ? 'typing' : '';
     var repostClass = data.repost ? 'repost' : '';
 
-
-    var $messageDiv = $('<li id="'+data.id+'" class="list-group-item message dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown"/>')
+    var $messageDiv = $('<li id="'+data.id+'" class="list-group-item message dropdown-toggle" data-toggle="dropdown"/>')
       .data('username', data.username)
       .addClass(typingClass)
       .addClass(repostClass)
       .append($avatarDiv, $usernameDiv, $messageBodyDiv);
 
-    var $parentDiv = $('<div class="dropdown"/>')
+    var $parentDiv = $('<div id="'+Date.now()+'" class="dropdown"/>')
       .append($messageDiv, $menuDiv);
 
     addHostMessageElement($parentDiv, options);
@@ -519,6 +518,17 @@ $(function() {
     return $menuDiv;
   }
 
+  // Helper events for changing message background color when dropdown menu appears
+  $('#hostMessages, #fanMessages').on('show.bs.dropdown', function (e) {
+    var $selectedMessageDiv = $('#'+e.target.id);
+    $selectedMessageDiv.children('.message').css('background-color', 'LightYellow');
+  });
+
+    $('#hostMessages, #fanMessages').on('hide.bs.dropdown', function (e) {
+    var $selectedMessageDiv = $('#'+e.target.id);
+    $selectedMessageDiv.children('.message').css('background-color', 'white');
+  });
+
  // Adds the visual fan message to the message list
   function addFanMessage (data, options) {
 
@@ -540,7 +550,7 @@ $(function() {
       .data('username', data.username)
       .append($avatarDiv, $usernameDiv, $messageBodyDiv);
 
-    var $parentDiv = $('<div class="dropdown"/>')
+    var $parentDiv = $('<div id="'+Date.now()+'" class="dropdown"/>')
       .append($messageDiv, $menuDiv);
 
     addFanMessageElement($parentDiv, options);
