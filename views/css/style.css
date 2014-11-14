@@ -186,12 +186,11 @@ p {
 */
 .file_button_container, .file_button_container input {
     height: 34px;
-    width: 43px;
+    width: 46px;
 }
 
 .file_button_container {
-	background-color: blue;
-    background: transparent url(http://devontownsend.com/images/cameraicon.png) left top no-repeat;
+    background: transparent url(http://sick.af/images/cameraicon.png) left top no-repeat;
     margin-left: 5px;
     vertical-align: middle;
 	display: inline-block;
