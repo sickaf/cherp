@@ -461,6 +461,34 @@ $(function() {
     addHostMessageElement($parentDiv, options);
   }
 
+   // Adds the visual fan message to the message list
+  function addFanMessage (data, options) {
+
+    if (data.avatar_url) $avatarDiv = $('<img/>').attr('src', data.avatar_url);
+    else $avatarDiv = $('<div/>').css('background-color', getIdColor(data.id));
+    $avatarDiv.attr('id', 'fan-avatar');
+
+    $usernameDiv = $('<span class="username"/>')
+    .text(data.username + ' ')
+    .css('color', getIdColor(data.id));
+
+    var messageText = linkify(data.message, false);
+    $messageBodyDiv = $('<span class="messageBody">')
+      .append(messageText);
+
+    $menuDiv = getMenuDiv(data, true);
+
+    var $messageDiv = $('<li id="'+data.id+'" class="list-group-item message dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown"/>')
+      .data('username', data.username)
+      .append($avatarDiv, $usernameDiv, $messageBodyDiv);
+
+    var $parentDiv = $('<div id="'+Date.now()+'" class="dropdown"/>')
+      .append($messageDiv, $menuDiv);
+
+    addFanMessageElement($parentDiv, options);
+  }
+
+
   function getMenuDiv(data, forFan) {
     $repostItem = $('<li role="presentation"><a role="menuitem">Forward Message</a></li');
     $repostItem.click(function () {
@@ -470,7 +498,7 @@ $(function() {
     });
 
     //quickly typed code
-    if(forFan) {
+    if(forFan && iAmHost) {
       $muteItem = $('<li role="presentation"><a role="menuitem">Mute</a></li');
       $muteItem.click(function () {
         socket.emit('mute user', data.id);
@@ -522,32 +550,6 @@ $(function() {
     $selectedMessageDiv.children('.message').css('background-color', 'white');
   });
 
- // Adds the visual fan message to the message list
-  function addFanMessage (data, options) {
-
-    if (data.avatar_url) $avatarDiv = $('<img/>').attr('src', data.avatar_url);
-    else $avatarDiv = $('<div/>').css('background-color', getIdColor(data.id));
-    $avatarDiv.attr('id', 'fan-avatar');
-
-    $usernameDiv = $('<span class="username"/>')
-    .text(data.username + ' ')
-    .css('color', getIdColor(data.id));
-
-    var messageText = linkify(data.message, false);
-    $messageBodyDiv = $('<span class="messageBody">')
-      .append(messageText);
-
-    $menuDiv = getMenuDiv(data, true);
-
-    var $messageDiv = $('<li id="'+data.id+'" class="list-group-item message dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown"/>')
-      .data('username', data.username)
-      .append($avatarDiv, $usernameDiv, $messageBodyDiv);
-
-    var $parentDiv = $('<div id="'+Date.now()+'" class="dropdown"/>')
-      .append($messageDiv, $menuDiv);
-
-    addFanMessageElement($parentDiv, options);
-  }
 
   function addHostMessageElement (el, options) {
     addMessageElement(el, $hostMessages, options);
