@@ -513,8 +513,6 @@ $(function() {
     }
     //end of bad code
  
-
-
     $promoteMenuItem = forFan ? $('<li role="presentation"><a role="menuitem">Make Host</a></li') : $('<li role="presentation"><a role="menuitem">Demote host</a></li');
                             
     $promoteMenuItem.click(function () {
