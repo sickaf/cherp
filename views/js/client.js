@@ -275,29 +275,29 @@ $(function() {
   }
 
   //someone needs to get rid of this dumb function
-  function addParticipantsMessage (data) {
-    var message = '';
+  // function addParticipantsMessage (data) {
+  //   var message = '';
 
-    normalLog("there are " + data.numUsers + " people in this room.");
+  //   normalLog("there are " + data.numUsers + " people in this room.");
 
-    // if (data.numUsers === 1) {
-    //   iAmHost = true;
-    //   message += "you're the host";
-    //   normalLog(message)
-    // } 
-  }
+  //   // if (data.numUsers === 1) {
+  //   //   iAmHost = true;
+  //   //   message += "you're the host";
+  //   //   normalLog(message)
+  //   // } 
+  // }
 
-  function addChatroomUpdate (data) {
-    var message = '';
+  // function addChatroomUpdate (data) {
+  //   var message = '';
 
-    normalLog("there are " + data.numUsers + " people in this room.");
+  //   normalLog("there are " + data.numUsers + " people in this room.");
 
-    // if (data.numUsers === 1) {
-    //   iAmHost = true;
-    //   message += "you're the host";
-    //   normalLog(message)
-    // } 
-  }
+  //   // if (data.numUsers === 1) {
+  //   //   iAmHost = true;
+  //   //   message += "you're the host";
+  //   //   normalLog(message)
+  //   // } 
+  // }
 
   function updateRoomsList (data, options) {
     $trendingRoomsDiv.html("");
@@ -492,7 +492,25 @@ $(function() {
       data.repost = true;
       socket.emit('host repost', data);
       if(iAmHost) addHostMessage(data);
-    });   
+    });
+
+    //quickly typed code
+    if(forFan) {
+      $muteItem = $('<li role="presentation"><a role="menuitem">Mute</a></li');
+      $muteItem.click(function () {
+        socket.emit('mute user', data.id);
+      });  
+      $unmuteItem = $('<li role="presentation"><a role="menuitem">Unmute</a></li');
+      $unmuteItem.click(function () {
+        socket.emit('unmute user', data.id);
+      });  
+    } else {
+      $muteItem = $('');
+      $unmuteItem = $('');
+    }
+    //end of bad code
+ 
+
 
     $promoteMenuItem = forFan ? $('<li role="presentation"><a role="menuitem">Make Host</a></li') : $('<li role="presentation"><a role="menuitem">Demote host</a></li');
                             
@@ -513,7 +531,7 @@ $(function() {
     }
 
     $menuDiv = $('<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"/>')
-      .append($repostItem, $promoteMenuItem, data.anon ? null : $profileMenuItem);
+      .append($repostItem, $muteItem, $unmuteItem, $promoteMenuItem, data.anon ? null : $profileMenuItem);
 
     return $menuDiv;
   }

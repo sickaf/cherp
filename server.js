@@ -214,6 +214,13 @@ function isThisUserInThisRoom (userParam, roomId) {
   return false;
 }
 
+function isThisUserMuted (userParam, roomId) {
+  var room = getRoomWithID(roomId);
+  if(room.getMutedUser(userParam.id)) return true;
+  return false;
+}
+
+
 function removeSocketFromRoom(socket, user, room) {
   var otherSocketForThisUserIsInThisRoom = false;
   for(var i = 0; i < user.sockets.length; i++) { // loop through all the users sockets
@@ -339,7 +346,9 @@ io.on('connection', function (socket) {
       pushMessageToDB(ourUser.id, getRoomWithID(socket.room), fullMessage);
     }
     else {
-      socket.broadcast.to(socket.room).emit("new fan message", fullMessage);
+      if(!isThisUserMuted(ourUser, socket.room)) {
+        socket.broadcast.to(socket.room).emit("new fan message", fullMessage);
+      }
     }
   });
 
@@ -362,41 +371,83 @@ io.on('connection', function (socket) {
     socket.emit("log notification", { message: "your socket is not in a chatroom buddy.  go live or join one from the left if any exist.", type : "danger" });
     return false;
   }
+    
+  socket.on('mute user', function (userId) { 
+    changeMuteStatus(userId, true);
+  });
+
+  socket.on('unmute user', function (userId) { 
+    changeMuteStatus(userId, false);
+  });
 
   // when the client emits 'make host', this listens and executes
   socket.on('promote fan', function (fanId) {
-    changeStatus(fanId, true);
+    changeHostStatus(fanId, true);
   });
 
   // when the client emits 'make host', this listens and executes
   socket.on('demote host', function (hostId) {
-    changeStatus(hostId, false);
+    changeHostStatus(hostId, false);
   });
 
-  function changeStatus(userId, promoteUp) {
-    if(!socketIsInChat()) return;
+  function getUserAndRoomIfClearedToManage(userId) {
+    if(!socketIsInChat()) return false;
 
     var userToChange = getUserWithId(userId);
     var roomForChange = getRoomWithID(socket.room);
 
     if(!roomForChange.isOwner(ourUser.id)) {
       socket.emit("log notification", { message: "ur not the owner u cant change users status go make ur own room", type : "danger" });   
-      return;
+      return false;
     }
 
     if(!userToChange) {
       socket.emit("log notification", { message: "that user ("+userId+") logged off", type : "danger" });   
-      return;
+      return false;
     }
 
     if(!isThisUserInThisRoom(userToChange, socket.room)) {
       socket.emit("log notification", { message: "that user ("+userId+") is no longer in this chat", type : "danger" });   
-      return;
+      return false;
     }
+    return [userToChange, roomForChange];
+  }
+
+  function changeMuteStatus(userId, toBeMuted) {
+    var userAndRoom = getUserAndRoomIfClearedToManage(userId);
+    if(!userAndRoom) return;
+
+    var userToChange = userAndRoom[0];
+    var roomForChange = userAndRoom[1];
+
+    if(toBeMuted) {
+      if(isThisUserMuted(userToChange, socket.room)) {
+        socket.emit("log notification", { message: "that user is already muted", type : "danger" });   
+        return;
+      }
+      roomForChange.muteUser(userToChange);
+      socket.emit("log notification", { message: "just muted "+userToChange.username, type : "success" }); 
+
+    } else {
+      if(!isThisUserMuted(userToChange, socket.room)) {
+        socket.emit("log notification", { message: "that user is not muted", type : "danger" });   
+        return;
+      }
+      roomForChange.unmuteUser(userToChange.id);
+      socket.emit("log notification", { message: "just unmuted "+userToChange.username, type : "success" }); 
+    }
+  }
+
+  function changeHostStatus(userId, promoteUp) {
+    var userAndRoom = getUserAndRoomIfClearedToManage(userId);
+    if(!userAndRoom) return;
+
+    var userToChange = userAndRoom[0];
+    var roomForChange = userAndRoom[1];
 
     if(promoteUp) { //PROMOTION (yay)
       if(isThisUserAtLeastHostOfThisRoom(userToChange, socket.room)) {
-        socket.emit("log notification", { message: "that user ("+userId+") is already a host hahahahahhahaha", type : "danger" });   
+        socket.emit("log notification", { message: "that user is already a host hahahahahhahaha", type : "danger" });   
         return;
       }
       roomForChange.promoteFanToHost(userToChange.id);
@@ -410,7 +461,7 @@ io.on('connection', function (socket) {
         return;
       }
       else if(!isThisUserAtLeastHostOfThisRoom(userToChange, socket.room)) {
-        socket.emit("log notification", { message: "that user ("+userId+") is not a host", type : "danger" });   
+        socket.emit("log notification", { message: "that user is not a host", type : "danger" });   
         return;
       }
 
@@ -421,6 +472,7 @@ io.on('connection', function (socket) {
     io.to(socket.room).emit("update room metadata", roomForChange);
     socket.broadcast.to(socket.room).emit("set iAmHost", userToChange.username, promoteUp);
   }
+
 
   // when the client emits 'add username', this listens and executes
   socket.on('set username', function (username) {

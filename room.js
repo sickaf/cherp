@@ -6,6 +6,7 @@ function Room(id, owner, name) {
   this.id = id;
   this.hosts = [];
   this.fans = [];
+  this.mutedUsers = [];
   this.fanLimit = 4;
   this.peopleNum = 0;
   this.status = "available";
@@ -39,7 +40,6 @@ Room.prototype.removeFan = function(personId) {
   var fanIndex = -1;
   for(var i = 0; i < this.fans.length; i++){
     if(this.fans[i].id === personId){
-      var fan = this.fans[i];
       this.fans.splice(i,1);
       this.peopleNum--;
       return;
@@ -63,6 +63,33 @@ Room.prototype.isOwner = function(userId) {
   return false;
 }
 
+Room.prototype.muteUser = function(user) {
+  if(this.getUser(user.id) && !this.getMutedUser(user.id)) {
+    this.mutedUsers.push(user);
+  }
+}
+
+Room.prototype.unmuteUser = function(userId) {
+  var theIndex = -1;
+  for(var i = 0; i < this.mutedUsers.length; i++){
+    if(this.mutedUsers[i].id === userId){
+      this.mutedUsers.splice(i,1);
+      return;
+    }
+  }
+}
+
+Room.prototype.getMutedUser = function(userId) {
+  var userToRet = null;
+  for(var i = 0; i < this.mutedUsers.length; i++) {
+    if(this.mutedUsers[i].id === userId) {
+      userToRet = this.mutedUsers[i];
+      break;
+    }
+  }
+  return userToRet;
+};
+
 Room.prototype.addHost = function(host) {
   if(this.getUser(host.id)) return;
   this.hosts.push(host);
@@ -83,7 +110,6 @@ Room.prototype.removeHost = function(personId) {
 
   for(var i = 0; i < this.hosts.length; i++){
     if(this.hosts[i].id === personId){
-      var hostToRemove = this.hosts[i];
       this.hosts.splice(i,1);
       if(personId == this.owner.id) {
         this.removeOwner();
