@@ -274,31 +274,6 @@ $(function() {
     }
   }
 
-  //someone needs to get rid of this dumb function
-  // function addParticipantsMessage (data) {
-  //   var message = '';
-
-  //   normalLog("there are " + data.numUsers + " people in this room.");
-
-  //   // if (data.numUsers === 1) {
-  //   //   iAmHost = true;
-  //   //   message += "you're the host";
-  //   //   normalLog(message)
-  //   // } 
-  // }
-
-  // function addChatroomUpdate (data) {
-  //   var message = '';
-
-  //   normalLog("there are " + data.numUsers + " people in this room.");
-
-  //   // if (data.numUsers === 1) {
-  //   //   iAmHost = true;
-  //   //   message += "you're the host";
-  //   //   normalLog(message)
-  //   // } 
-  // }
-
   function updateRoomsList (data, options) {
     $trendingRoomsDiv.html("");
     if(data.length == 0) {

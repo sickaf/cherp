@@ -397,7 +397,7 @@ io.on('connection', function (socket) {
     var roomForChange = getRoomWithID(socket.room);
 
     if(!roomForChange.isOwner(ourUser.id)) {
-      socket.emit("log notification", { message: "ur not the owner u cant change users status go make ur own room", type : "danger" });   
+      socket.emit("log notification", { message: "youre not the owner you cant change users status go make your own room", type : "danger" });   
       return false;
     }
 
