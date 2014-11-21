@@ -3,74 +3,24 @@
   padding-bottom: 15px;
 }*/
 
+/*Removed alot of CSS for index page, don't know if I screwed up any styles anwhere else*/
+
 body {
 	padding-top: 10px;
 	font-family: Menlo, 'Andale Mono', monospace;
 }
-ul {
-	padding-left: 0px;
-}
+
 
 .chat-container {
 	padding-bottom: 20px;
 }
 
 #hostMessages, #fanMessages {
-	height:550px;
+	height:600px;
 	background-color: white;
-    border: 3px solid #000;
+    border: 1px solid #000;
 	margin: 0;
 	overflow-y: scroll;
-}
-
-.host-image {
-	max-width: 100%;
-	padding-top: 10px;
-}
-
-.text-input-row {
-	padding-top: 10px;
-	padding-bottom: 10px;
-}
-
-#members-label {
-	float: right;
-}
-
-.form-control {
-	border-radius: 0px;
-	border: 3px solid #000;
-}
-
-.list-group-item {
-	border:0px;
-	margin-bottom: 0px;
-}
-
-.trending-room {
-	display: block;
-	padding-left: 15px;
-}
-
-.trending-rooms-col{
-	padding-left: 0px;
-}
-
-.list-group-item:first-child{
-	border-top-left-radius:0px;
-	border-top-right-radius:0px;
-}
-
-.list-group-item:last-child {
-	border-bottom-left-radius:0px;
-	border-bottom-right-radius:0px;
-}
-
-.navbar {
-	border-radius: 0px;
-	border: 0px;
-	min-height: 65px;
-	padding-top: 9px;
 }
 
 .navbar-default {
@@ -78,112 +28,54 @@ ul {
 	color: #fff;
 }
 
-#username-label{
-	padding: 15px;
+.trending-rooms-col {
+
+	text-align: center;
+
 }
 
-.navbar-default .navbar-nav>li>a {
-	color: #fff;
-}
+.trending-rooms-col h4{
 
-.navbar-default .navbar-brand {
-	color: #fff;
-}
+	padding-bottom: 5px;
+	border-bottom: 1px solid #ccc;
+	margin-right: 10px;
 
-.navbar-default .navbar-brand:hover, .navbar-default .navbar-nav>li>a:hover {
-	color: #ccc;
-}
-
-.btn {
-	border-radius: 0px;
-	border:0px;
-}
-
-.navbar-default .navbar-nav>.open>a, .navbar-default .navbar-nav>.open>a:hover, .navbar-default .navbar-nav>.open>a:focus{
-	color: #ccc;
-	background-color: #000;
-}
-
-.modal-content {
-	border-radius: 0px;
-}
-
-.btn-success {	
-	background-color: #26a65b;
-	padding: 7px 12px;
-}
-.btn-success:hover {
-	background-color: #1b7942;
-}
-
-.input-group .form-control {
-	width: 100%;
 }
 
 .start-hidden {
 	display:none;
 }
 
-#twitter-signin {
-	margin-right: 20px;
+#noRoomsImage img{
+
+	padding-left: 30px;
 }
 
-/*#chatRoom {
-	display:none;
-}*/
+.navbar-default .navbar-nav>.active>a, .navbar-default .navbar-nav>.active>a:hover, .navbar-default .navbar-nav>.active>a:focus {
 
-.panel {
-	box-shadow: 0 0px 0px rgba(0,0,0,0);
+	background-color: rgb(74, 74, 74);
+	color: white;
 }
 
-p {
-	padding-left: 0px;
+.trending-room {
+
+	text-align: left;
 }
 
-.message {
-	border-left: 0px;
-	border-right: 0px;
-	border-radius: 0px;
-}
+.centered-ul {
 
-.repost {
-  margin-left: 30px;
-  padding-left: 15px;
-  border-left: 3px solid #ccc;
-  list-style-type: none;
-}
-
-.dropdown-menu {
-	border-radius: 0px;
-	border: 1px solid #000;
-
-}
-
-.archived-chats-list {
-	list-style-type: none;
-}
-
-.text-input {
-	padding-top: 20px;
-}
-
-.new-chat-button {
-	width: 180px;
-}
-
-.send-button {
-	width: 80px;
+	text-align: center;
 }
 
 .input-group-btn {
 	padding-left: 7px; /* THIS DOESNT FEEL RIGHT.  IDEALLY IT WOULD BE 5px */
 }
 
-/* 
-*
-* START OF SEND IMAGE BUTTON STUFF
-*
-*/
+.text-input-row {
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
 .file_button_container, .file_button_container input {
     height: 34px;
     width: 46px;
@@ -199,91 +91,9 @@ p {
 .file_button_container input {
     opacity: 0;
 }
-/* END OF SEND IMAGE BUTTON STUFF */
-
-.trending-users {
-	padding-top: 20px;
-}
 
 .typing {
 	color: #D3D3D3;
-}
-
-.username {
-	padding-left: 10px;
-}
-
-#host-avatar, #fan-avatar {
-	border-radius: 5px;
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
-	vertical-align: middle;
-	display: inline-block;
-}
-
-#fan-avatar {
-	width: 20px;
-	height: 20px;
-}
-
-#host-avatar {
-	width: 30px;
-	height: 30px;
-}
-
-.profile-row {
-	padding-left: 20px;
-	padding-right: 20px;
-}
-
-#profile-header {
-	padding-top: 20px;
-}
-
-.profile-bio {
-	padding-top: 20px;
-}
-
-.archive-list {
-	padding: 0px;
-}
-
-#profile-avatar {
-	width: 50px;
-	height: 50px;
-	/*border-radius: 25px;
-	-webkit-border-radius: 25px;
-	-moz-border-radius: 25px;*/
-	background-color: black;
-}
-
-#profile-username {
-	padding-left: 30px;
-	font-weight: bold;
-}
-
-#archive-delete-button {
-  margin-top: 16px;
-}
-
-/*.send-button-row {
-  position: relative;
-  top: 50%;
-  transform: translateY(-50%);
-}*/
-
-.chat-info {
-	padding-left: 0px;
-	padding-right: 0px;
-}
-
-/* makes it so that list items break words to new line if they're too long */
-li {
-	word-wrap: break-word;
-}
-
-.log-message {
-	font-size: 12px;
 }
 
 @media(min-width:768px) {
@@ -302,6 +112,10 @@ li {
 		padding-bottom: 0px;
 	}
 }
+
+/** {
+    transition: 2.5s;
+}*/
 
 
 
