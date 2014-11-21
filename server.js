@@ -200,7 +200,8 @@ function addDatabaseMessagesWithRoomId(roomId, socket){
       if (err)
         console.log("database ERR getting hostMessages: "+err);
       if (room) {
-        console.log("database found room with id: "+room.id);
+        console.log("database found room with id: "+room.id+". "+room.hostMessages.length+" messages retrieved from db");        
+        room.hostMessages = room.hostMessages.slice(-10);
         socket.emit("add database messages", room.hostMessages);
       } else {
         console.log("database couldnt find "+roomId+" to load messages from");

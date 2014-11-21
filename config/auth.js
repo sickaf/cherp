@@ -2,8 +2,8 @@
 module.exports = {
 
 	'twitterAuth' : {
-		'consumerKey' 		: 'cHQekw0Ll1erlW6okoRIXBWR9',
-		'consumerSecret' 	: 'vBcjKilx3i2cMIGIE4GZEPlb3jCUtVTSdCgzx2B4GRvykGHCvI',
+		'consumerKey' 		: 'VK1zOyRYCbCt5L4TnMYIxzbZn',
+		'consumerSecret' 	: 'RGFV4CdZ8RA1D7gGlrLryU824PyraesvlOqjlJi8LV08E75yiE',
 		'callbackURL' 		: 'http://devspinn-chat.nodejitsu.com/auth/twitter/callback'
 		// 'callbackURL' 		: 'http://localhost:3000/auth/twitter/callback'
 	},
