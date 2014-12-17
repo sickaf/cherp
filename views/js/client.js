@@ -39,7 +39,7 @@ $(function() {
   // Variables for adjusting size of chat divs
   var heightOfTextInputRow = 44;
   var originalHeightOfChatDiv = $('#hostMessages').height();
-  var adjustedHeightOfChatDiv = $('#hostMessages').height() - heightOfTextInputRow;
+  var adjustedHeightOfChatDiv = $('#hostMessages').height();
   var textInputRow = $(".text-input-row");
   var hostColumn = $(".host-column");
   var fanColumn = $(".fan-column");

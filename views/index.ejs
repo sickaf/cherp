@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -17,31 +16,42 @@
     <link href="js/smoke/smoke.css" rel="stylesheet">
     <link href="js/toastr/toastr.min.css" rel="stylesheet">
 
+
+    <title>Cherp</title>
   </head>
 
-  <body>
-
-    <div class="container">
-
-        <div class="col-md-12"> <!-- main column -->
+    <body>
       
-          <nav class="navbar navbar-default" role="navigation">
-            <div class="navbar-header">
-              <a class="navbar-brand" href="#">Cherp</a>
-            </div>
-
-            <div class="collapse navbar-collapse">
-
-              <div class="nav navbar-nav navbar-left"> <!-- left side -->
-                <button type="button" class="btn btn-success navbar-btn new-chat-button start-hidden" id="create-room-button">Start Conversation</button>
+      <!-- Add navbar fullwidth of site + responsive -->
+        <nav class="navbar navbar-default" role="navigation">
+            <div class="container-fluid">
+              <!-- Brand and toggle get grouped for better mobile display -->
+              <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                  <span class="sr-only">Toggle navigation</span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">Cherp</a>
               </div>
 
-              <ul class="nav navbar-nav navbar-right start-hidden" id="right-nav-signed-out"> <!-- right side that shows if user is signed in -->
-                <li><a id="username-label"></a></li>
-                <li><button type="button" class="btn btn-info navbar-btn" id="twitter-signin"><span class="fa fa-twitter"></span>Sign in with Twitter</button></li>
-              </ul>
+              <!-- Collect the nav links, forms, and other content for toggling -->
+              <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <form class="navbar-form navbar-left" role="search">   
+                  <button type="button" class="btn btn-default new-chat-button start-hidden" id="create-room-button">Start Conversation</button>
+                </form>
 
-              <ul class="nav navbar-nav navbar-right start-hidden" id="right-nav-signed-in"> <!-- right side that shows if user is signed out -->
+                <ul class="nav navbar-nav navbar-right start-hidden" id="right-nav-signed-out">
+                  <li>
+                    <a id="username-label"></a>
+                  </li>
+                  <li>
+                    <button type="button" class="btn btn-default twitter-btn navbar-btn" id="twitter-signin">Sign in with Twitter</button>
+                  </li>
+                </ul>
+
+                <ul class="nav navbar-nav navbar-right start-hidden" id="right-nav-signed-in"> <!-- right side that shows if user is signed out -->
                  <li class="dropdown" id="profile-dropdown">
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown" id="username-label">Signed in as <%= user.username %> <span class="caret"></span></a>
                   <ul class="dropdown-menu" role="menu">
@@ -51,63 +61,76 @@
                 </li>
               </ul>
 
-            </div>
+              </div><!-- /.navbar-collapse -->
+            </div><!-- /.container-fluid -->
           </nav>
 
-          <div class="col-md-2 trending-rooms-col"> <!-- Left column -->
-            <h4>Trending</h4>
-            <div class="row" id="trending-rooms"> <!-- Trending rooms row -->
-              <li class="trending-room">Loading...</li>
-            </div>
+    <div class="container-fluid">
+      <div class="row">
+
+        <div class="col-md-2 trending-rooms-col">
+          <div class="well">
+            <h5>Trending</h5>
+              <div  id="trending-rooms"> <!-- Trending rooms row -->
+                <li class="trending-room">Loading...</li>
+              </div>
           </div>
+        </div>
 
-          <div class="start-hidden" id="noRoomsImage"><img src="img/getstarted.png" style="width:304px;height:228px"/></div>
 
-          <div class="col-md-10 chat-container start-hidden" id="chatRoom"> <!-- Chat column -->
 
-            <div class="row chat-header-row"> <!-- chat header row -->
-              <div class="col-md-6 chat-info">
-                <h5 id="host-label"/>
-              </div>
-              <div class="col-md-6 chat-info">
-                <h5 id="members-label"/>
-              </div>
+      <div class="chat-container start-hidden" id="chatRoom">
+
+          <div class="chat-header-row"> <!-- chat header row -->
+              
+              
             </div>
 
-            <div class="row chat-windows"> <!-- chat windows row -->
+             <div class="chat-windows">
+                <div class="col-md-7 host-column">
+                  <div class="chat-info">
+                    <h5 id="host-label"/>
+                  </div>
+                  <div class="well">
+                    <div class="host-message">
+                      <ul class="list-group" id="hostMessages"></ul>
+                    </div>
+                  </div>
 
-              <div class="col-md-6 host-column">
-
-                <div class="row host-message">
-                  <ul class="list-group" id="hostMessages"></ul>
+                      <div class="text-input-row">
+                      <div class="input-group">
+                        <input type="text" class="form-control" id="chat_input">
+                        <span class="input-group-btn">
+                        <!-- Split button -->
+                          <button type="button" class="btn btn-default send-button" id="send-button">Send</button>
+                          <!-- <div id="send-image-button" class="file_button_container">
+                            <input type="file" id="imagefile" accept="image/*" />
+                          </div> -->
+                        </span>
+                      </div>
+                    </div>
                 </div>
 
-                <div class="row text-input-row">
-                  <div class="input-group">
-                    <input type="text" class="form-control" id="chat_input">
-                    <span class="input-group-btn">
-                    <!-- Split button -->
-                      <button type="button" class="btn btn-success send-button" id="send-button">Send</button>
-                      <div id="send-image-button" class="file_button_container">
-                        <input type="file" id="imagefile" accept="image/*" />
-                      </div>
-                    </span>
+                <div class="col-md-3 fan-column no-padding">
+                  <div class="chat-info">
+                    <h5 id="members-label"/>
+                  </div>
+
+
+                  <div class="well">
+                    <div class="fan-message" id="fan-message">
+                  <ul class="list-group" id="fanMessages"></ul>
+                </div>
                   </div>
                 </div>
 
-              </div>
+             </div>  
+      </div>
 
-              <div class="col-md-6 fan-column">
-                <div class="row fan-message">
-                  <ul class="list-group" id="fanMessages"></ul>
-                </div>
-              </div>
+      </div>
+    </div>
 
-            </div>
-
-        </div>
-
-        <!-- PROFILE -->
+    <!-- PROFILE -->
 
         <div class="modal fade" id="profile-modal">
           <div class="modal-dialog">
@@ -150,11 +173,9 @@
           </div><!-- /.modal-dialog -->
         </div><!-- /.modal -->
 
-      </div> <!-- main column -->
 
-    </div> <!-- container -->
 
-    <!-- Placed at the end of the document so the pages load faster -->
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
@@ -164,7 +185,11 @@
     <script>
     var user = <%- JSON.stringify(user) %>;
     console.log(user.wantsToJoin);
+
+
     </script>
     <script src="js/client.js"></script>
-  </body>
+
+    </body> 
+
 </html>
