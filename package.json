@@ -17,15 +17,16 @@
     "express-session": "*",
     "formidable": "^1.0.15",
     "fs-extra": "^0.12.0",
+    "jshint": "^2.5.11",
     "method-override": "*",
     "mongodb-uri": "*",
     "mongoose": "*",
     "morgan": "*",
     "node-uuid": "*",
-    "sanitize-html": "*",
     "passport": "*",
     "passport-local": "*",
     "passport-twitter": "*",
+    "sanitize-html": "*",
     "socket.io": "^1.1.0",
     "underscore": "*"
   },
@@ -35,5 +36,9 @@
   },
   "engines": {
     "node": "0.10.x"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-jshint": "^0.10.0"
   }
 }

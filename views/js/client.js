@@ -11,19 +11,21 @@ $(function() {
   ];
 
   // Initialize varibles
-  var $window = $(window);
-  var $hostMessages = $('#hostMessages'); // host messages area
-  var $fanMessages = $('#fanMessages'); // fan messages area
-  var $chatRoom = $('#chatRoom'); // fan messages area
-  var $inputMessage = $('#chat_input'); // Input message input box
-  var $sendButton = $('#send_button');
-  var $chatRoomField = $('#chat-room-field');
+  var $window           = $(window);
+  var $hostMessages     = $('#hostMessages'); // host messages area
+  var $fanMessages      = $('#fanMessages'); // fan messages area
+  var $chatRoom         = $('#chatRoom'); // fan messages area
+  var $inputMessage     = $('#chat_input'); // Input message input box
+  var $sendButton       = $('#send_button');
+  var $chatRoomField    = $('#chat-room-field');
   var $trendingRoomsDiv = $('#trending-rooms');
   var $createRoomButton = $('#create-room-button');
-  var $usernameLabel = $('#username-label');
-  var $hostLabel = $("#host-label");
-  var $membersLabel = $("#members-label");
-  var $textGroup = $(".text-input-row");
+  var $usernameLabel    = $('#username-label');
+  var $hostLabel        = $("#host-label");
+  var $membersLabel     = $("#members-label");
+  var $textInputRow     = $(".text-input-row");
+  var $hostColumn       = $(".host-column");
+  var $fanColumn        = $(".fan-column");
 
   // Prompt for setting a username
   var username = null;
@@ -40,9 +42,6 @@ $(function() {
   var heightOfTextInputRow = 44;
   var originalHeightOfChatDiv = $('#hostMessages').height();
   var adjustedHeightOfChatDiv = $('#hostMessages').height() - heightOfTextInputRow;
-  var textInputRow = $(".text-input-row");
-  var hostColumn = $(".host-column");
-  var fanColumn = $(".fan-column");
 
   // Socket
   var socket = io();
@@ -69,6 +68,7 @@ $(function() {
 
   //allow user to rename room
   $usernameLabel.click(function() {
+
     smoke.prompt("Change username", function(e){
       if (e) { 
         socket.emit('set username', e);
@@ -79,6 +79,11 @@ $(function() {
       classname: "popup-text-field",
       value: username
     });
+  });
+
+  // Click events
+  $('#send-button').click(function() {
+    sendTextFieldMessage();
   });
 
   $('#twitter-signin').click(function() {
@@ -93,7 +98,7 @@ $(function() {
   ///////////////////////////////////////////////////////////////
 
   $('#profile-link').click(function () {
-      $("#profile-dropdown").click()
+      $("#profile-dropdown").click();
       showProfileForMe();
       return false;  
   });
@@ -121,6 +126,7 @@ $(function() {
 
     // Set username title regardless of user
     $('.modal-title').text(data.username);
+
     // Bio text should be loading...
     $('.profile-bio').text('Loading...');
 
@@ -130,9 +136,7 @@ $(function() {
     // Retrieve profile data and update profile
     var url = "/api/v1/profile/"+data.id;
     profileRequest = $.getJSON(url, {}, function(result) {
-
       setProfileInfoForUser(result);
-
     });
 
     getArchivedChatsAndDisplayInProfileForUser(data.id);
@@ -151,7 +155,7 @@ $(function() {
       // abort all REST requests currently in process
       if (profileRequest) {
         profileRequest.abort();
-      };
+      }
       
       archivesRequest.abort();
 
@@ -163,14 +167,14 @@ $(function() {
       $('.profile-bio').text('');
       $('#profile-avatar').attr('src', '');
       $('#profile-twitter-link').attr('href', '#').attr("target", "_blank");
-  })
+  });
 
   function getArchivedChatsAndDisplayInProfileForUser(userID) {
       // Get archived chat info
       var url = "/api/v1/profile/archives/"+userID;
       archivesRequest = $.getJSON(url, {}, function(data) {
 
-        if (data.length == 0) {
+        if (data.length === 0) {
           $('#loading').text('No archived chats');
           return;
         }
@@ -203,7 +207,7 @@ $(function() {
       });
 
       linkItem.click(function() {
-        switchToArchivedRoom(element.id)
+        switchToArchivedRoom(element.id);
         $('#profile-modal').modal('hide');
         $('#profile-dropdown').click();
         return false;
@@ -247,19 +251,35 @@ $(function() {
 
   function adjustTextInputDivForHost(host) {
 
-    textInputRow.remove();
+    $textInputRow.remove();
 
     if (host) {
-      hostColumn.append(textInputRow);
+      $hostColumn.append($textInputRow);
       $("#hostMessages").height(adjustedHeightOfChatDiv);
       $("#fanMessages").height(originalHeightOfChatDiv);
       $('#send-image-button').show();
     } else {
-      fanColumn.append(textInputRow);
+      $fanColumn.append($textInputRow);
       $("#hostMessages").height(originalHeightOfChatDiv);
       $("#fanMessages").height(adjustedHeightOfChatDiv);
       $('#send-image-button').hide();
     }
+
+    //
+    // TODO
+    //
+    // THIS IS A HACK BECAUSE OF THE ISSUE OF REMOVING THE $textInputRow
+    //
+    //
+    $('#chat_input').on('input', function() {
+      updateTyping();
+    });
+
+    // Click events
+    $('#send-button').click(function() {
+      sendTextFieldMessage();
+    });
+    // END OF HACK
   } 
 
   // Enable or disable nav buttons if user is logged in or not
@@ -276,7 +296,7 @@ $(function() {
 
   function updateRoomsList (data, options) {
     $trendingRoomsDiv.html("");
-    if(data.length == 0) {
+    if(data.length === 0) {
       $trendingRoomsDiv.append($('<li class="trending-room">no rooms yet</li>'));
       if(!$chatRoom.is(":visible")) {
         $("#noRoomsImage").show();
@@ -370,7 +390,7 @@ $(function() {
       "fadeOut": 300,
       "timeOut": 2000,
       "extendedTimeOut": 1000
-    }
+    };
     switch (type) {
       case 'info':
         toastr.info(message, title);
@@ -599,6 +619,7 @@ $(function() {
 
   // Updates the typing event
   function updateTyping () {
+
     if (currentlyInRoom) {
       if (!typing) {
         typing = true;
@@ -691,7 +712,7 @@ $(function() {
 
   $window.keydown(function (event) {
     // Auto-focus the current input when a key is typed
-    if (!(event.ctrlKey || event.metaKey || event.altKey) && $(".popup-text-field").length == 0) {
+    if (!(event.ctrlKey || event.metaKey || event.altKey) && $(".popup-text-field").length === 0) {
       $inputMessage.focus();
     }
 
@@ -701,12 +722,13 @@ $(function() {
     }
   });
 
-  $inputMessage.on('input', function() {
+  // // $inputMessage.on('input', function() {
+  $('#chat_input').on('input', function() {
     updateTyping();
   });
 
-  // Click events
-  $sendButton.click(function() {
+  // // Click events
+  $('#send-button').click(function() {
     sendTextFieldMessage();
   });
 
@@ -744,13 +766,14 @@ $(function() {
     if(bool) {
       $chatRoom.show();  //this isn't the best long term place for this
       $fanMessages.show();
-      $textGroup.show();
+      // $textGroup.show();
+      $textInputRow.show();
       $("#noRoomsImage").hide();
     } else {
       $hostLabel.text("This room is archived.");
       $membersLabel.text('');
       $fanMessages.hide();
-      $textGroup.hide();
+      $textInputRow.hide();
     }
   });
 
@@ -905,7 +928,7 @@ $(function() {
 
   function getHostName(url) {
     var match = url.match(/:\/\/(www[0-9]?\.)?(.[^/:]+)/i);
-    if (match != null && match.length > 2 &&
+    if (match !== null && match.length > 2 &&
         typeof match[2] === 'string' && match[2].length > 0) {
     return match[2];
     }
@@ -918,14 +941,13 @@ $(function() {
     var hostName = getHostName(url);
     var domain = hostName;
     
-    if (hostName != null) {
+    if (hostName !== null) {
         var parts = hostName.split('.').reverse();
         
-      if (parts != null && parts.length > 1) {
+      if (parts !== null && parts.length > 1) {
           domain = parts[1] + '.' + parts[0];
             
-         if (hostName.toLowerCase().indexOf('.co.uk') != -1
-                 && parts.length > 2) {
+         if (hostName.toLowerCase().indexOf('.co.uk') != -1 && parts.length > 2) {
            domain = parts[2] + '.' + domain;
          }
       }
@@ -960,16 +982,15 @@ $(function() {
           }
        } 
       return '<a href="' +fullURL+ '" target="_blank">' + url + '</a>';
-    }) 
+    }); 
   }
 
   // $('a').live('click', function() {
   //   window.open($(this).attr('href'));
   //   return false;
   // }); 
+
 });
-
-
 
 // Utilities
 
@@ -980,167 +1001,3 @@ Date.prototype.yyyymmdd = function() {
    return (mm[1]?mm:"0"+mm[0]) + '-' + (dd[1]?dd:"0"+dd[0]) + '-' + yyyy; // padding
 };
 
-
-/*
-
-
-                         8888  8888888
-                  888888888888888888888888
-               8888:::8888888888888888888888888
-             8888::::::8888888888888888888888888888
-            88::::::::888:::8888888888888888888888888
-          88888888::::8:::::::::::88888888888888888888
-        888 8::888888::::::::::::::::::88888888888   888
-           88::::88888888::::m::::::::::88888888888    8
-         888888888888888888:M:::::::::::8888888888888
-        88888888888888888888::::::::::::M88888888888888
-        8888888888888888888888:::::::::M8888888888888888
-         8888888888888888888888:::::::M888888888888888888
-        8888888888888888::88888::::::M88888888888888888888
-      88888888888888888:::88888:::::M888888888888888   8888
-     88888888888888888:::88888::::M::;o*M*o;888888888    88
-    88888888888888888:::8888:::::M:::::::::::88888888    8
-   88888888888888888::::88::::::M:;:::::::::::888888888     
-  8888888888888888888:::8::::::M::aAa::::::::M8888888888       8
-  88   8888888888::88::::8::::M:::::::::::::888888888888888 8888
- 88  88888888888:::8:::::::::M::::::::::;::88:88888888888888888
- 8  8888888888888:::::::::::M::"@@@@@@@"::::8w8888888888888888
-  88888888888:888::::::::::M:::::"@a@":::::M8i888888888888888
- 8888888888::::88:::::::::M88:::::::::::::M88z88888888888888888 
-8888888888:::::8:::::::::M88888:::::::::MM888!888888888888888888
-888888888:::::8:::::::::M8888888MAmmmAMVMM888*88888888   88888888
-888888 M:::::::::::::::M888888888:::::::MM88888888888888   8888888
-8888   M::::::::::::::M88888888888::::::MM888888888888888    88888
- 888   M:::::::::::::M8888888888888M:::::mM888888888888888    8888
-  888  M::::::::::::M8888:888888888888::::m::Mm88888 888888   8888
-   88  M::::::::::::8888:88888888888888888::::::Mm8   88888   888
-   88  M::::::::::8888M::88888::888888888888:::::::Mm88888    88
-   8   MM::::::::8888M:::8888:::::888888888888::::::::Mm8     4
-       8M:::::::8888M:::::888:::::::88:::8888888::::::::Mm    2
-      88MM:::::8888M:::::::88::::::::8:::::888888:::M:::::M
-     8888M:::::888MM::::::::8:::::::::::M::::8888::::M::::M
-    88888M:::::88:M::::::::::8:::::::::::M:::8888::::::M::M
-   88 888MM:::888:M:::::::::::::::::::::::M:8888:::::::::M:
-   8 88888M:::88::M:::::::::::::::::::::::MM:88::::::::::::M
-     88888M:::88::M::::::::::*88*::::::::::M:88::::::::::::::M             
-    888888M:::88::M:::::::::88@@88:::::::::M::88::::::::::::::M
-    888888MM::88::MM::::::::88@@88:::::::::M:::8::::::::::::::*8
-    88888  M:::8::MM:::::::::*88*::::::::::M:::::::::::::::::88@@
-    8888   MM::::::MM:::::::::::::::::::::MM:::::::::::::::::88@@
-     888    M:::::::MM:::::::::::::::::::MM::M::::::::::::::::*8
-     888    MM:::::::MMM::::::::::::::::MM:::MM:::::::::::::::M
-      88     M::::::::MMMM:::::::::::MMMM:::::MM::::::::::::MM
-       88    MM:::::::::MMMMMMMMMMMMMMM::::::::MMM::::::::MMM
-        88    MM::::::::::::MMMMMMM::::::::::::::MMMMMMMMMM
-         88   8MM::::::::::::::::::::::::::::::::::MMMMMM
-          8   88MM::::::::::::::::::::::M:::M::::::::MM
-              888MM::::::::::::::::::MM::::::MM::::::MM
-             88888MM:::::::::::::::MMM:::::::mM:::::MM
-             888888MM:::::::::::::MMM:::::::::MMM:::M
-            88888888MM:::::::::::MMM:::::::::::MM:::M
-           88 8888888M:::::::::MMM::::::::::::::M:::M
-           8  888888 M:::::::MM:::::::::::::::::M:::M:
-              888888 M::::::M:::::::::::::::::::M:::MM
-             888888  M:::::M::::::::::::::::::::::::M:M
-             888888  M:::::M:::::::::@::::::::::::::M::M
-             88888   M::::::::::::::@@:::::::::::::::M::M
-            88888   M::::::::::::::@@@::::::::::::::::M::M
-           88888   M:::::::::::::::@@::::::::::::::::::M::M
-          88888   M:::::m::::::::::@::::::::::Mm:::::::M:::M
-          8888   M:::::M:::::::::::::::::::::::MM:::::::M:::M
-         8888   M:::::M:::::::::::::::::::::::MMM::::::::M:::M
-        888    M:::::Mm::::::::::::::::::::::MMM:::::::::M::::M
-      8888    MM::::Mm:::::::::::::::::::::MMMM:::::::::m::m:::M
-     888      M:::::M::::::::::::::::::::MMM::::::::::::M::mm:::M
-  8888       MM:::::::::::::::::::::::::MM:::::::::::::mM::MM:::M:
-             M:::::::::::::::::::::::::M:::::::::::::::mM::MM:::Mm
-            MM::::::m:::::::::::::::::::::::::::::::::::M::MM:::MM
-            M::::::::M:::::::::::::::::::::::::::::::::::M::M:::MM         
-           MM:::::::::M:::::::::::::M:::::::::::::::::::::M:M:::MM
-           M:::::::::::M88:::::::::M:::::::::::::::::::::::MM::MMM
-           M::::::::::::8888888888M::::::::::::::::::::::::MM::MM
-           M:::::::::::::88888888M:::::::::::::::::::::::::M::MM
-           M::::::::::::::888888M:::::::::::::::::::::::::M::MM
-           M:::::::::::::::88888M:::::::::::::::::::::::::M:MM
-           M:::::::::::::::::88M::::::::::::::::::::::::::MMM
-           M:::::::::::::::::::M::::::::::::::::::::::::::MMM
-           MM:::::::::::::::::M::::::::::::::::::::::::::MMM
-            M:::::::::::::::::M::::::::::::::::::::::::::MMM
-            MM:::::::::::::::M::::::::::::::::::::::::::MMM
-             M:::::::::::::::M:::::::::::::::::::::::::MMM
-             MM:::::::::::::M:::::::::::::::::::::::::MMM
-              M:::::::::::::M::::::::::::::::::::::::MMM
-              MM:::::::::::M::::::::::::::::::::::::MMM
-               M:::::::::::M:::::::::::::::::::::::MMM  
-               MM:::::::::M:::::::::::::::::::::::MMM
-                M:::::::::M::::::::::::::::::::::MMM
-                MM:::::::M::::::::::::::::::::::MMM
-                 MM::::::M:::::::::::::::::::::MMM
-                 MM:::::M:::::::::::::::::::::MMM
-                  MM::::M::::::::::::::::::::MMM
-                  MM:::M::::::::::::::::::::MMM
-                   MM::M:::::::::::::::::::MMM
-                   MM:M:::::::::::::::::::MMM
-                    MMM::::::::::::::::::MMM
-                    MM::::::::::::::::::MMM
-                     M:::::::::::::::::MMM
-                    MM::::::::::::::::MMM
-                    MM:::::::::::::::MMM
-                    MM::::M:::::::::MMM:
-                    mMM::::MM:::::::MMMM
-                     MMM:::::::::::MMM:M
-                     mMM:::M:::::::M:M:M
-                      MM::MMMM:::::::M:M
-                      MM::MMM::::::::M:M
-                      mMM::MM::::::::M:M
-                       MM::MM:::::::::M:M
-                       MM::MM::::::::::M:m
-                       MM:::M:::::::::::MM
-                       MMM:::::::::::::::M:
-                       MMM:::::::::::::::M:
-                       MMM::::::::::::::::M
-                       MMM::::::::::::::::M
-                       MMM::::::::::::::::Mm
-                        MM::::::::::::::::MM
-                        MMM:::::::::::::::MM
-                        MMM:::::::::::::::MM
-                        MMM:::::::::::::::MM
-                        MMM:::::::::::::::MM
-                         MM::::::::::::::MMM
-                         MMM:::::::::::::MM
-                         MMM:::::::::::::MM
-                         MMM::::::::::::MM
-                          MM::::::::::::MM
-                          MM::::::::::::MM
-                          MM:::::::::::MM
-                          MMM::::::::::MM
-                          MMM::::::::::MM
-                           MM:::::::::MM
-                           MMM::::::::MM
-                           MMM::::::::MM
-                            MM::::::::MM
-                            MMM::::::MM
-                            MMM::::::MM
-                             MM::::::MM
-                             MM::::::MM
-                              MM:::::MM
-                              MM:::::MM:
-                              MM:::::M:M
-                              MM:::::M:M
-                              :M::::::M:
-                             M:M:::::::M
-                            M:::M::::::M
-                           M::::M::::::M
-                          M:::::M:::::::M
-                         M::::::MM:::::::M
-                         M:::::::M::::::::M
-                         M;:;::::M:::::::::M
-                         M:m:;:::M::::::::::M
-                         MM:m:m::M::::::::;:M
-                          MM:m::MM:::::::;:;M
-                           MM::MMM::::::;:m:M
-                            MMMM MM::::m:m:MM
-                                  MM::::m:MM
-                                   MM::::MM
-                                    MM::MM
-*/

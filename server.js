@@ -618,7 +618,8 @@ io.on('connection', function (socket) {
 
     if(isThisUserAtLeastHostOfThisRoom(ourUser, socket.room)) { //we only give a shit if they are a host
       socket.broadcast.to(socket.room).emit('typing', {
-        username: ourUser.username
+        username : ourUser.username,
+        id       : ourUser.id
       });
     }
   });
