@@ -67,28 +67,28 @@ module.exports = function(grunt) {
         }
       }
     },
-    // csslint: {
-    //   options: {
-    //     csslintrc: '.csslintrc'
-    //   },
-    //   lax: {
-    //     options: {
-    //       import: false
-    //     },
-    //     src: ['src/css/style.css']
-    //   }
-    // }
+    csslint: {
+      options: {
+        csslintrc: '.csslintrc'
+      },
+      lax: {
+        options: {
+          import: false
+        },
+        src: ['views/css/*']
+      }
+    }
   });
 
   // grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-jshint');
-  // grunt.loadNpmTasks('grunt-contrib-csslint');
+  grunt.loadNpmTasks('grunt-contrib-csslint');
   // grunt.loadNpmTasks('grunt-contrib-concat');
   // grunt.loadNpmTasks('grunt-contrib-cssmin');
   // grunt.loadNpmTasks('grunt-contrib-copy');
 
 
   // grunt.registerTask('default', ['jshint', 'concat', 'uglify', 'csslint', 'cssmin', 'copy']);
-  grunt.registerTask('default', ['jshint']);
+  grunt.registerTask('default', ['jshint', 'csslint']);
 
 };
