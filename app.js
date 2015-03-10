@@ -72,7 +72,9 @@ io.use(function(socket, next){
 //
 require('./routes/routes.js')(app, passport); // pass in app and passport
 require('./routes/api/v1/api.js')(app);
-app.use(express.static(path.join(__dirname, 'views'))); // tells express that static content is in the views directory
+app.use(express.static(path.join(__dirname, 'public'))); // tells express that static content is in the views directory
+app.set('views', __dirname + '/public');
+
 
 server.listen(port, function () {
   console.log('Server listening at port %d', port);

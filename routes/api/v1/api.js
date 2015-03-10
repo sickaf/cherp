@@ -92,7 +92,7 @@ module.exports = function(app) {
 	});
 
 	// Delete a specific archive
-	app.del('/api/v1/archives/:id', function(req, res) {
+	app.delete('/api/v1/archives/:id', function(req, res) {
 		RoomModel.remove({'id' : req.params.id}, function(err, docs) {
 			res.send(err);
 		});
