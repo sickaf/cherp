@@ -314,12 +314,12 @@ io.on('connection', function (socket) {
   else {
     console.error("NO SESSION io.on connection");
     /* TODO: REMOVE */
-    // console.log("socket connecton from anon user, generating uuid");
-    // ourUser = new User();
-    // ourUser.username = randomUsername();
-    // ourUser.sockets.push(socket.id);
-    // ourUser.anon = true;
-    // users.push(ourUser);
+    console.log("socket connecton from anon user, generating uuid");
+    ourUser = new User();
+    ourUser.username = randomUsername();
+    ourUser.sockets.push(socket.id);
+    ourUser.anon = true;
+    users.push(ourUser);
     /* END */
 
     return;

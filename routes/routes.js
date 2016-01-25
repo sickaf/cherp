@@ -14,7 +14,7 @@ module.exports = function(app, passport) {
 		else {
 			console.log('no user found, creating anon user and saving to session');
 			var user = new User();
-      user.wantsToJoin = req.flash('wantsToJoin'); //TODO: CODY uncomment and debug this
+      // user.wantsToJoin = req.flash('wantsToJoin'); //TODO: CODY uncomment and debug this
       res.render('index', { user : user });
     }
 	});
