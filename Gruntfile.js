@@ -75,7 +75,7 @@ module.exports = function(grunt) {
         options: {
           import: false
         },
-        src: ['public/css/*']
+        src: ['public/css/style.css']
       }
     }
   });

@@ -3,7 +3,7 @@ var LocalStrategy   = require('passport-local').Strategy;
 var TwitterStrategy  = require('passport-twitter').Strategy;
 
 // load up the user model
-var User       		= require('../user');
+var User       		= require('../model/user');
 
 // load the auth variables
 var configAuth = require('./auth');
@@ -12,7 +12,7 @@ var configAuth = require('./auth');
 module.exports = function(passport) {
 
     // =========================================================================
-    // passport session setup ==================================================
+    // ====================passport session setup ==============================
     // =========================================================================
     // required for persistent login sessions
     // passport needs ability to serialize and unserialize users out of session
@@ -27,7 +27,7 @@ module.exports = function(passport) {
     });
 
     // =========================================================================
-    // TWITTER =================================================================
+    // ==========================TWITTER =======================================
     // =========================================================================
     passport.use(new TwitterStrategy({
 
@@ -44,14 +44,15 @@ module.exports = function(passport) {
 
             console.log(profile);
 
-            var newFields = {   'username' : "@"+profile.username,
-                                'twitter.id' : profile.id,
-                                'twitter.token' : token,
-                                'twitter.username' : profile.username,
-                                'twitter.displayName' : profile.displayName,
-                                'avatar_url' : profile["_json"]["profile_image_url"].replace('_normal', ''),
-                                'bio' : profile["_json"]["description"]
-                            };
+            var newFields = {   
+                'username' : "@"+profile.username,
+                'twitter.id' : profile.id,
+                'twitter.token' : token,
+                'twitter.username' : profile.username,
+                'twitter.displayName' : profile.displayName,
+                'avatar_url' : profile["_json"]["profile_image_url"].replace('_normal', ''),
+                'bio' : profile["_json"]["description"]
+            };
 
             User.findOneAndUpdate({ 'twitter.id' : profile.id }, newFields, { upsert : true }, function(err, user) {
 

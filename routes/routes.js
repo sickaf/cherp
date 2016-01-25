@@ -1,4 +1,4 @@
-var User = require('../user');
+var User = require('../model/user');
 
 module.exports = function(app, passport) {
 
@@ -7,15 +7,16 @@ module.exports = function(app, passport) {
 	// =====================================
 	app.get('/', function(req, res) {
 		if (req.user) {
-			console.log('logged in user found i n session');
+			console.log('logged in user found in session');
 			req.user.wantsToJoin = req.flash('wantsToJoin');
 			res.render('index', { user : req.user });
-		} else {
+		}
+		else {
 			console.log('no user found, creating anon user and saving to session');
 			var user = new User();
-      		user.wantsToJoin = req.flash('wantsToJoin');
-      		res.render('index', { user : user });
-        }
+      user.wantsToJoin = req.flash('wantsToJoin'); //TODO: CODY uncomment and debug this
+      res.render('index', { user : user });
+    }
 	});
 
 	// =====================================
@@ -54,12 +55,13 @@ module.exports = function(app, passport) {
 			console.log('logged in user found in session');
 			req.user.wantsToJoin = req.params.ownerName;
 			res.render('index', { user : req.user });
-		} else {
+		}
+		else {
 			console.log('no user found, creating anon user and saving to session');
 			var user = new User();
-      		user.wantsToJoin = req.params.ownerName;
-      		res.render('index', { user : user });
-        }
+      user.wantsToJoin = req.params.ownerName;
+      res.render('index', { user : user });
+    }
 	});
 
 }
@@ -67,7 +69,7 @@ module.exports = function(app, passport) {
 // route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
 
-	// if user is authenticated in the session, carry on 
+	// if user is authenticated in the session, carry on
 	if (req.user) {
 		return next();
 	}

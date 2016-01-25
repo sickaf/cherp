@@ -6,8 +6,8 @@ $(function() {
   var COLORS = [
     '#1abc9c', '#2ecc71', '#3498db',            '#34495e',
     '#16a085',                       '#8e44ad',
-    '#f1c40f', '#e67e22', '#e74c3c',            
-               '#d35400', '#c0392b',            '#7f8c8d'  
+    '#f1c40f', '#e67e22', '#e74c3c',
+               '#d35400', '#c0392b',            '#7f8c8d'
   ];
 
   // Initialize varibles
@@ -45,7 +45,7 @@ $(function() {
 
   // Socket
   var socket = io();
-  
+
   if (user.wantsToJoin) {
     socket.emit('join chat by owner', user.wantsToJoin);
   } else {
@@ -55,9 +55,9 @@ $(function() {
   //allow user to set roomname when they create a room
   $createRoomButton.click(function() {
     smoke.prompt("Name your room", function(e){
-      if (e) { 
+      if (e) {
         socket.emit('enter chat with id', { id : null, name : e});
-      } 
+      }
       }, {
       ok: "Create Conversation",
       cancel: "Cancel",
@@ -70,9 +70,9 @@ $(function() {
   $usernameLabel.click(function() {
 
     smoke.prompt("Change username", function(e){
-      if (e) { 
+      if (e) {
         socket.emit('set username', e);
-      } 
+      }
       }, {
       ok: "Set new username",
       cancel: "Cancel",
@@ -100,7 +100,7 @@ $(function() {
   $('#profile-link').click(function () {
       $("#profile-dropdown").click();
       showProfileForMe();
-      return false;  
+      return false;
   });
 
   function showProfileForMe() {
@@ -156,7 +156,7 @@ $(function() {
       if (profileRequest) {
         profileRequest.abort();
       }
-      
+
       archivesRequest.abort();
 
       $('.archived-chats-list').empty();
@@ -216,11 +216,11 @@ $(function() {
       title.append(linkItem);
 
       var c = new Date(element.created_at).yyyymmdd();
-      
+
       var created = $("<h5 />", {
         text: c
       });
-      
+
       col.append(title);
       col.append(created);
 
@@ -280,7 +280,7 @@ $(function() {
       sendTextFieldMessage();
     });
     // END OF HACK
-  } 
+  }
 
   // Enable or disable nav buttons if user is logged in or not
   function configureRightNavBar () {
@@ -337,7 +337,7 @@ $(function() {
     message = cleanInput(message);
     // if there is a non-empty message and a socket connection
     if (message) {
-      $inputMessage.val('');  
+      $inputMessage.val('');
       socket.emit('new message', message);
 
       if(currentlyInRoom) {
@@ -359,7 +359,7 @@ $(function() {
             anon: !user.twitter
           });
         }
-      } 
+      }
     }
   }
 
@@ -445,14 +445,14 @@ $(function() {
     if (data.avatar_url) $avatarDiv = $('<img/>').attr('src', data.avatar_url);
     else $avatarDiv = $('<div/>').css('background-color', getIdColor(data.id));
     $avatarDiv.attr('id', 'host-avatar');
-    
+
     var $usernameDiv = $('<span/>')
       .addClass('username')
       .text(data.username + ' ')
       .css('color', getIdColor(data.id));
 
     var $messageBodyDiv;
-    
+
     //if it's an image, do that
     if(data.base64Image) {
       $messageBodyDiv = $('<span>')
@@ -522,19 +522,19 @@ $(function() {
       $muteItem = $('<li role="presentation"><a role="menuitem">Mute</a></li');
       $muteItem.click(function () {
         socket.emit('mute user', data.id);
-      });  
+      });
       $unmuteItem = $('<li role="presentation"><a role="menuitem">Unmute</a></li');
       $unmuteItem.click(function () {
         socket.emit('unmute user', data.id);
-      });  
+      });
     } else {
       $muteItem = $('');
       $unmuteItem = $('');
     }
     //end of bad code
- 
+
     $promoteMenuItem = forFan ? $('<li role="presentation"><a role="menuitem">Make Host</a></li') : $('<li role="presentation"><a role="menuitem">Demote host</a></li');
-                            
+
     $promoteMenuItem.click(function () {
       if(forFan) socket.emit('promote fan', data.id);
       else socket.emit('demote host', data.id);
@@ -548,7 +548,7 @@ $(function() {
         } else {
           showProfileForUser(data);
         }
-      }); 
+      });
     }
 
     $menuDiv = $('<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"/>')
@@ -588,14 +588,14 @@ $(function() {
 
     // Apply options
     if (options.fade) $el.hide().fadeIn(FADE_TIME);
-    
+
     if (options.prepend) div.prepend($el);
     else div.append($el);
-    
+
     //DONT HARDCODE 600 maybe try to work in div.height()
     if((div[0].scrollTop+600) > div[0].scrollHeight) {
-      div[0].scrollTop = div[0].scrollHeight;  
-    } 
+      div[0].scrollTop = div[0].scrollHeight;
+    }
   }
 
   // Adds the visual chat typing message
@@ -670,16 +670,12 @@ $(function() {
   }
 
   function randomRoomName() {
-    var nouns = ['fart','weed','420','snowboard','longboarding','blaze','pussy'];
-    var descriptors = ['room'];
-    var numbers = ['420','69'];
-    var noun = nouns[Math.floor(Math.random() * nouns.length)];
+    var descriptors = ['snowboard','longboarding','expert','happy','best','lovely'];
     var descriptor = descriptors[Math.floor(Math.random() * descriptors.length)];
-    var number = numbers[Math.floor(Math.random() * numbers.length)];
-    return noun+descriptor+number;
+    return descriptor+'_room';
   }
 
-  // function createFirstRoom() {   
+  // function createFirstRoom() {
   //    socket.emit('enter chat with id', { id : null, name : 'First Room'});
   // }
 
@@ -917,8 +913,8 @@ $(function() {
     }
   });
 
-  
-  
+
+
 
   ///////////////////////////////////////////////////////////////
   ///////                                                  //////
@@ -940,13 +936,13 @@ $(function() {
   function getDomain(url) {
     var hostName = getHostName(url);
     var domain = hostName;
-    
+
     if (hostName !== null) {
         var parts = hostName.split('.').reverse();
-        
+
       if (parts !== null && parts.length > 1) {
           domain = parts[1] + '.' + parts[0];
-            
+
          if (hostName.toLowerCase().indexOf('.co.uk') != -1 && parts.length > 2) {
            domain = parts[2] + '.' + domain;
          }
@@ -960,7 +956,7 @@ $(function() {
     return '//www.youtube.com/embed/' + url.substring(url.indexOf('v=')+2);
   }
 
-  // Adds link html around hyperlinks 
+  // Adds link html around hyperlinks
   function linkify(text, shouldEmbed) {
     var urlRegex = /(((https?:\/\/)|(www\.))[^\s]+)/g;
     return text.replace(urlRegex, function(url,b,c) {
@@ -980,15 +976,15 @@ $(function() {
          else if (getDomain(fullURL) == "soundcloud.com"){
             return '<a class="embedly-card" href="' + fullURL + '"></a> <script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>';
           }
-       } 
+       }
       return '<a href="' +fullURL+ '" target="_blank">' + url + '</a>';
-    }); 
+    });
   }
 
   // $('a').live('click', function() {
   //   window.open($(this).attr('href'));
   //   return false;
-  // }); 
+  // });
 
 });
 
@@ -1000,4 +996,3 @@ Date.prototype.yyyymmdd = function() {
    var dd  = this.getDate().toString();
    return (mm[1]?mm:"0"+mm[0]) + '-' + (dd[1]?dd:"0"+dd[0]) + '-' + yyyy; // padding
 };
-

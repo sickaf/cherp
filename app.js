@@ -14,8 +14,8 @@ var path = require('path');
 var _ = require('underscore')._; //tool for doing things like calling .size on an array
 var logger = require('morgan'); //hoping this will make debugging easier
 var uuid = require('node-uuid'); //for generating IDs for things like rooms
-var RoomModel = require('./roommodel');
-var User = require('./user');
+var RoomModel = require('./model/roommodel');
+var User = require('./model/user');
 var sanitizeHtml = require('sanitize-html');
 
 //
@@ -23,7 +23,14 @@ var sanitizeHtml = require('sanitize-html');
 //
 var mongoose = require('mongoose');
 var configDB = require('./config/database.js')
-mongoose.connect(configDB.url, configDB.options);
+// mongoose.connect("mongodb://dtown:meat69spin@ds047940.mongolab.com:47940/cherp", configDB.options);
+
+// Connect to mongo database
+mongoose.connect(configDB.url, configDB.options, function (err, res) {
+  if (err) { console.log ('ERROR connecting to: '+configDB.url+' -- '+ err); }
+  else { console.log ('Successfully connected to: '+configDB.url); }
+});
+
 var RedisStore = require('connect-redis')(session);
 
 // configuration ===============================================================
@@ -45,8 +52,8 @@ app.use(cookieParser());
 // passport
 var sessionMiddleware = session({
   store : new RedisStore({
-      host: 'pub-redis-17900.us-east-1-4.3.ec2.garantiadata.com',
-      port: '17900'
+    host: 'pub-redis-18268.us-east-1-2.3.ec2.garantiadata.com',
+    port: '18268'
   }),
   secret: 'devon is gay',
   cookie : {
@@ -67,11 +74,11 @@ io.use(function(socket, next){
   sessionMiddleware(socket.request, {}, next);
 })
 
-//
-// Routing
-//
+/*
+** Routing
+*/
 require('./routes/routes.js')(app, passport); // pass in app and passport
-require('./routes/api/v1/api.js')(app);
+require('./routes/api/v1')(app);
 app.use(express.static(path.join(__dirname, 'public'))); // tells express that static content is in the views directory
 app.set('views', __dirname + '/public');
 
@@ -92,19 +99,17 @@ app.use(function(req, res, next) {
 //
 
 // users which are currently connected to the chat
-var Room = require('./room.js');
-var users = []; 
+var Room = require('./model/room.js');
+var users = [];
 var rooms = [];
 var sockets = [];
 
 function randomUsername() {
-  var nouns = ['fart','weed','poop','snowboard','longboarding','blaze','pussy','meat','slippery','dumb','heady','messy','drunk','blood'];
-  var descriptors = ['fan','dude','man','doctor','expert','thug','hero','king','queen','idiot','queef','muscles','splatter','satan','worshipper', 'virgin'];
-  var numbers = ['420','69'];
+  var descriptors = ['snowboard','longboarding','happy'];
+  var nouns = ['fan','dude','man','doctor','expert','hero','king','queen'];;
   var noun = nouns[Math.floor(Math.random() * nouns.length)];
   var descriptor = descriptors[Math.floor(Math.random() * descriptors.length)];
-  var number = numbers[Math.floor(Math.random() * numbers.length)];
-  return noun+descriptor+number;
+  return descriptor+'_'+noun;
 }
 
 function getUsersList () {
@@ -114,7 +119,8 @@ function getUsersList () {
     if (first) {
       toReturn = users[i].username;
       first = false;
-    } else {
+    }
+    else {
       toReturn += ", " + users[i].username;
     }
   }
@@ -138,7 +144,7 @@ function getRoomWithID (id) {
   var toRet = _.where(rooms, {id: id});
   if(toRet.length > 0) return toRet[0];
   else return null;
-}   
+}
 
 function getUserWithId (idParam) {
   for(var i = 0; i < users.length; i++) {
@@ -147,7 +153,7 @@ function getUserWithId (idParam) {
     }
   }
   return null;
-}   
+}
 function usernameExists (usernameParam) {
   for(var i = 0; i < users.length; i++) {
     if (users[i].username == usernameParam) {
@@ -155,7 +161,7 @@ function usernameExists (usernameParam) {
     }
   }
   return false;
-}   
+}
 
 function getSocketWithId(socketId) {
   var toRet = _.where(sockets, {id: socketId});
@@ -202,7 +208,7 @@ function addDatabaseMessagesWithRoomId(roomId, socket){
       if (err)
         console.log("database ERR getting hostMessages: "+err);
       if (room) {
-        console.log("database found room with id: "+room.id+". "+room.hostMessages.length+" messages retrieved from db");        
+        console.log("database found room with id: "+room.id+". "+room.hostMessages.length+" messages retrieved from db");
         room.hostMessages = room.hostMessages.slice(-10);
         socket.emit("add database messages", room.hostMessages);
       } else {
@@ -238,7 +244,7 @@ function removeSocketFromRoom(socket, user, room) {
       killRoom(room);
     } else {
       room.removeUser(user.id);
-      io.to(room.id).emit("update room metadata", room);  
+      io.to(room.id).emit("update room metadata", room);
     }
   }
 }
@@ -254,7 +260,7 @@ function isThisUserHostOfThisRoom (userParam, roomId) {
   var room = getRoomWithID(roomId);
   if(room.getHost(userParam.id)) return true;
   return false;
-} 
+}
 
 function isThisUserAtLeastHostOfThisRoom (userParam, roomId) {
   if (isThisUserHostOfThisRoom(userParam, roomId)) return true;
@@ -277,38 +283,50 @@ function getRoomList () {
 
 io.on('connection', function (socket) {
 
-  console.log(socket.request.session);
+  console.log("The socket session is "+socket.request.session);
+  console.log("The socket id is "+socket.id);
 
   var ourUser = null;
   var ourUserId;
-  if (socket.request.session) {
-      if ("passport" in socket.request.session) {
-          if ("user" in socket.request.session.passport) {
-            console.log('socket connection from logged in twitter user');
-            
-            ourUserId = socket.request.session.passport.user._id;
-            ourUser = getUserWithId(ourUserId);
-            if (ourUser) { //user already exists
-              ourUser.sockets.push(socket.id);
-            } else {  //wooo lets start fresh
-              ourUser = socket.request.session.passport.user;
-              ourUser.id = ourUserId;
-              ourUser.sockets.push(socket.id);
-              users.push(ourUser);
-            }
-          } else { //anon user wooo
-            console.log("socket connecton from anon user, generating uuid");
-            ourUser = new User();
-            ourUser.username = randomUsername();
-            ourUser.sockets.push(socket.id);
-            ourUser.anon = true;
-            users.push(ourUser);
-          }
-      } else {console.error("NO PASSPORT io.on connection"); return;}
-  } else {console.error("NO SESSION io.on connection"); return;}
+  if (socket.request.session && "passport" in socket.request.session) {
+    if ("user" in socket.request.session.passport) {
+      console.log('socket connection from logged in twitter user');
+
+      ourUserId = socket.request.session.passport.user._id;
+      ourUser = getUserWithId(ourUserId);
+      if (ourUser) { //user already exists
+        ourUser.sockets.push(socket.id);
+      } else {  //wooo lets start fresh
+        ourUser = socket.request.session.passport.user;
+        ourUser.id = ourUserId;
+        ourUser.sockets.push(socket.id);
+        users.push(ourUser);
+      }
+    } else { //anon user wooo
+      console.log("socket connecton from anon user, generating uuid");
+      ourUser = new User();
+      ourUser.username = randomUsername();
+      ourUser.sockets.push(socket.id);
+      ourUser.anon = true;
+      users.push(ourUser);
+    }
+  }
+  else {
+    console.error("NO SESSION io.on connection");
+    /* TODO: REMOVE */
+    // console.log("socket connecton from anon user, generating uuid");
+    // ourUser = new User();
+    // ourUser.username = randomUsername();
+    // ourUser.sockets.push(socket.id);
+    // ourUser.anon = true;
+    // users.push(ourUser);
+    /* END */
+
+    return;
+  }
 
   //messaging
-  socket.emit("set client username and id", ourUser.username, ourUser.id);   
+  socket.emit("set client username and id", ourUser.username, ourUser.id);
   sockets.push(socket);
 
   //Received an image: broadcast to all
@@ -328,7 +346,7 @@ io.on('connection', function (socket) {
       pushMessageToDB(ourUser.id, getRoomWithID(socket.room), fullMessage);
     }
     else  {
-      socket.emit("log notification", { message: "ur not the host get a day job", type : "danger" });   
+      socket.emit("log notification", { message: "ur not the host get a day job", type : "danger" });
     }
   });
 
@@ -365,7 +383,7 @@ io.on('connection', function (socket) {
       pushMessageToDB(ourUser.id, getRoomWithID(socket.room), data);
     }
     else {
-      socket.emit("log notification", { message: "ur not the host lol pull out homie", type : "danger" });   
+      socket.emit("log notification", { message: "ur not the host lol pull out homie", type : "danger" });
     }
   });
 
@@ -374,12 +392,12 @@ io.on('connection', function (socket) {
     socket.emit("log notification", { message: "your socket is not in a chatroom buddy.  go live or join one from the left if any exist.", type : "danger" });
     return false;
   }
-    
-  socket.on('mute user', function (userId) { 
+
+  socket.on('mute user', function (userId) {
     changeMuteStatus(userId, true);
   });
 
-  socket.on('unmute user', function (userId) { 
+  socket.on('unmute user', function (userId) {
     changeMuteStatus(userId, false);
   });
 
@@ -400,17 +418,17 @@ io.on('connection', function (socket) {
     var roomForChange = getRoomWithID(socket.room);
 
     if(!roomForChange.isOwner(ourUser.id)) {
-      socket.emit("log notification", { message: "youre not the owner you cant change users status go make your own room", type : "danger" });   
+      socket.emit("log notification", { message: "youre not the owner you cant change users status go make your own room", type : "danger" });
       return false;
     }
 
     if(!userToChange) {
-      socket.emit("log notification", { message: "that user ("+userId+") logged off", type : "danger" });   
+      socket.emit("log notification", { message: "that user ("+userId+") logged off", type : "danger" });
       return false;
     }
 
     if(!isThisUserInThisRoom(userToChange, socket.room)) {
-      socket.emit("log notification", { message: "that user ("+userId+") is no longer in this chat", type : "danger" });   
+      socket.emit("log notification", { message: "that user ("+userId+") is no longer in this chat", type : "danger" });
       return false;
     }
     return [userToChange, roomForChange];
@@ -425,19 +443,19 @@ io.on('connection', function (socket) {
 
     if(toBeMuted) {
       if(isThisUserMuted(userToChange, socket.room)) {
-        socket.emit("log notification", { message: "that user is already muted", type : "danger" });   
+        socket.emit("log notification", { message: "that user is already muted", type : "danger" });
         return;
       }
       roomForChange.muteUser(userToChange);
-      socket.emit("log notification", { message: "just muted "+userToChange.username, type : "success" }); 
+      socket.emit("log notification", { message: "just muted "+userToChange.username, type : "success" });
 
     } else {
       if(!isThisUserMuted(userToChange, socket.room)) {
-        socket.emit("log notification", { message: "that user is not muted", type : "danger" });   
+        socket.emit("log notification", { message: "that user is not muted", type : "danger" });
         return;
       }
       roomForChange.unmuteUser(userToChange.id);
-      socket.emit("log notification", { message: "just unmuted "+userToChange.username, type : "success" }); 
+      socket.emit("log notification", { message: "just unmuted "+userToChange.username, type : "success" });
     }
   }
 
@@ -450,27 +468,27 @@ io.on('connection', function (socket) {
 
     if(promoteUp) { //PROMOTION (yay)
       if(isThisUserAtLeastHostOfThisRoom(userToChange, socket.room)) {
-        socket.emit("log notification", { message: "that user is already a host hahahahahhahaha", type : "danger" });   
+        socket.emit("log notification", { message: "that user is already a host hahahahahhahaha", type : "danger" });
         return;
       }
       roomForChange.promoteFanToHost(userToChange.id);
-      socket.emit("log notification", { message: "just made "+userToChange.username+" a host.", type : "success" }); 
-      socket.broadcast.to(socket.room).emit("user was promoted", userToChange.username); 
+      socket.emit("log notification", { message: "just made "+userToChange.username+" a host.", type : "success" });
+      socket.broadcast.to(socket.room).emit("user was promoted", userToChange.username);
     }
     else { //DEMOTION :(
       if(roomForChange.isOwner(userToChange.id)) {
-        socket.emit("log notification", { message: "you cant demote urself!", type : "danger" });   
+        socket.emit("log notification", { message: "you cant demote urself!", type : "danger" });
 
         return;
       }
       else if(!isThisUserAtLeastHostOfThisRoom(userToChange, socket.room)) {
-        socket.emit("log notification", { message: "that user is not a host", type : "danger" });   
+        socket.emit("log notification", { message: "that user is not a host", type : "danger" });
         return;
       }
 
       roomForChange.demoteHostToFan(userToChange.id);
       socket.emit("log notification", { message: "just demoted "+userToChange.username+".", type : "success" });
-      socket.broadcast.to(socket.room).emit("user was demoted", userToChange.username); 
+      socket.broadcast.to(socket.room).emit("user was demoted", userToChange.username);
     }
     io.to(socket.room).emit("update room metadata", roomForChange);
     socket.broadcast.to(socket.room).emit("set iAmHost", userToChange.username, promoteUp);
@@ -481,11 +499,11 @@ io.on('connection', function (socket) {
   socket.on('set username', function (username) {
     var usernameSanitized = sanitizeHtml(username);
     if(usernameExists(usernameSanitized)) {
-      socket.emit("toast notification", {type: "warning", title : "oops", message: "that username is taken"});   
+      socket.emit("toast notification", {type: "warning", title : "oops", message: "that username is taken"});
       return;
     }
     if(usernameSanitized[0] == "@") {
-      socket.emit("toast notification", {type: "warning", title : "oops", message: "can't start with '@'"});   
+      socket.emit("toast notification", {type: "warning", title : "oops", message: "can't start with '@'"});
       return;
     }
     ourUser.username = sanitizeHtml(username);
@@ -530,16 +548,16 @@ io.on('connection', function (socket) {
     //check if this socket is already in the room
     var roomToEnter = getRoomWithID(id);
     if(roomToEnter && roomToEnter.id == socket.room) {
-      socket.emit("log notification", { message: "this socket is already in that room", type : "danger" });   
+      socket.emit("log notification", { message: "this socket is already in that room", type : "danger" });
       return;
     }
 
     //LETS DO THIS
     socket.emit("clear messages", {});
-   
+
     var oldRoom = getRoomWithID(socket.room);
     if (oldRoom) removeSocketFromRoom(socket, ourUser, oldRoom);
-    
+
     //what if the chatroom already exists!!
     if(getRoomWithID(id)) {
 
@@ -551,53 +569,53 @@ io.on('connection', function (socket) {
         }
       } else {
         existingRoom.addFan(ourUser);
-        socket.emit("log notification", { message:  "Adding you to this already existing room...", type : "normal" });   
+        socket.emit("log notification", { message:  "Adding you to this already existing room...", type : "normal" });
         socket.broadcast.to(id).emit("fan joined room", ourUser.username);
 
         socket.emit("set iAmHost", ourUser.username, false); //tell the client
       }
     }
     else { //room doesnt exist. create it
-      socket.emit("log notification", { message:  "Creating a new room for ya and adding you as OWNER. pretty cool huh?", type : "normal" });   
+      socket.emit("log notification", { message:  "Creating a new room for ya and adding you as OWNER. pretty cool huh?", type : "normal" });
       var room = new Room(id, ourUser, roomName);
       rooms.push(room);
 
       //add room to socket, and auto join the creator of the room
-      socket.emit("set iAmHost", ourUser.username, true); 
+      socket.emit("set iAmHost", ourUser.username, true);
     }
     socket.leave(socket.room);
     socket.room = id;
     socket.join(socket.room);
 
     addDatabaseMessagesWithRoomId(id, socket);
-    
+
     socket.emit("set in active room", true); //tell the client whats really good
     io.sockets.emit("update roomsList", rooms);
     socket.emit("push state", getRoomWithID(id).owner.username); //updates the address bar
     io.to(socket.room).emit("update room metadata", getRoomWithID(id));
   }
-  
+
   socket.on('enter archived chat', function (id) {
     enterArchivedChat(id);
   });
 
   function enterArchivedChat(idParam, name) {
-    
+
     var id = idParam ? idParam : uuid.v4();
     var roomName = name ? name : "Untitled";
-    
+
     //LETS DO THIS
     socket.emit("clear messages", {});
-   
+
     var oldRoom = getRoomWithID(socket.room);
     if (oldRoom) removeSocketFromRoom(socket, ourUser, oldRoom);
-  
+
     socket.leave(socket.room);
     socket.room = id;
     socket.join(socket.room);
 
     addDatabaseMessagesWithRoomId(id, socket);
-    
+
     socket.emit("set in active room", false); //tell the client whats really good
     io.sockets.emit("update roomsList", rooms);
     socket.emit("push state", "archivedChat"); //updates the address bar
@@ -610,7 +628,7 @@ io.on('connection', function (socket) {
       killRoom(getRoomWithID(socket.room));
     }
     else {
-      socket.broadcast.emit("log notification", { message: "ur not the owner omg freakin buzz off", type : "danger" });   
+      socket.broadcast.emit("log notification", { message: "ur not the owner omg freakin buzz off", type : "danger" });
     }
   });
 
@@ -661,10 +679,10 @@ io.on('connection', function (socket) {
 
     if(ourUser.sockets.length == 0) {
       users = _.without(users, ourUser);
-      delete ourUser; 
+      delete ourUser;
     }
   });
 
 });
 
-module.exports = app; 
+module.exports = app;
